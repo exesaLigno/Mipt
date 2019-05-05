@@ -1,0 +1,4 @@
+DEF_REG (AX, 1)
+DEF_REG (BX, 2)
+DEF_REG (CX, 3)
+DEF_REG (DX, 4)

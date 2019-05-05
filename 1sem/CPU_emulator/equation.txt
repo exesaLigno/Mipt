@@ -1,0 +1,78 @@
+KV_1.0
+
+in
+in
+in
+
+pop cx
+pop bx
+pop ax
+
+
+
+
+:1    #Поиск дискриминанта
+push ax
+push cx
+push 4
+mul
+mul
+push bx
+sqr
+sub
+pop dx
+push 0
+push dx
+jb :9
+push 0
+push dx
+je :8
+push 0
+push dx
+ja :7
+end
+
+
+:7        #Если два корня
+push ax
+push 2
+mul
+push dx
+sqrt
+push bx
+push -1
+mul
+add
+div
+out
+
+push ax
+push 2
+mul
+push dx
+sqrt
+push bx
+push -1
+mul
+sub
+div
+out
+end
+
+
+
+:8          #Если один корень
+push ax
+push 2
+mul
+push bx
+div
+push -1
+mul
+out
+end
+
+
+
+:9    #Нет корней, D отрицательно
+end

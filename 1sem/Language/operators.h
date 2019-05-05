@@ -1,0 +1,40 @@
+#define dR derivate_branch (func_derivated, element -> right)
+#define dL derivate_branch (func_derivated, element -> left)
+#define cR copy_branch (func_derivated, element -> right)
+#define cL copy_branch (func_derivated, element -> left)
+
+#define cmd( code ) fprintf (compiled_code, #code); fprintf (compiled_code, "\n")
+
+#define meow
+
+
+//!   DEF_OP( name, operator, number )
+
+DEF_OP ( assgn,     "=",        1,       )
+DEF_OP ( plus,      "+",        2,      {cmd (add);} )
+DEF_OP ( minus,     "-",        3,      {cmd (sub);} )
+DEF_OP ( mul,       "*",        4,      {cmd (mul);} )
+DEF_OP ( div,       "/",        5,      {cmd (div);} )
+DEF_OP ( power,     "^",        6,      {cmd (pow);} )
+DEF_OP ( obracket,  "(",        7,       )
+DEF_OP ( clbracket, ")",        8,       )
+DEF_OP ( ocode,     "{",        9,       )
+DEF_OP ( clcode,    "}",        10,      )
+DEF_OP ( more,      ">",        11,      )
+DEF_OP ( moreeq,    ">=",       12,      )
+DEF_OP ( less,      "<",        13,      )
+DEF_OP ( lesseq,    "<=",       14,      )
+DEF_OP ( equal,     "==",       15,      )
+DEF_OP ( for,       "for",      16,      )
+DEF_OP ( while,     "while",    17,      )
+DEF_OP ( if,        "if",       18,      )
+DEF_OP ( else,      "else",     19,      )
+DEF_OP ( def,       "def",      20,      )
+//DEF_OP ( derivate,  "'",        21,      )
+DEF_OP ( itemize,   ",",        22,      )
+DEF_OP ( return,    "return",   23,      )
+//DEF_OP ( oblock,    "[",        24,      )
+//DEF_OP ( clblock,   "]",        25,      )
+DEF_OP ( print,     "print",    26,      {cmd (out);} )
+DEF_OP ( input,     "input",    27,      )
+

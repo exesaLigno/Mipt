@@ -1,0 +1,26 @@
+KV_1.0
+
+in  #¬водим число
+pop bx
+push bx
+pop ax
+call :3
+
+:3
+push 1
+push ax
+push 1
+push bx
+sub
+pop bx
+push bx
+mul
+pop ax
+push bx
+je :4
+call :3
+
+:4
+push ax
+out
+end
