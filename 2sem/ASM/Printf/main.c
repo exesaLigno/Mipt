@@ -8,7 +8,8 @@ int main()
 	char string1[10] = "Vodka";
 	char string2[10] = "people";
 	int test_number = 912303;
-	int test = forout("%s connecting %s%c\n", string1, string2, '!');
-	printf("%d\n", test);
+	int test1 = forout("%s connecting %s%c\n", string1, string2, '!');
+	int test2 = forout("%d: %b (binary); %o (octal); %h (heximal)\n", test_number, test_number, test_number, test_number);
+	printf("%d %d\n", test1, test2);
 	return 0;
 }
