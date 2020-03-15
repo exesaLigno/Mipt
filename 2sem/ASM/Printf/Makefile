@@ -1,6 +1,6 @@
 all: 
-	nasm -f elf64 printf.s -o printf.o
-	gcc -fPIE main.c printf.o -o program.out
+	nasm -f elf64 forout.s -o forout.o
+	gcc -fPIE main.c forout.o -o program.out
 	
 	
 .PHONY: clean

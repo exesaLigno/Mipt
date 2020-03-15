@@ -103,11 +103,11 @@ printer:        mov r15, 24        ;Initail parameters indent
 parser:         inc rsi
 
                 cmp byte [rsi], 'b'
-                jne .quatro
+                jne .quaternary
                 mov rax, 2
                 call twodegreebase
                 
-    .quatro:    cmp byte [rsi], 'q'
+    .quaternary:cmp byte [rsi], 'q'
                 jne .octal
                 mov rax, 4
                 call twodegreebase
@@ -124,7 +124,8 @@ parser:         inc rsi
                 
     .decimal:   cmp byte [rsi], 'd'
                 jne .char
-                call decimal
+                mov rax, 10
+                call anybase
                 
     .char:      cmp byte [rsi], 'c'
                 jne .string
@@ -216,10 +217,44 @@ twodegreebase:  push rsi
                 ret
 
 
-decimal:        ret
+;------------------------------------------------;
+; Number printer (any base)                      ;
+; ENTRY:    R15 - Stack indent                   ;
+;           Stack[R15] - number                  ;
+;           RAX - base                           ;
+; DESTR:    RAX, RDI, RDX, RCX, R8, R14          ;
+;------------------------------------------------;
+anybase:        push rsi
+                
+                xor r8, r8
+                
+                mov rcx, rax
+                mov rax, parameter
+                
+    .trcycle:   xor rdx, rdx
+                div rcx
+                push rdx
+                inc r8
+                cmp rax, 0
+                jne .trcycle
+                
+                
+    .prcycle:   pop rdi
+                mov rsi, NUMBERS
+                add rsi, rdi
+                
+                printChar
+                
+                dec r8
+                
+                cmp r8, 0
+                jne .prcycle
+                
+                pop rsi
+                ret
 
 
-NUMBERS:        db "0123456789abcdef"
+NUMBERS:        db "0123456789abcdefghijklmnopqrstuvwxyz"
 
 
 
