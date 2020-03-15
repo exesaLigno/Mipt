@@ -20,7 +20,9 @@ SECTION .TEXT
 %define parameter [rsp + r15]
 
 
-forout:         push r9             ;|
+forout:         pop r12             ;| Saving return adress
+
+                push r9             ;|
                 push r8             ;|
                 push rcx            ;|
                 push rdx            ;|
@@ -38,7 +40,9 @@ forout:         push r9             ;|
                 pop rax
                 pop rax
                 
-                mov rax, r14
+                mov rax, r14        ;| Returning count of printed symbols
+                
+                push r12            ;| Restoring return adress
                 
                 ret
                 
