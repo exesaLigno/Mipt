@@ -1,9 +1,23 @@
 SECTION .TEXT
     GLOBAL forout
 
-;Parameters sending throw RDI, RSI, RDX, RCX, R8, R9
+%macro printString 0
+    mov rax, 0x01
+    mov rdi, 1
+    call getstrlen
+    syscall
+    add r14, rdx
+%endmacro
 
-;R15 - parameter_counter
+%macro printChar 0
+    mov rax, 0x01
+    mov rdi, 1
+    mov rdx, 1
+    syscall
+    add r14, 1
+%endmacro
+
+%define parameter [rsp + r15]
 
 
 forout:         push r9             ;|
@@ -65,13 +79,7 @@ getstrlen:      xor rdx, rdx
 printer:        mov r15, 24        ;Initail parameters indent
                 xor r14, r14
                 
-    .cycle:     mov rax, 0x01
-                mov rdi, 1
-                call getstrlen
-                
-                syscall
-                
-                add r14, rdx
+    .cycle:     printString
                 
                 add rsi, rdx
                 
@@ -95,20 +103,28 @@ printer:        mov r15, 24        ;Initail parameters indent
 parser:         inc rsi
 
                 cmp byte [rsi], 'b'
+                jne .quatro
+                mov rax, 2
+                call twodegreebase
+                
+    .quatro:    cmp byte [rsi], 'q'
                 jne .octal
-                call binary
+                mov rax, 4
+                call twodegreebase
                 
     .octal:     cmp byte [rsi], 'o'
-                jne .decimal
-                call octal
-                
-    .decimal:   cmp byte [rsi], 'd'
                 jne .hex
-                call decimal
+                mov rax, 8
+                call twodegreebase
                 
     .hex:       cmp byte [rsi], 'h'
+                jne .decimal
+                mov rax, 16
+                call twodegreebase
+                
+    .decimal:   cmp byte [rsi], 'd'
                 jne .char
-                call hex
+                call decimal
                 
     .char:      cmp byte [rsi], 'c'
                 jne .string
@@ -133,12 +149,7 @@ char:           push rsi
                 mov rsi, rsp
                 add rsi, r15
                 
-                mov rax, 0x01
-                mov rdi, 1
-                mov rdx, 1
-                syscall
-                
-                add r14, 1
+                printChar
                 
                 pop rsi                
                 
@@ -152,110 +163,58 @@ char:           push rsi
 ; DESTR:    RAX, RDI, RDX, R14                  ;
 ;-----------------------------------------------;
 string:         push rsi
-                mov rsi, [rsp + r15]
-                
-                mov rax, 0x01
-                mov rdi, 1
-                call getstrlen
-                
-                syscall
-                
-                add r14, rdx
 
+                mov rsi, parameter
+                printString
+                
                 pop rsi
-            
                 ret
                 
                 
-binary:         push rsi
-                mov rsi, [rsp + r15]
+               
+;------------------------------------------------;
+; Number printer (base multiple of two)          ;
+; ENTRY:    R15 - Stack indent                   ;
+;           Stack[R15] - number                  ;
+;           RAX - base                           ;
+; DESTR:    RAX, RDI, RDX, R8, R13, R14          ;
+;------------------------------------------------;
+twodegreebase:  push rsi
+                mov rsi, parameter
                 xor r8, r8
+                dec rax
                 
-    .cycle1:    mov r13, rsi
-                and rsi, 01b
+    .trcycle:   mov r13, rsi
+                and rsi, rax
                 push rsi
                 inc r8
                 mov rsi, r13
-                shr rsi, 1
-                cmp rsi, 0
-                jne .cycle1
                 
-    .cycle2:    pop rdi
+                    push rax
+        .shcycle:   shr rax, 1
+                    shr rsi, 1
+                    cmp rax, 0
+                    jne .shcycle
+                    pop rax
+                
+                cmp rsi, 0
+                jne .trcycle
+                
+    .prcycle:   pop rdi
                 mov rsi, NUMBERS
                 add rsi, rdi
-                mov rax, 0x01
-                mov rdi, 1
-                mov rdx, 1
-                syscall
+                
+                printChar
                 
                 dec r8
                 
                 cmp r8, 0
-                jne .cycle2                
-                
-                pop rsi
-                
-                ret
-
-octal:          push rsi
-                mov rsi, [rsp + r15]
-                xor r8, r8
-                
-    .cycle1:    mov r13, rsi
-                and rsi, 0111b
-                push rsi
-                inc r8
-                mov rsi, r13
-                shr rsi, 3
-                cmp rsi, 0
-                jne .cycle1
-                
-    .cycle2:    pop rdi
-                mov rsi, NUMBERS
-                add rsi, rdi
-                mov rax, 0x01
-                mov rdi, 1
-                mov rdx, 1
-                syscall
-                
-                dec r8
-                
-                cmp r8, 0
-                jne .cycle2                
+                jne .prcycle2             
                 
                 pop rsi
                 
                 ret
 
-hex:            push rsi
-                mov rsi, [rsp + r15]
-                xor r8, r8
-                
-    .cycle1:    mov r13, rsi
-                and rsi, 01111b
-                push rsi
-                inc r8
-                mov rsi, r13
-                shr rsi, 4
-                cmp rsi, 0
-                jne .cycle1
-                
-    .cycle2:    pop rdi
-                mov rsi, NUMBERS
-                add rsi, rdi
-                mov rax, 0x01
-                mov rdi, 1
-                mov rdx, 1
-                syscall
-                
-                dec r8
-                
-                cmp r8, 0
-                jne .cycle2                
-                
-                pop rsi
-                
-                ret
 
 decimal:        ret
 
