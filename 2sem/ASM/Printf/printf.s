@@ -209,7 +209,7 @@ twodegreebase:  push rsi
                 dec r8
                 
                 cmp r8, 0
-                jne .prcycle2             
+                jne .prcycle             
                 
                 pop rsi
                 
