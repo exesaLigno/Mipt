@@ -24,6 +24,7 @@ class Programm
 	PTree programm_tree;
 	char* compiled_text;
 	bool asm_listing;
+	bool silent;
 	
 	
   public:

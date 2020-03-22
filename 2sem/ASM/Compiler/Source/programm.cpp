@@ -10,6 +10,7 @@ Programm::Programm()
 	this -> tokens_length = 0;
 	this -> compiled_text = 0;
 	this -> asm_listing = false;
+	this -> silent = false;
 }
 
 Programm::Programm(int argc, char* argv[])
@@ -22,8 +23,8 @@ Programm::Programm(int argc, char* argv[])
 		else if (!strcmp(argv[argcounter], "-l") or !strcmp(argv[argcounter], "--listing"))
 			this -> asm_listing = true;
 		
-		//else if (!strcmp(argv[argcounter], "-s") or !strcmp(argv[argcounter], "--silent"))
-		//	silent
+		else if (!strcmp(argv[argcounter], "-s") or !strcmp(argv[argcounter], "--silent"))
+			this -> silent = true;
 		
 		else
 			this -> source_path = argv[argcounter];
@@ -37,8 +38,12 @@ Programm::Programm(int argc, char* argv[])
 	this -> source_tokens = 0;
 	this -> tokens_length = 0;
 	this -> compiled_text = 0;
+	
 	if (not this -> asm_listing)
 		this -> asm_listing = false;
+		
+	if (not this -> silent)
+		this -> silent = false;
 }
 
 
@@ -59,26 +64,32 @@ Programm::~Programm()
 
 int Programm::readSource()
 {
+	if (strcmp(this -> source_path + (strlen(this -> source_path) - 5), ".jaul"))
+	{
+		printf("\x1b[1;31mError\x1b[0m: file \x1b[1m\"%s\"\x1b[0m extension not supported.\n", this -> source_path);
+		exit(WRONG_EXTENSION);
+	}
 	
 	FILE* source_file = fopen(this -> source_path, "r");
 	
 	if (not source_file)
 	{
-		printf("\x1b[1;31mError\x1b[0m: file %s not exist.\n", this -> source_path);
+		printf("\x1b[1;31mError\x1b[0m: file \x1b[1m\"%s\"\x1b[0m not exist.\n", this -> source_path);
 		exit(FILE_NOT_EXIST);
 	}
 	
-    fseek(source_file, 0, SEEK_END);
-    this -> source_length = ftell(source_file);
-    rewind(source_file);
+	fseek(source_file, 0, SEEK_END);
+	this -> source_length = ftell(source_file);
+	rewind(source_file);
 
-    this -> source_text = new char[this -> source_length + 1];
-    (this -> source_text)[this -> source_length] = '\0';
+	this -> source_text = new char[this -> source_length + 1];
+	(this -> source_text)[this -> source_length] = '\0';
 
-    this -> source_length = fread(this -> source_text, sizeof(char), this -> source_length, source_file);
-    
-    printf("\n\x1b[1;32m%lld\x1b[0;32m symbols readed from \x1b[1;32m%s\x1b[0m\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> source_length, this -> source_path, this -> source_text);
-    
+	this -> source_length = fread(this -> source_text, sizeof(char), this -> source_length, source_file);
+
+	if (not this -> silent)
+		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols readed from \x1b[1;32m%s\x1b[0m\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> source_length, this -> source_path, this -> source_text);
+
 	return this -> source_length;
 }
 
