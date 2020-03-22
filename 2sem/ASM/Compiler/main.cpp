@@ -2,7 +2,7 @@
 #include "Headers/programm.hpp"
 
 #ifndef release
-	#define DEBUG printf(">> debug from <%s::%d>\n", __FILE__, __LINE__);
+	#define DEBUG printf("\x1b[35m>> debug from <%s::%d>\n\x1b[0m", __FILE__, __LINE__);
 #else
 	#define DEBUG
 #endif
@@ -14,15 +14,15 @@ int main(int argc, char* argv[])
 	DEBUG
 	programm.readSource();
 	DEBUG
-	programm.makeTokens();
+	//programm.makeTokens();
 	DEBUG
-	programm.makeTree();
+	//programm.makeTree();
 	DEBUG
-	while(programm.optimize());
+	//while(programm.optimize());
 	DEBUG
-	programm.compile();
+	//programm.compile();
 	DEBUG
-	programm.write();
+	//programm.write();
 	DEBUG
 	
     return 0;
