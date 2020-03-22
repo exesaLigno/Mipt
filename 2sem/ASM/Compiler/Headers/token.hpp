@@ -13,6 +13,7 @@ class Token
   		name, number,
   		count_of_types
   	};
+  	Token();
   	Token(char* text);
   	~Token();
 };
