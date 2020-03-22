@@ -1,8 +1,16 @@
 #pragma once
-#include "token.hpp"
+#include "errcodes.hpp"
 
-typedef Tree<Token*> PTree
-typedef Ptree::Node PNode
+#include "../Source/tree.cpp"
+#include "token.hpp"
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+
+typedef Tree<Token*> PTree;
+typedef PTree::Node PNode;
+
+
 
 class Programm
 {
@@ -10,15 +18,16 @@ class Programm
 	char* source_path;
 	char* output_path;
 	char* source_text;
-	unsigned long long int text_length;
+	unsigned long long int source_length;
 	Token* source_tokens;
 	unsigned long long int tokens_length;
 	PTree programm_tree;
-	char* compiled_text;	
+	char* compiled_text;
+	bool asm_listing;
 	
 	
   public:
-  	Programm();
+	Programm();
 	Programm(int argc, char* argv[]);
 	~Programm();
 	
@@ -27,5 +36,5 @@ class Programm
 	int makeTree();
 	int optimize();
 	int compile();
-	int write()
+	int write();
 };
