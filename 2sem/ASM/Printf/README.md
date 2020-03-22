@@ -16,7 +16,8 @@ make clean
 ```
 # Time managment
 ```
-7h - Reading mans
-2h - Designing programm structure
-8h - Writing programm
+7 h - Reading mans
+2 h - Designing programm structure
+8 h - Writing programm
+6 days - panic about coronavirus
 ```
