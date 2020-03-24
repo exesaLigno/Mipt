@@ -1,31 +1,31 @@
 #include <fstream>
+#include <unistd.h>
 #include "Headers/programm.hpp"
 
 
+/*----------------------------------------------|
+| TODO 	In programm.cpp - symbol by symbol		|
+|		printing								|
+|----------------------------------------------*/
 
-#ifndef release
-	#define DEBUG printf("\x1b[35m>> debug from <%s::%d>\n\x1b[0m", __FILE__, __LINE__);
-#else
-	#define DEBUG
-#endif
+#include "Headers/debug.hpp"
 
 int main(int argc, char* argv[])
 {
-	DEBUG
 	Programm programm(argc, argv);
-	DEBUG
 	programm.readSource();
+	programm.preprocessor();
 	DEBUG
 	//programm.makeTokens();
-	DEBUG
+	//DEBUG
 	//programm.makeTree();
-	DEBUG
+	//DEBUG
 	//while(programm.optimize());
-	DEBUG
+	//DEBUG
 	//programm.compile();
-	DEBUG
+	//DEBUG
 	//programm.write();
-	DEBUG
+	//DEBUG
 	
     return 0;
 }
