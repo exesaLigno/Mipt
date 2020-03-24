@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall -std=c++2a
 LDFLAGS=
 SOURCES=main.cpp Source/programm.cpp Source/token.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
