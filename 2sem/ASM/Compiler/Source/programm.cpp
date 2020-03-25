@@ -106,9 +106,18 @@ int Programm::readSource()
 
 unsigned long long int Programm::_calcNewLength()
 {
-	unsigned long long int new_length = 0;
+	unsigned long long int new_length = source_length;
+	
 	for (int counter = 0; counter < libraries_count; counter++)
-		new_length = source_length - (8 + strlen(libraries[counter].libname)) + libraries[counter].liblength;
+		new_length += -(8 + strlen(libraries[counter].libname)) + libraries[counter].libtext_length;
+	
+	for (int counter = 0; counter < definitions_count; counter++)
+	{
+		int defcount = strcount(source_text, (definitions[counter]).defname);
+		int lendelta = (definitions[counter]).defstatement_length - (definitions[counter]).defname_length;
+		new_length += lendelta * defcount;
+		new_length -= (10 + (definitions[counter]).defstatement_length + (definitions[counter]).defname_length);
+	}
 		
 	return new_length;
 }
@@ -136,6 +145,8 @@ int Programm::_importLibraries()
 				((libraries[library_counter]).libname)[counter] = _source_text[counter];
 				counter++;
 			}
+			
+			(libraries[library_counter]).libname_length = counter;
 			
 			(libraries[library_counter]).readLibrary();
 			
@@ -209,19 +220,72 @@ int Programm::_setDefinitions()
 
 int Programm::preprocessor()
 {
+
 	_importLibraries();
 	_setDefinitions();
 	unsigned long long int new_length = _calcNewLength();
-	char* preprocessed_source_text = new char[new_length];
-	unsigned long long int counter = 0;
-	while(source_text[counter] != '\0')
+	
+	if ((not silent) and new_length != source_length)
+		printf("Source buffer expended from %lld to %lld\n", source_length, new_length);
+		
+	char* preprocessed_source_text = new char[new_length]{0};
+	char* _preprocessed_source_text = preprocessed_source_text;
+	char* _source_text = source_text;
+	
+	while(*_source_text != '\0')
 	{
-		counter++;
+		
+		bool solved = false;
+		
+		for (int counter = 0; counter < definitions_count; counter++)
+		{
+			if (not strncmp(_source_text, (definitions[counter]).defname, (definitions[counter]).defname_length) and isSpace(*(_source_text - 1)) and isSpace(*(_source_text + (definitions[counter]).defname_length)))
+			{
+				strcpy(_preprocessed_source_text, (definitions[counter]).defstatement);
+				_preprocessed_source_text += (definitions[counter]).defstatement_length;
+				_source_text += (definitions[counter]).defname_length;
+				solved = true;
+				break;
+			}			
+		}
+		
+		if (solved)
+			continue;
+		
+		for (int counter = 0; counter < libraries_count; counter++)
+		{
+			if (not strncmp(_source_text + 8, (libraries[counter]).libname, strlen((libraries[counter]).libname)))
+			{
+				strcpy(_preprocessed_source_text, (libraries[counter]).libtext);
+				_preprocessed_source_text += (libraries[counter]).libtext_length;
+				_source_text += ((libraries[counter]).libname_length + 8);
+				solved = true;
+				break;
+			}			
+		}
+		
+		if (solved)
+			continue;
+		
+		if (*_source_text == '#' or *_source_text == '@')
+		{
+			while (*_source_text != '\n' and *_source_text != '\0')
+				_source_text++;
+		}
+		
+		*_preprocessed_source_text = *_source_text;
+		
+		_source_text++;
+		_preprocessed_source_text++;
 	}
 	
 	source_length = new_length;
 	free(source_text);
 	source_text = preprocessed_source_text;
+	
+	if (not silent)
+		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", source_length, source_text);
+	
 	return 0;
 }
 
@@ -252,7 +316,7 @@ Library::Library()
 {
 	libname = new char[30]{0};
 	libtext = 0;
-	liblength = 0;
+	libtext_length = 0;
 }
 
 Library::~Library()
@@ -280,17 +344,17 @@ int Library::readLibrary()
 	}
 	
 	fseek(source_file, 0, SEEK_END);
-	liblength = ftell(source_file);
+	libtext_length = ftell(source_file);
 	rewind(source_file);
 
-	libtext = new char[liblength + 1];
-	(libtext)[liblength] = '\0';
+	libtext = new char[libtext_length + 1];
+	(libtext)[libtext_length] = '\0';
 
-	liblength = fread(libtext, sizeof(char), liblength, source_file);
+	libtext_length = fread(libtext, sizeof(char), libtext_length, source_file);
 	
 	fclose(source_file);
 
-	return liblength;
+	return libtext_length;
 }
 
 
@@ -313,6 +377,13 @@ int strcount(char* str, const char* expression)
 	
 	return counter;
 }
+
+bool isSpace(char symbol)
+{
+	return (symbol == ' ' or symbol == '\n' or symbol == '\t' or symbol == '\0');
+}
+
+
 
 
 

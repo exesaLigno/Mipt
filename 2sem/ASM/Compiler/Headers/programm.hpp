@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include "debug.hpp"
+#include <cmath>
 
 
 
@@ -30,8 +31,9 @@ class Library
 {
   public:
 	char* libname;
+	int libname_length;
 	char* libtext;
-	unsigned long long int liblength;
+	unsigned long long int libtext_length;
 	
 	Library();
 	~Library();
@@ -79,3 +81,6 @@ class Programm
 
 
 int strcount(char* str, const char* expression);
+bool isSpace(char symbol);
+int getHash(char*);
+
