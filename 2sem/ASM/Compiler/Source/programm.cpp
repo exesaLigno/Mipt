@@ -6,10 +6,6 @@ Programm::Programm()
 	output_path = 0;
 	source_text = 0;
 	source_length = 0;
-	libraries = 0;
-	libraries_count = 0;
-	definitions = 0;
-	definitions_count = 0;
 	source_tokens = 0;
 	tokens_length = 0;
 	compiled_text = 0;
@@ -39,10 +35,6 @@ Programm::Programm(int argc, char* argv[])
 		
 	source_text = 0;
 	source_length = 0;
-	libraries = 0;
-	libraries_count = 0;
-	definitions = 0;
-	definitions_count = 0;
 	source_tokens = 0;
 	tokens_length = 0;
 	compiled_text = 0;
@@ -104,63 +96,85 @@ int Programm::readSource()
 }
 
 
-unsigned long long int Programm::_calcNewLength()
+int Programm::preprocessor()
 {
-	unsigned long long int new_length = source_length;
+	while (importLibraries());
 	
-	for (int counter = 0; counter < libraries_count; counter++)
-		new_length += -(8 + strlen(libraries[counter].libname)) + libraries[counter].libtext_length;
+	int define_counter = setDefinitions();
 	
-	for (int counter = 0; counter < definitions_count; counter++)
-	{
-		int defcount = strcount(source_text, (definitions[counter]).defname);
-		int lendelta = (definitions[counter]).defstatement_length - (definitions[counter]).defname_length;
-		new_length += lendelta * defcount;
-		new_length -= (10 + (definitions[counter]).defstatement_length + (definitions[counter]).defname_length);
-	}
-		
-	return new_length;
+	if (not silent)
+		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", source_length, source_text);
+
+	return 0;
 }
 
 
-int Programm::_importLibraries()
+int Programm::importLibraries()
 {
-	libraries_count = strcount(source_text, "@import");
-	libraries = new Library[libraries_count];
+	int imports_count = strcount(source_text, "@import");
+	if (imports_count == 0)
+		return 0;
 	
-	int library_counter = 0;
+	Library libraries[imports_count];
+	
+	int new_length = source_length;
 	char* _source_text = source_text;
-	bool flag = true;
-	while (flag)
+	
+	for (int counter = 0; counter < imports_count; counter++)
 	{
-		_source_text = strstr(_source_text, "@import");
-		if (_source_text == nullptr)
-			flag = false;
+		_source_text = strstr(_source_text, "@import") + 8;
+		(libraries[counter]).libname_length = std::min(strchr(_source_text, ' '), strchr(_source_text, '\n')) - _source_text;
+		strncpy((libraries[counter]).libname, _source_text, (libraries[counter]).libname_length);
+		(libraries[counter]).readLibrary();
+		new_length = new_length - (8 + (libraries[counter]).libname_length) + (libraries[counter]).libtext_length;
+	}
+	
+	source_length = new_length;
+	char* old_source_text = source_text;
+	char* _old_source_text = old_source_text;
+	source_text = new char[source_length]{0};
+	_source_text = source_text;
+	
+	int lib_counter = 0;
+	
+	while (*_old_source_text)
+	{
+		if (!strncmp(_old_source_text, "@import", 7))
+		{
+			strcpy(_source_text, (libraries[lib_counter]).libtext);
+			_source_text += (libraries[lib_counter]).libtext_length;
+			_old_source_text += (8 + (libraries[lib_counter]).libname_length);
+			lib_counter++;
+		}
+		
 		else
 		{
-			_source_text += 8;
-			int counter = 0;
-			while (_source_text[counter] != ' ' and _source_text[counter] != '\n')
-			{
-				((libraries[library_counter]).libname)[counter] = _source_text[counter];
-				counter++;
-			}
-			
-			(libraries[library_counter]).libname_length = counter;
-			
-			(libraries[library_counter]).readLibrary();
-			
-			if (not silent)
-				printf("\x1b[1;34m\"%s\"\x1b[0m library imported\n", (libraries[library_counter]).libname);
-			
-			library_counter++;
+			*_source_text = *_old_source_text;
+			_source_text++;
+			_old_source_text++;
 		}
 	}
 	
-	return library_counter;
+	delete old_source_text;
+	//delete libraries;			// TODO fix munmap_chunk(): invalid pointer
+								// TODO add recursive including check
+	return imports_count;
 }
 
 
+int Programm::setDefinitions()
+{
+	int definitions_count = strcount(source_text, "@define");
+	if (definitions_count == 0)
+		return 0;
+		
+	Definition definitions[definitions_count];
+	
+	return definitions_count;
+}
+
+
+/*
 int Programm::_setDefinitions()
 {
 	definitions_count = strcount(source_text, "@define");
@@ -289,7 +303,7 @@ int Programm::preprocessor()
 	return 0;
 }
 
-
+*/
 
 
 

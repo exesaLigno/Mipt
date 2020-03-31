@@ -60,9 +60,8 @@ class Programm
 	bool asm_listing;
 	bool silent;
 	
-	unsigned long long int _calcNewLength();
-	int _importLibraries();
-	int _setDefinitions();
+	int importLibraries();
+	int setDefinitions();
 	
 	
   public:
