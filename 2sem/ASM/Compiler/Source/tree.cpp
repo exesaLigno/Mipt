@@ -7,7 +7,7 @@ class Tree
 
 	class Node
 	{		
-	friend class Tree;
+		friend class Tree;
 	  public:
 		D data;
 		Node* parent;
