@@ -13,11 +13,11 @@ section .text
 ;   printString string*, strlen   ;
 ;---------------------------------;
 %macro printString 2
-	push rax
-	push rdi
-	push rsi
-	push rdx
-	
+    push rax
+    push rdi
+    push rsi
+    push rdx
+
     mov rax, 0x01
     mov rdi, 1
     mov rsi, %1
@@ -31,7 +31,7 @@ section .text
     pop rax
 %endmacro
 
-%define parameter [rsp + r15]
+%define parameter(depth) [rsp + 8*r15 + depth]
 ;// r15 - parameters counter
 ;// r14 - symbols counter
 ;// rcx - buffer counter
@@ -47,9 +47,6 @@ forout:         pop r12             ;| Saving return adress
                 mov rsi, rdi
 
                 call printer
-                
-                ;add rsi, rdx
-                ;add rsi, 2
                 
                 pop rax
                 pop rax
@@ -67,7 +64,7 @@ forout:         pop r12             ;| Saving return adress
 ;-----------------------------------------------;
 ; Counting length of string                     ;
 ; ENTRY:    RSI - string offset                 ; Надо ли?
-; EXIT:     RDX - strlen(string)                ;
+; EXIT:     RDX - strlen(string)                ; Не нихуя блять!
 ; DESTR:    RDX                                 ;
 ;-----------------------------------------------;
 ;getstrlen:      xor rdx, rdx
@@ -97,7 +94,7 @@ forout:         pop r12             ;| Saving return adress
 ; EXIT:     R14 - count of printed symbols              ;
 ; DESTR:    RAX, RDI, RDX, R15                          ;
 ;-------------------------------------------------------;
-printer:        xor r15, r15;32        ;Initail parameters indent
+printer:        xor r15, r15
                 xor r14, r14
                 xor rcx, rcx
                 mov rdx, BUFFER
@@ -109,12 +106,12 @@ printer:        xor r15, r15;32        ;Initail parameters indent
                 jmp .cycle             ;|
                 
     .continue:  cmp byte [rsi], 0x0    ;| else if (*rsi == '\0')
-    			je .exit               ;|     return counter
-    			
-    			mov al, byte [rsi]
-    			mov [rdx + rcx], al    ;| else
-    			inc rcx                ;|     BUFFER[rcx] = *rsi
-    			inc rsi                ;|
+                je .exit               ;|     return counter
+
+                mov al, byte [rsi]
+                mov [rdx + rcx], al    ;| else
+                inc rcx                ;|     BUFFER[rcx] = *rsi
+                inc rsi                ;|
                 
                 jmp .cycle
                 
@@ -130,30 +127,30 @@ printer:        xor r15, r15;32        ;Initail parameters indent
 ;----------------------------------------------;            
 parser:         inc rsi
 
-;                cmp byte [rsi], 'b'
-;                jne .quaternary
-;                mov rax, 2
-;                call twodegreebase
-;                
-;    .quaternary:cmp byte [rsi], 'q'
-;                jne .octal
-;                mov rax, 4
-;                call twodegreebase
-;                
-;    .octal:     cmp byte [rsi], 'o'
-;                jne .hex
-;                mov rax, 8
-;                call twodegreebase
-;                
-;    .hex:       cmp byte [rsi], 'h'
-;                jne .decimal
-;                mov rax, 16
-;                call twodegreebase
-;                
-;    .decimal:   cmp byte [rsi], 'd'
-;                jne .char
-;                mov rax, 10
-;                call anybase
+                cmp byte [rsi], 'b'
+                jne .quaternary
+                mov rax, 2
+                call twodegreebase
+                
+    .quaternary:cmp byte [rsi], 'q'
+                jne .octal
+                mov rax, 4
+                call twodegreebase
+                
+    .octal:     cmp byte [rsi], 'o'
+                jne .hex
+                mov rax, 8
+                call twodegreebase
+                
+    .hex:       cmp byte [rsi], 'h'
+                jne .decimal
+                mov rax, 16
+                call twodegreebase
+                
+    .decimal:   cmp byte [rsi], 'd'
+                jne .char
+                mov rax, 10
+                call anybase
                 
     .char:      cmp byte [rsi], 'c'
                 jne .string
@@ -174,7 +171,7 @@ parser:         inc rsi
 ;           Stack[R15] - symbol                ;
 ; DESTR:    RCX                                ;
 ;----------------------------------------------;
-char:           mov rax, [rsp + 8 * r15 + 24]  ;| rsp (stack head) + r15 (param number) * 8 (sizeof(byte)) + 24 (parameters depth)
+char:           mov rax, parameter(24)  ;| 24 is a parameters depth - number of elements above the start of parameters
                 mov [rdx + rcx], al
                 inc rcx
                 
@@ -190,7 +187,7 @@ char:           mov rax, [rsp + 8 * r15 + 24]  ;| rsp (stack head) + r15 (param 
 ; DESTR:    RAX, RDI, RDX, R14                  ;
 ;-----------------------------------------------;
 string:         push rsi
-                mov rsi, [rsp + 8 * r15 + 32]
+                mov rsi, parameter(32)
                 
     .cycle      cmp byte [rsi], 0x0
                 je .exit
@@ -214,41 +211,43 @@ string:         push rsi
 ;           RAX - base                           ;
 ; DESTR:    RAX, RDI, RDX, R8, R13, R14          ;
 ;------------------------------------------------;
-;twodegreebase:  push rsi
-;                mov rsi, parameter
-;                xor r8, r8
-;                dec rax
-;                
-;    .trcycle:   mov r13, rsi
-;                and rsi, rax
-;                push rsi
-;                inc r8
-;                mov rsi, r13
-;                
-;                    push rax
-;        .shcycle:   shr rax, 1
-;                    shr rsi, 1
-;                    cmp rax, 0
-;                    jne .shcycle
-;                    pop rax
-;                
-;                cmp rsi, 0
-;                jne .trcycle
-;                
-;    .prcycle:   pop rdi
-;                mov rsi, NUMBERS
-;                add rsi, rdi
-;                
-;                printChar
-;                
-;                dec r8
-;                
-;                cmp r8, 0
-;                jne .prcycle             
-;                
-;                pop rsi
-;                
-;                ret
+twodegreebase:  push rsi
+                mov rsi, parameter(32)
+                xor r8, r8
+                dec rax
+                
+    .trcycle:   mov r13, rsi
+                and rsi, rax
+                push rsi
+                inc r8
+                mov rsi, r13
+                
+                    push rax
+        .shcycle:   shr rax, 1
+                    shr rsi, 1
+                    cmp rax, 0
+                    jne .shcycle
+                    pop rax
+                
+                cmp rsi, 0
+                jne .trcycle
+                	
+    .prcycle:   pop rdi
+                mov rsi, NUMBERS
+                add rsi, rdi
+                mov bl, [rsi]
+                
+                mov [rdx + rcx], bl
+                
+                inc rcx
+                dec r8
+                
+                cmp r8, 0
+                jne .prcycle
+
+                pop rsi
+                
+                ret
 
 
 ;------------------------------------------------;
@@ -258,40 +257,47 @@ string:         push rsi
 ;           RAX - base                           ;
 ; DESTR:    RAX, RDI, RDX, RCX, R8, R14          ;
 ;------------------------------------------------;
-;anybase:        push rsi
-;                
-;                xor r8, r8
-;                
-;                mov rcx, rax
-;                mov rax, parameter
-;                
-;    .trcycle:   xor rdx, rdx
-;                div rcx
-;                push rdx
-;                inc r8
-;                cmp rax, 0
-;                jne .trcycle
-;                
-;                
-;    .prcycle:   pop rdi
-;                mov rsi, NUMBERS
-;                add rsi, rdi
-;                
-;                printChar
-;                
-;                dec r8
-;                
-;                cmp r8, 0
-;                jne .prcycle
-;                
-;                pop rsi
-;                ret
+anybase:        push rsi
+                mov r9, rcx
+                
+                xor r8, r8
+                
+                mov rcx, rax
+                mov rax, parameter(32)
+                
+    .trcycle:   xor rdx, rdx
+                div rcx
+                push rdx
+                inc r8
+                cmp rax, 0
+                jne .trcycle
+                
+                mov rdx, BUFFER
+                mov rcx, r9
+                
+    .prcycle:   pop rdi
+                mov rsi, NUMBERS
+                add rsi, rdi
+                mov bl, [rsi]
+                
+                mov [rdx + rcx], bl
+                
+                inc rcx
+                dec r8
+                
+                cmp r8, 0
+                jne .prcycle
+                
+                inc r15
+                pop rsi
+                ret
 
 
-NUMBERS:        db "0123456789abcdefghijklmnopqrstuvwxyz"
+NUMBERS:        db "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 
 section .bss
-BUFFER:			resb 1024
+BUFFER:         resb 1024
 BUFFER_LENGTH   equ $ - BUFFER
 
 

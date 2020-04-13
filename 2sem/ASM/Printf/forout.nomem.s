@@ -1,7 +1,7 @@
 default rel
 
 section .text
-    global forout_old
+    global forout_nomem
 
 %macro printString 0
     mov rax, 0x01
@@ -22,7 +22,7 @@ section .text
 %define parameter [rsp + r15]
 
 
-forout_old:     pop r12             ;| Saving return adress
+forout_nomem:   pop r12             ;| Saving return adress
 
                 push r9             ;|
                 push r8             ;|
@@ -32,9 +32,6 @@ forout_old:     pop r12             ;| Saving return adress
                 mov rsi, rdi
 
                 call printer
-                
-                ;add rsi, rdx
-                ;add rsi, 2
                 
                 pop rax
                 pop rax
