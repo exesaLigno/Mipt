@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int forout_old(const char*, ...);
+int forout_nomem(const char*, ...);
 int forout(const char*, ...);
 
 int main()
@@ -24,7 +24,8 @@ int main()
 	forout("---Printed %d symbols---\n\n", test);
 	test = forout("%d in other cs:\n\t%b (binary);\n\t%q (quaternary);\n\t%o (octal);\n\t%h (heximal)\n", test_number, test_number, test_number, test_number, test_number);
 	forout("---Printed %d symbols---\n\n", test);
-	forout("Many parameters test: %d %d %d %d %d %d %d %d %d %d %d %d\n\n", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	test = forout("Many parameters test: %d %d %d %d %d %d %d %d %d %d %d %d\n", 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	forout("---Printed %d symbols---\n\n", test);
 	printf("\x1b[1;31m----- NEW forout test END -----\x1b[0m\n\n");
 	
 	return 0;

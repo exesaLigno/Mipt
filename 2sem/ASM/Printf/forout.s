@@ -25,6 +25,8 @@ section .text
     syscall
     add r14, rdx
     
+    xor %2, %2
+    
     pop rdx
     pop rsi
     pop rdi
@@ -61,31 +63,7 @@ forout:         pop r12             ;| Saving return adress
                 ret
                 
 
-;-----------------------------------------------;
-; Counting length of string                     ;
-; ENTRY:    RSI - string offset                 ; Надо ли?
-; EXIT:     RDX - strlen(string)                ; Не нихуя блять!
-; DESTR:    RDX                                 ;
-;-----------------------------------------------;
-;getstrlen:      xor rdx, rdx
-;                push rsi
-;    
-;    .cycle:     cmp byte [rsi], 0x0
-;                je .exit
-;                cmp byte [rsi], '%'
-;                je .exit
-;                
-;                inc rsi
-;                inc rdx
-;                
-;                jmp .cycle
-;                
-;    .exit:      pop rsi
-;                
-;                ret
-;                
-;                
-;                
+               
 ;-------------------------------------------------------;
 ; Printing format string and calling parameters         ;
 ; parser when it necessary                              ;
@@ -108,7 +86,11 @@ printer:        xor r15, r15
     .continue:  cmp byte [rsi], 0x0    ;| else if (*rsi == '\0')
                 je .exit               ;|     return counter
 
-                mov al, byte [rsi]
+                cmp rcx, BUFFER_LENGTH
+                jne .cont
+                printString BUFFER, rcx
+    
+        .cont:  mov al, byte [rsi]
                 mov [rdx + rcx], al    ;| else
                 inc rcx                ;|     BUFFER[rcx] = *rsi
                 inc rsi                ;|
@@ -171,7 +153,11 @@ parser:         inc rsi
 ;           Stack[R15] - symbol                ;
 ; DESTR:    RCX                                ;
 ;----------------------------------------------;
-char:           mov rax, parameter(24)  ;| 24 is a parameters depth - number of elements above the start of parameters
+char:           cmp rcx, BUFFER_LENGTH
+                jne .cont
+                printString BUFFER, rcx
+    
+        .cont:  mov rax, parameter(24)  ;| 24 is a parameters depth - number of elements above the start of parameters
                 mov [rdx + rcx], al
                 inc rcx
                 
@@ -189,7 +175,11 @@ char:           mov rax, parameter(24)  ;| 24 is a parameters depth - number of 
 string:         push rsi
                 mov rsi, parameter(32)
                 
-    .cycle      cmp byte [rsi], 0x0
+    .cycle      cmp rcx, BUFFER_LENGTH
+                jne .cont
+                printString BUFFER, rcx
+    
+        .cont:  cmp byte [rsi], 0x0
                 je .exit
                 mov al, byte [rsi]
                 mov [rdx + rcx], al
@@ -232,7 +222,11 @@ twodegreebase:  push rsi
                 cmp rsi, 0
                 jne .trcycle
                 	
-    .prcycle:   pop rdi
+    .prcycle:   cmp rcx, BUFFER_LENGTH
+                jne .cont
+                printString BUFFER, rcx
+    
+        .cont:  pop rdi
                 mov rsi, NUMBERS
                 add rsi, rdi
                 mov bl, [rsi]
@@ -275,7 +269,11 @@ anybase:        push rsi
                 mov rdx, BUFFER
                 mov rcx, r9
                 
-    .prcycle:   pop rdi
+    .prcycle:   cmp rcx, BUFFER_LENGTH
+                jne .cont
+                printString BUFFER, rcx
+    
+        .cont:  pop rdi
                 mov rsi, NUMBERS
                 add rsi, rdi
                 mov bl, [rsi]
