@@ -2,68 +2,31 @@
 
 Programm::Programm()
 {
-	source_path = 0;
-	output_path = 0;
-	source_text = 0;
-	source_length = 0;
-	source_tokens = 0;
-	tokens_length = 0;
-	compiled_text = 0;
-	asm_listing = false;
-	silent = false;
-}
-
-Programm::Programm(int argc, char* argv[])
-{
-	for (int argcounter = 1; argcounter < argc; argcounter++)
-	{
-		if (!strcmp(argv[argcounter], "-o") or !strcmp(argv[argcounter], "--output"))
-			output_path = argv[++argcounter];
-		
-		else if (!strcmp(argv[argcounter], "-l") or !strcmp(argv[argcounter], "--listing"))
-			asm_listing = true;
-		
-		else if (!strcmp(argv[argcounter], "-s") or !strcmp(argv[argcounter], "--silent"))
-			silent = true;
-		
-		else
-			source_path = argv[argcounter];
-	}
-	
-	if (not output_path)
-		output_path = "a.out";
-		
-	source_text = 0;
-	source_length = 0;
-	source_tokens = 0;
-	tokens_length = 0;
-	compiled_text = 0;
-	
-	if (not asm_listing)
-		asm_listing = false;
-		
-	if (not silent)
-		silent = false;
+	text = 0;
+	text_length = 0;
+	//source_tokens = 0;
+	//tokens_length = 0;
+	//programm_tree;
 }
 
 
 Programm::~Programm()
 {
-	if (source_text)
-		delete source_text;
-		
-	if (source_tokens)
-		delete source_tokens;
-		
-	if (compiled_text)
-		delete compiled_text;
+	if (this -> text)
+		free(text);
+
+
+	//if (this -> source_tokens)
+	//	delete source_tokens;
 }
 
 
 
 
-int Programm::readSource()
+int Programm::readSource(const Settings* settings)
 {
+	char* source_path = settings -> source_path;
+	
 	if (strcmp(source_path + (strlen(source_path) - 5), ".jaul"))
 	{
 		printf("\x1b[1;31mError\x1b[0m: file \x1b[1m\"%s\"\x1b[0m extension not supported.\n", source_path);
@@ -79,233 +42,210 @@ int Programm::readSource()
 	}
 	
 	fseek(source_file, 0, SEEK_END);
-	source_length = ftell(source_file);
+	this -> text_length = ftell(source_file);
 	rewind(source_file);
 
-	source_text = new char[source_length + 1];
-	(source_text)[source_length] = '\0';
+	this -> text = (char*) calloc(this -> text_length + 1, sizeof(char));
+	(this -> text)[this -> text_length] = '\0';
 
-	source_length = fread(source_text, sizeof(char), source_length, source_file);
+	this -> text_length = fread(this -> text, sizeof(char), this -> text_length, source_file);
 	
 	fclose(source_file);
 
-	if (not silent)
-		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols readed from \x1b[1;32m%s\x1b[0m\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> source_length, this -> source_path, this -> source_text);
+	if (not settings -> silent)
+		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols readed from \x1b[1;32m%s\x1b[0m\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, source_path, this -> text);
 	
-	return source_length;
+	return this -> text_length;
 }
 
 
-int Programm::preprocessor()
+int Programm::preprocessor(const Settings* settings)
 {
+	DEBUG
 	while (importLibraries());
-	
-	int define_counter = setDefinitions();
-	
-	if (not silent)
-		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", source_length, source_text);
-
+	DEBUG
+	setDefinitions();
+	DEBUG
+	deleteComments();
+	DEBUG
+	if (not settings -> silent)
+		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, this -> text);
+	DEBUG
 	return 0;
 }
 
 
 int Programm::importLibraries()
 {
-	int imports_count = strcount(source_text, "@import");
+	int imports_count = strcount(this -> text, "@import");
+	DEBUG
 	if (imports_count == 0)
 		return 0;
-	
-	Library libraries[imports_count];
-	
-	int new_length = source_length;
-	char* _source_text = source_text;
-	
+	DEBUG
+	Library* libraries = (Library*) calloc(imports_count, sizeof(Library));
+	DEBUG
+	int new_length = this -> text_length;
+	char* _text = this -> text;
+	DEBUG
 	for (int counter = 0; counter < imports_count; counter++)
 	{
-		_source_text = strstr(_source_text, "@import") + 8;
-		(libraries[counter]).libname_length = std::min(strchr(_source_text, ' '), strchr(_source_text, '\n')) - _source_text;
-		strncpy((libraries[counter]).libname, _source_text, (libraries[counter]).libname_length);
+		_text = strstr(_text, "@import") + 8;
+		(libraries[counter]).libname_length = std::min(strchr(_text, ' '), strchr(_text, '\n')) - _text;
+		(libraries[counter]).libname = (char*) calloc ((libraries[counter]).libname_length + 1, sizeof(char));
+		strncpy((libraries[counter]).libname, _text, (libraries[counter]).libname_length);
 		(libraries[counter]).readLibrary();
 		new_length = new_length - (8 + (libraries[counter]).libname_length) + (libraries[counter]).libtext_length;
 	}
-	
-	source_length = new_length;
-	char* old_source_text = source_text;
-	char* _old_source_text = old_source_text;
-	source_text = new char[source_length]{0};
-	_source_text = source_text;
+	DEBUG
+	this -> text_length = new_length;
+	char* old_text = this -> text;
+	char* _old_text = old_text;
+	this -> text = (char*) calloc(this -> text_length, sizeof(char));
+	_text = this -> text;
 	
 	int lib_counter = 0;
 	
-	while (*_old_source_text)
+	while (*_old_text)
 	{
-		if (!strncmp(_old_source_text, "@import", 7))
+		if (!strncmp(_old_text, "@import", 7))
 		{
-			strcpy(_source_text, (libraries[lib_counter]).libtext);
-			_source_text += (libraries[lib_counter]).libtext_length;
-			_old_source_text += (8 + (libraries[lib_counter]).libname_length);
+			strcpy(_text, (libraries[lib_counter]).libtext);
+			_text += (libraries[lib_counter]).libtext_length;
+			_old_text += (8 + (libraries[lib_counter]).libname_length);
 			lib_counter++;
 		}
 		
 		else
 		{
-			*_source_text = *_old_source_text;
-			_source_text++;
-			_old_source_text++;
+			*_text = *_old_text;
+			_text++;
+			_old_text++;
 		}
 	}
 	
-	delete old_source_text;
-	//delete libraries;			// TODO fix munmap_chunk(): invalid pointer
-								// TODO add recursive including check
+	free(old_text);
+	
+	free(libraries);			// TODO add recursive including check
+	
 	return imports_count;
 }
 
 
-int Programm::setDefinitions()
+int Programm::setDefinitions()		// TODO fix replacing middle of word (word borders checking)
+									// TODO fix memory errors
 {
-	int definitions_count = strcount(source_text, "@define");
+	int definitions_count = strcount(this -> text, "@define");
 	if (definitions_count == 0)
 		return 0;
 		
-	Definition definitions[definitions_count];
+	Definition* definitions = (Definition*) calloc(definitions_count, sizeof(Definition));
+	
+	int new_length = this -> text_length;
+	char* _text = this -> text;
+	
+	for (int counter = 0; counter < definitions_count; counter++)
+	{
+		_text = strstr(_text, "@define") + 8;
+		(definitions[counter]).defname_length = std::min(strchr(_text, ' '), strchr(_text, '\n')) - _text;
+		
+		(definitions[counter]).defname = (char*) calloc((definitions[counter]).defname_length, sizeof(char));
+		strncpy((definitions[counter]).defname, _text, (definitions[counter]).defname_length);
+		
+		_text += (definitions[counter]).defname_length + 1;
+		(definitions[counter]).defstatement_length = strchr(_text, '\n') - _text;
+		
+		(definitions[counter]).defstatement = (char*) calloc((definitions[counter]).defstatement_length, sizeof(char));
+		strncpy((definitions[counter]).defstatement, _text, (definitions[counter]).defstatement_length);
+		
+		new_length = new_length + (((definitions[counter]).defstatement_length - (definitions[counter]).defname_length) \
+									* (strcount(this -> text, (definitions[counter]).defname) - 1) - \
+									((definitions[counter]).defstatement_length + (definitions[counter]).defname_length) + 9);
+	}
+	
+	this -> text_length = new_length;
+	char* old_text = this -> text;
+	char* _old_text = old_text;
+	this -> text = (char*) calloc(this -> text_length, sizeof(char));
+	_text = this -> text;
+
+	while (*_old_text)
+	{
+		if (!strncmp(_old_text, "@define", 7))
+		{
+			while(*_old_text != '\n')
+				_old_text++;
+		}
+		
+		bool defstatement_placed = false;
+		for (int counter = 0; counter < definitions_count; counter++)
+		{
+			if (!strncmp(_old_text, definitions[counter].defname, definitions[counter].defname_length))
+			{
+				strncpy(_text, definitions[counter].defstatement, definitions[counter].defstatement_length);
+				_text += definitions[counter].defstatement_length;
+				_old_text += definitions[counter].defname_length;
+				defstatement_placed = true;
+				break;
+			}
+		}
+		
+		if (not defstatement_placed)
+		{
+			*_text = *_old_text;
+			_text++;
+			_old_text++;
+		}
+	}
+	
+	free(old_text);
+
+	free(definitions);
 	
 	return definitions_count;
 }
 
 
-/*
-int Programm::_setDefinitions()
+int Programm::deleteComments()
 {
-	definitions_count = strcount(source_text, "@define");
-	definitions = new Definition[definitions_count];
+	char* _text = this -> text;
+	char* _old_text = this -> text;
 	
-	int definition_counter = 0;
-	char* _source_text = source_text;
-	bool flag = true;
-	while (flag)
+	bool in_comment = false;
+	while (*_old_text)
 	{
-		_source_text = strstr(_source_text, "@define");
-		if (_source_text == nullptr)
-			flag = false;
+		if (*_old_text == '#')
+			in_comment = true;
+		
+		if (*_old_text == '\n')
+			in_comment = false;
+			
+		if (in_comment)
+			_old_text++;
+			
 		else
 		{
-			_source_text += 8;
-			int counter = 0;
-			while (_source_text[counter] != ' ' and _source_text[counter] != '\n')
-				counter++;
-				
-			(definitions[definition_counter]).defname = new char[counter + 1]{0};
-			(definitions[definition_counter]).defname_length = counter;
-			
-			counter = 0;
-			while (_source_text[counter] != ' ' and _source_text[counter] != '\n')
-			{
-				(definitions[definition_counter]).defname[counter] = _source_text[counter];
-				counter++;
-			}
-			
-			_source_text += (counter + 1);
-			counter = 0;
-			
-			while (_source_text[counter] != '\n')
-				counter++;
-				
-			(definitions[definition_counter]).defstatement = new char[counter + 1]{0};
-			(definitions[definition_counter]).defstatement_length = counter;
-			
-			counter = 0;
-			while (_source_text[counter] != '\n')
-			{
-				(definitions[definition_counter]).defstatement[counter] = _source_text[counter];
-				counter++;
-			}
-			
-			if (not silent)
-				printf("Definition \x1b[1;34m\"%s\"\x1b[0m means \x1b[1;34m\"%s\"\x1b[0m in this scope\n", (definitions[definition_counter]).defname, (definitions[definition_counter]).defstatement);
-			
-			definition_counter++;
+			*_text = *_old_text;
+			_text++;
+			_old_text++;
 		}
 	}
 	
-	return definition_counter;
-}
-
-
-int Programm::preprocessor()
-{
-
-	_importLibraries();
-	_setDefinitions();
-	unsigned long long int new_length = _calcNewLength();
-	
-	if ((not silent) and new_length != source_length)
-		printf("Source buffer expended from %lld to %lld\n", source_length, new_length);
-		
-	char* preprocessed_source_text = new char[new_length]{0};
-	char* _preprocessed_source_text = preprocessed_source_text;
-	char* _source_text = source_text;
-	
-	while(*_source_text != '\0')
-	{
-		
-		bool solved = false;
-		
-		for (int counter = 0; counter < definitions_count; counter++)
-		{
-			if (not strncmp(_source_text, (definitions[counter]).defname, (definitions[counter]).defname_length) and isSpace(*(_source_text - 1)) and isSpace(*(_source_text + (definitions[counter]).defname_length)))
-			{
-				strcpy(_preprocessed_source_text, (definitions[counter]).defstatement);
-				_preprocessed_source_text += (definitions[counter]).defstatement_length;
-				_source_text += (definitions[counter]).defname_length;
-				solved = true;
-				break;
-			}			
-		}
-		
-		if (solved)
-			continue;
-		
-		for (int counter = 0; counter < libraries_count; counter++)
-		{
-			if (not strncmp(_source_text + 8, (libraries[counter]).libname, strlen((libraries[counter]).libname)))
-			{
-				strcpy(_preprocessed_source_text, (libraries[counter]).libtext);
-				_preprocessed_source_text += (libraries[counter]).libtext_length;
-				_source_text += ((libraries[counter]).libname_length + 8);
-				solved = true;
-				break;
-			}			
-		}
-		
-		if (solved)
-			continue;
-		
-		if (*_source_text == '#' or *_source_text == '@')
-		{
-			while (*_source_text != '\n' and *_source_text != '\0')
-				_source_text++;
-		}
-		
-		*_preprocessed_source_text = *_source_text;
-		
-		_source_text++;
-		_preprocessed_source_text++;
-	}
-	
-	source_length = new_length;
-	free(source_text);
-	source_text = preprocessed_source_text;
-	
-	if (not silent)
-		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", source_length, source_text);
+	*_text = '\0';
 	
 	return 0;
 }
 
-*/
 
+int Programm::write(const Settings* settings)
+{
+	FILE* file = fopen("tested.out", "w");
 
+	fprintf(file, "%s", this -> text);
+	
+	fclose(file);
+	
+	return 0;
+}
 
 
 Definition::Definition()
@@ -319,16 +259,17 @@ Definition::Definition()
 Definition::~Definition()
 {
 	if (defname)
-		delete defname;
+		free(defname);
 	if (defstatement)
-		delete defstatement;
+		free(defstatement);
 }
 
 
 
 Library::Library()
 {
-	libname = new char[30]{0};
+	libname = 0;
+	libname_length = 0;
 	libtext = 0;
 	libtext_length = 0;
 }
@@ -336,9 +277,9 @@ Library::Library()
 Library::~Library()
 {
 	if (libname)
-		delete libname;
+		free(libname);
 	if (libtext)
-		delete libtext;
+		free(libtext);
 }
 
 int Library::readLibrary()
@@ -361,7 +302,7 @@ int Library::readLibrary()
 	libtext_length = ftell(source_file);
 	rewind(source_file);
 
-	libtext = new char[libtext_length + 1];
+	libtext = (char*) calloc(libtext_length + 1, sizeof(char));
 	(libtext)[libtext_length] = '\0';
 
 	libtext_length = fread(libtext, sizeof(char), libtext_length, source_file);
