@@ -4,5 +4,5 @@ Import test success
 
 new func yep (g, u):
 	test1
-	proc
+	@proc
 	test2
