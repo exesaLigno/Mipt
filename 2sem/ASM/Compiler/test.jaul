@@ -1,14 +1,14 @@
-@import dick.jaul
-@import shit.jaul
+@import library.jaul
 
+def sum(a, b, c)
+	d = a + b + c
+	return d
+	
 
-@define ded ya s'yel deda
-@define blya suka ti kuda polez mudak yeto defain!!1!
+x = 45
+y = x * 2
+z = 45 + 2
 
+t = sum(x, y, z)
 
-What the fuck
-	ded
-	is going						# Что блять тут
-	blya ded 	# Насрал в эту строку
-	# on
-	ded								# В эту кстати тоже
+print_res(x, y, z, t)
