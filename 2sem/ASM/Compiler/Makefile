@@ -1,9 +1,9 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++2a
 LDFLAGS=
-SOURCES=main.cpp Source/programm.cpp Source/token.cpp
+SOURCES=main.cpp Source/settings.cpp Source/programm.cpp Source/token.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=app.out
+EXECUTABLE=jc
 
 all: $(SOURCES) $(EXECUTABLE)
 	
@@ -15,7 +15,7 @@ $(EXECUTABLE): $(OBJECTS)
 	
 .PHONY: clean
 clean:
-	rm -rf *.o Source/*.o app.out
+	rm -rf *.o Source/*.o $(EXECUTABLE)
 	
 .PHONY: run
 run:

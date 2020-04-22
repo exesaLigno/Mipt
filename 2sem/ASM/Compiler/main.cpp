@@ -1,6 +1,9 @@
 #include <fstream>
+#include <iostream>
 #include <unistd.h>
+#include <cstring>
 #include "Headers/programm.hpp"
+#include "Headers/settings.hpp"
 
 
 /*----------------------------------------------|
@@ -12,20 +15,31 @@
 
 int main(int argc, char* argv[])
 {
-	Programm programm(argc, argv);
-	programm.readSource();
-	programm.preprocessor();
+	Settings settings(argc, argv);	// 1 error
 	DEBUG
+	Programm programm;				// 0 errors
+	DEBUG
+	programm.readSource(&settings); // 3 errors
+	
+	programm.preprocessor(&settings); // 25 errors
+	
+	
+	programm.write(&settings);
+	
 	//programm.makeTokens();
-	//DEBUG
 	//programm.makeTree();
-	//DEBUG
 	//while(programm.optimize());
-	//DEBUG
 	//programm.compile();
-	//DEBUG
 	//programm.write();
-	//DEBUG
 	
     return 0;
 }
+
+
+
+
+
+
+
+
+// end;
