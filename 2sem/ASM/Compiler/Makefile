@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall -std=c++2a
 LDFLAGS=
-SOURCES=main.cpp Source/settings.cpp Source/programm.cpp Source/token.cpp
+SOURCES=main.cpp Source/settings.cpp Source/programm.cpp Source/token.cpp Source/library.cpp Source/definition.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=jc
 
