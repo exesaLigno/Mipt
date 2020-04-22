@@ -16,13 +16,13 @@ Settings::Settings(int argc, char* argv[])
 		else if (!strcmp("-o", argv[counter]) or !strcmp("--output", argv[counter]))
 		{
 			counter++;
-			this -> output_path = (char*) calloc(strlen(argv[counter]), sizeof(char));
+			this -> output_path = new char[strlen(argv[counter]) + 1]{0};
 			strcpy(this -> output_path, argv[counter]);
 		}
 		
 		else if (strstr(argv[counter], ".jaul") != NULL)
 		{
-			this -> source_path = (char*) calloc(strlen(argv[counter]), sizeof(char));
+			this -> source_path = new char[strlen(argv[counter]) + 1]{0};
 			strcpy(this -> source_path, argv[counter]);
 		}
 		
@@ -39,10 +39,10 @@ Settings::Settings(int argc, char* argv[])
 Settings::~Settings()
 {
 	if (this -> source_path)
-		free(source_path);
+		delete[] source_path;
 		
 	if (this -> output_path)
-		free(output_path);
+		delete[] output_path;
 }
 
 

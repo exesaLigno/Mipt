@@ -13,7 +13,7 @@ Programm::Programm()
 Programm::~Programm()
 {
 	if (this -> text)
-		free(text);
+		delete[] text;
 
 
 	//if (this -> source_tokens)
@@ -45,8 +45,7 @@ int Programm::readSource(const Settings* settings)
 	this -> text_length = ftell(source_file);
 	rewind(source_file);
 
-	this -> text = (char*) calloc(this -> text_length + 1, sizeof(char));
-	(this -> text)[this -> text_length] = '\0';
+	this -> text = new char[this -> text_length + 1]{0};
 
 	this -> text_length = fread(this -> text, sizeof(char), this -> text_length, source_file);
 	
@@ -61,16 +60,15 @@ int Programm::readSource(const Settings* settings)
 
 int Programm::preprocessor(const Settings* settings)
 {
-	DEBUG
 	while (importLibraries());
-	DEBUG
+
 	setDefinitions();
-	DEBUG
+
 	deleteComments();
-	DEBUG
+
 	if (not settings -> silent)
 		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, this -> text);
-	DEBUG
+
 	return 0;
 }
 
@@ -78,29 +76,29 @@ int Programm::preprocessor(const Settings* settings)
 int Programm::importLibraries()
 {
 	int imports_count = strcount(this -> text, "@import");
-	DEBUG
+
 	if (imports_count == 0)
 		return 0;
-	DEBUG
-	Library* libraries = (Library*) calloc(imports_count, sizeof(Library));
-	DEBUG
+
+	Library* libraries = new Library[imports_count];
+
 	int new_length = this -> text_length;
 	char* _text = this -> text;
-	DEBUG
+
 	for (int counter = 0; counter < imports_count; counter++)
 	{
 		_text = strstr(_text, "@import") + 8;
 		(libraries[counter]).libname_length = std::min(strchr(_text, ' '), strchr(_text, '\n')) - _text;
-		(libraries[counter]).libname = (char*) calloc ((libraries[counter]).libname_length + 1, sizeof(char));
+		(libraries[counter]).libname = new char[(libraries[counter]).libname_length + 1]{0};
 		strncpy((libraries[counter]).libname, _text, (libraries[counter]).libname_length);
 		(libraries[counter]).readLibrary();
 		new_length = new_length - (8 + (libraries[counter]).libname_length) + (libraries[counter]).libtext_length;
 	}
-	DEBUG
+
 	this -> text_length = new_length;
 	char* old_text = this -> text;
 	char* _old_text = old_text;
-	this -> text = (char*) calloc(this -> text_length, sizeof(char));
+	this -> text = new char[this -> text_length + 1]{0};
 	_text = this -> text;
 	
 	int lib_counter = 0;
@@ -123,22 +121,21 @@ int Programm::importLibraries()
 		}
 	}
 	
-	free(old_text);
+	delete[] old_text;
 	
-	free(libraries);			// TODO add recursive including check
+	delete[] libraries;			// TODO add recursive including check
 	
 	return imports_count;
 }
 
 
 int Programm::setDefinitions()		// TODO fix replacing middle of word (word borders checking)
-									// TODO fix memory errors
 {
 	int definitions_count = strcount(this -> text, "@define");
 	if (definitions_count == 0)
 		return 0;
 		
-	Definition* definitions = (Definition*) calloc(definitions_count, sizeof(Definition));
+	Definition* definitions = new Definition[definitions_count];
 	
 	int new_length = this -> text_length;
 	char* _text = this -> text;
@@ -148,13 +145,13 @@ int Programm::setDefinitions()		// TODO fix replacing middle of word (word borde
 		_text = strstr(_text, "@define") + 8;
 		(definitions[counter]).defname_length = std::min(strchr(_text, ' '), strchr(_text, '\n')) - _text;
 		
-		(definitions[counter]).defname = (char*) calloc((definitions[counter]).defname_length, sizeof(char));
+		(definitions[counter]).defname = new char[(definitions[counter]).defname_length + 1]{0};
 		strncpy((definitions[counter]).defname, _text, (definitions[counter]).defname_length);
 		
 		_text += (definitions[counter]).defname_length + 1;
 		(definitions[counter]).defstatement_length = strchr(_text, '\n') - _text;
 		
-		(definitions[counter]).defstatement = (char*) calloc((definitions[counter]).defstatement_length, sizeof(char));
+		(definitions[counter]).defstatement = new char[(definitions[counter]).defstatement_length + 1]{0};
 		strncpy((definitions[counter]).defstatement, _text, (definitions[counter]).defstatement_length);
 		
 		new_length = new_length + (((definitions[counter]).defstatement_length - (definitions[counter]).defname_length) \
@@ -165,7 +162,7 @@ int Programm::setDefinitions()		// TODO fix replacing middle of word (word borde
 	this -> text_length = new_length;
 	char* old_text = this -> text;
 	char* _old_text = old_text;
-	this -> text = (char*) calloc(this -> text_length, sizeof(char));
+	this -> text = new char[this -> text_length + 1]{0};
 	_text = this -> text;
 
 	while (*_old_text)
@@ -197,9 +194,9 @@ int Programm::setDefinitions()		// TODO fix replacing middle of word (word borde
 		}
 	}
 	
-	free(old_text);
+	delete[] old_text;
 
-	free(definitions);
+	delete[] definitions;
 	
 	return definitions_count;
 }
@@ -238,7 +235,38 @@ int Programm::deleteComments()
 
 int Programm::write(const Settings* settings)
 {
-	FILE* file = fopen("tested.out", "w");
+	char* filename = 0;
+	if (settings -> output_path)
+	{
+		filename = new char[strlen(settings -> output_path) + 1]{0};
+		strcpy(filename, settings -> output_path);
+	}
+	
+	else
+	{
+		if (settings -> only_preprocess)
+		{
+			filename = new char[strlen(settings -> source_path) + 2]{0};
+			strncpy(filename, settings -> source_path, strlen(settings -> source_path));
+			filename[strlen(settings -> source_path)] = 'p';
+		}
+		
+		else if (settings -> nasm_listing)
+		{
+			filename = new char[strlen(settings -> source_path) - 3]{0};
+			strncpy(filename, settings -> source_path, strlen(settings -> source_path) - 4);
+			filename[strlen(settings -> source_path) - 4] = 's';
+		}
+		
+		else
+		{
+			filename = new char[strlen(settings -> source_path) - 3]{0};
+			strncpy(filename, settings -> source_path, strlen(settings -> source_path) - 4);
+			strcpy(filename + strlen(settings -> source_path) - 4, "out");
+		}
+	}
+
+	FILE* file = fopen(filename, "w");
 
 	fprintf(file, "%s", this -> text);
 	
@@ -259,9 +287,9 @@ Definition::Definition()
 Definition::~Definition()
 {
 	if (defname)
-		free(defname);
+		delete[] defname;
 	if (defstatement)
-		free(defstatement);
+		delete[] defstatement;
 }
 
 
@@ -277,9 +305,9 @@ Library::Library()
 Library::~Library()
 {
 	if (libname)
-		free(libname);
+		delete[] libname;
 	if (libtext)
-		free(libtext);
+		delete[] libtext;
 }
 
 int Library::readLibrary()
@@ -302,7 +330,7 @@ int Library::readLibrary()
 	libtext_length = ftell(source_file);
 	rewind(source_file);
 
-	libtext = (char*) calloc(libtext_length + 1, sizeof(char));
+	libtext = new char[libtext_length + 1]{0};
 	(libtext)[libtext_length] = '\0';
 
 	libtext_length = fread(libtext, sizeof(char), libtext_length, source_file);
