@@ -1,13 +1,16 @@
 #pragma once
-#include "errcodes.hpp"
 
 #include "../Source/tree.cpp"
 #include "settings.hpp"
 #include "token.hpp"
+#include "library.hpp"
+#include "definition.hpp"
+#include "debug.hpp"
+#include "errcodes.hpp"
+
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include "debug.hpp"
 #include <cmath>
 #include <fstream>
 
@@ -15,32 +18,6 @@
 
 typedef Tree<Token*> PTree;
 typedef PTree::Node PNode;
-
-
-class Definition
-{
-  public:
-	char* defname;
-	char* defstatement;
-	int defname_length;
-	int defstatement_length;
-	
-	Definition();
-	~Definition();
-};
-
-class Library
-{
-  public:
-	char* libname;
-	int libname_length;
-	char* libtext;
-	unsigned long long int libtext_length;
-	
-	Library();
-	~Library();
-	int readLibrary();
-};
 
 
 

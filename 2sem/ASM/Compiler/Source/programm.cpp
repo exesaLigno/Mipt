@@ -65,6 +65,8 @@ int Programm::preprocessor(const Settings* settings)
 	setDefinitions();
 
 	deleteComments();
+	
+	//deleteEmptiness();
 
 	if (not settings -> silent)
 		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, this -> text);
@@ -275,70 +277,6 @@ int Programm::write(const Settings* settings)
 	return 0;
 }
 
-
-Definition::Definition()
-{
-	defname = 0;
-	defstatement = 0;
-	defname_length = 0;
-	defstatement_length = 0;
-}
-
-Definition::~Definition()
-{
-	if (defname)
-		delete[] defname;
-	if (defstatement)
-		delete[] defstatement;
-}
-
-
-
-Library::Library()
-{
-	libname = 0;
-	libname_length = 0;
-	libtext = 0;
-	libtext_length = 0;
-}
-
-Library::~Library()
-{
-	if (libname)
-		delete[] libname;
-	if (libtext)
-		delete[] libtext;
-}
-
-int Library::readLibrary()
-{
-	if (strcmp(libname + (strlen(libname) - 5), ".jaul"))
-	{
-		printf("\x1b[1;31mError\x1b[0m: file \x1b[1m\"%s\"\x1b[0m is not a library.\n", libname);
-		exit(WRONG_EXTENSION);
-	}
-	
-	FILE* source_file = fopen(libname, "r");
-	
-	if (not source_file)
-	{
-		printf("\x1b[1;31mError\x1b[0m: library \x1b[1m\"%s\"\x1b[0m not exist.\n", libname);
-		exit(FILE_NOT_EXIST);
-	}
-	
-	fseek(source_file, 0, SEEK_END);
-	libtext_length = ftell(source_file);
-	rewind(source_file);
-
-	libtext = new char[libtext_length + 1]{0};
-	(libtext)[libtext_length] = '\0';
-
-	libtext_length = fread(libtext, sizeof(char), libtext_length, source_file);
-	
-	fclose(source_file);
-
-	return libtext_length;
-}
 
 
 int strcount(char* str, const char* expression)
