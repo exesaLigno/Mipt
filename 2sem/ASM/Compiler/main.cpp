@@ -15,16 +15,15 @@
 
 int main(int argc, char* argv[])
 {
-	Settings settings(argc, argv);	// 1 error
-	DEBUG
-	Programm programm;				// 0 errors
-	DEBUG
-	programm.readSource(&settings); // 3 errors
+	Settings settings(argc, argv);
+
+	Programm programm;
+
+	programm.readSource(&settings);
+	programm.preprocessor(&settings);
 	
-	programm.preprocessor(&settings); // 25 errors
-	
-	
-	programm.write(&settings);
+	if (settings.only_preprocess)
+		programm.write(&settings);
 	
 	//programm.makeTokens();
 	//programm.makeTree();
