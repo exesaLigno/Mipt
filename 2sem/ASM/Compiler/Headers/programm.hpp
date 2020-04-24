@@ -20,6 +20,10 @@ typedef Tree<Token*> PTree;
 typedef PTree::Node PNode;
 
 
+#define WRONGINDENT -2
+#define EMPTYLINE -1
+
+
 
 class Programm
 {
@@ -28,11 +32,14 @@ class Programm
 	unsigned long long int text_length;
 	//Token* source_tokens;
 	//unsigned long long int tokens_length;
-	//PTree programm_tree;
+	PTree programm_tree;
 	
 	int importLibraries();
 	int setDefinitions();
 	int deleteComments();
+	
+	PNode* parseBlock(int indent, char** _text);
+	PNode* parseLine(char** _text);
 	
 	
   public:

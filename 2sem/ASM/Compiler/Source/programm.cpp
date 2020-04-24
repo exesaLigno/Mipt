@@ -235,6 +235,73 @@ int Programm::deleteComments()
 }
 
 
+int Programm::makeTree(const Settings* settings)
+{
+	int initial_indent = 0;
+	char* _text = this -> text;
+	PNode* entry = (this -> programm_tree).createNode("ENTRY");
+	PNode* result = parseBlock(initial_indent, &_text);
+	entry -> leftConnect(result);
+	if (not settings -> silent)
+	{
+		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT);
+		printf("Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n");
+	}
+}
+
+
+PNode* Programm::parseBlock(int indent, char** _text)
+{
+	int current_indent = 0;
+	
+	PNode* branch = 0;
+	PNode* previous = 0;
+	
+	while ((current_indent = calculateIndent(*_text)) == indent)
+	{
+		PNode* current = new PNode("line");
+		current -> rightConnect(parseLine(_text));
+		if (not previous)
+		{
+			previous = current;
+			branch = previous;
+		}
+		
+		else
+		{
+			previous -> leftConnect(current);
+			previous = current;
+		}
+	}
+	
+	return
+}
+
+
+int calculateIndent(char* text)
+{
+	tabs_count = 0;
+	while(*text == '\t')
+	{
+		tabs_count++;
+		text++;
+		if (*text == ' ')
+			return WRONGINDENT;
+	}
+	
+	if (*text == '\n')
+		return EMPTYLINE;
+	
+	return tabs_count;	
+}
+
+
+PNode* parseLine(char** _text)
+{
+	
+}
+
+
 int Programm::write(const Settings* settings)
 {
 	char* filename = 0;
