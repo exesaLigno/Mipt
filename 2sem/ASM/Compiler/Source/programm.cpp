@@ -245,61 +245,131 @@ int Programm::makeTree(const Settings* settings)
 	if (not settings -> silent)
 	{
 		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT);
-		printf("Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n");
+		printf("Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n", settings -> source_path);
 	}
 }
 
 
-PNode* Programm::parseBlock(int indent, char** _text)
+PNode* parseBlock(int indent, char** _text)
 {
-	int current_indent = 0;
-	
-	PNode* branch = 0;
+	PNode* head = 0;
 	PNode* previous = 0;
-	
-	while ((current_indent = calculateIndent(*_text)) == indent)
+
+	while (**_text != '\0')
 	{
-		PNode* current = new PNode("line");
-		current -> rightConnect(parseLine(_text));
-		if (not previous)
+		bool line_founded = nextLine(_text);
+		
+		int current_indent = calculateIndent(*_text);
+
+		if (current_indent > indent)
+			printf("\x1b[1;31mIncorrect indent!\x1b[0m\n");
+
+		if (current_indent < indent)
+			break;
+		
+		if (line_founded)
 		{
-			previous = current;
-			branch = previous;
+			PNode* newline = new PNode("line");
+			
+			if (previous)
+			{
+				previous -> leftConnect(newline);
+				previous = newline;
+			}
+			
+			else
+			{
+				previous = newline;
+				head = newline;
+			}
+			
+			PNode* parsed = parseLine(indent, _text);
+			newline -> rightConnect(parsed);
+		}
+	}
+
+	return head;
+}
+
+
+bool nextLine(char** _text)
+{
+	while (**_text != '\0')
+	{		
+		if (**_text == '\n')
+			(*_text)++;
+			
+		char* line_start = *_text;
+		
+		bool empty = true;
+		
+		while (**_text != '\n' and **_text != '\0')
+		{
+			if (**_text != '\t' and **_text != ' ')
+			{
+				empty = false;
+				break;
+			}
+			
+			(*_text)++;
 		}
 		
-		else
+		if (not empty)
 		{
-			previous -> leftConnect(current);
-			previous = current;
+			*_text = line_start;
+			break;
 		}
 	}
 	
-	return
+	if (**_text == '\0')
+		return false;
+		
+	else
+		return true;
 }
 
 
 int calculateIndent(char* text)
 {
-	tabs_count = 0;
-	while(*text == '\t')
+	int indent = 0;
+	
+	while (*text == '\t')
 	{
-		tabs_count++;
+		indent++;
 		text++;
-		if (*text == ' ')
-			return WRONGINDENT;
 	}
-	
-	if (*text == '\n')
-		return EMPTYLINE;
-	
-	return tabs_count;	
+		
+	return indent;
 }
 
 
-PNode* parseLine(char** _text)
+PNode* parseLine(int indent, char** _text)
 {
+	while (**_text == '\t')
+		(*_text)++;
 	
+	char* endline = strchr(*_text, '\n');
+	if (endline == NULL)
+		endline = strchr(*_text, '\0');
+		
+	int length = endline - *_text;
+
+	char* line = new char[length + 1]{0};
+	strncpy(line, *_text, length);
+	
+	PNode* node = new PNode(line);
+	(*_text) += length;
+	
+	if (!strncmp(node -> data, "def ", 4) or !strncmp(node -> data, "for ", 4) or !strncmp(node -> data, "while ", 6) or !strncmp(node -> data, "if ", 3))
+	{
+		PNode* internal = parseBlock(indent + 1, _text);
+		node -> leftConnect(internal);
+	}
+
+	return node;
 }
+
+
 
 
 int Programm::write(const Settings* settings)

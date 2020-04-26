@@ -15,8 +15,8 @@
 #include <fstream>
 
 
-
-typedef Tree<Token*> PTree;
+typedef Tree<char*> PTree;
+//typedef Tree<Token*> PTree;
 typedef PTree::Node PNode;
 
 
@@ -38,9 +38,6 @@ class Programm
 	int setDefinitions();
 	int deleteComments();
 	
-	PNode* parseBlock(int indent, char** _text);
-	PNode* parseLine(char** _text);
-	
 	
   public:
 	Programm();
@@ -59,4 +56,9 @@ class Programm
 int strcount(char* str, const char* expression);
 bool isSpace(char symbol);
 int getHash(char*);
+
+int calculateIndent(char* text);
+bool nextLine(char** _text);
+PNode* parseBlock(int indent, char** _text);
+PNode* parseLine(int indent, char** _text);
 

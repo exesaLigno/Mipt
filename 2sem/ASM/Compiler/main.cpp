@@ -23,10 +23,13 @@ int main(int argc, char* argv[])
 	programm.preprocessor(&settings);
 	
 	if (settings.only_preprocess)
+	{
 		programm.write(&settings);
+		return 0;
+	}
 	
 	//programm.makeTokens();
-	//programm.makeTree();
+	programm.makeTree(&settings);
 	//while(programm.optimize());
 	//programm.compile();
 	//programm.write();
