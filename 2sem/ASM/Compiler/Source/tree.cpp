@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdio>
+#include <iostream>
+#include <fstream>
 //#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
@@ -32,7 +34,7 @@ class Tree
 		Tree<D>::Node* leftPush(D data);
 		Tree<D>::Node* rightPush(D data);
 		
-		int dumper(FILE* file, int mode);
+		int dumper(std::ofstream& file, int mode);
 		
 	  private:
 		Tree* container;
@@ -77,7 +79,8 @@ void Tree<D>::Node::leftConnect(Node* left)
 {
 	this -> left = left;
 	left -> parent = this;
-	this -> container -> nodes_count += 1;
+	if (this -> container)
+		this -> container -> nodes_count += 1;
 }
 
 template <class D>
@@ -85,7 +88,8 @@ void Tree<D>::Node::rightConnect(Node* right)
 {
 	this -> right = right;
 	right -> parent = this;
-	this -> container -> nodes_count += 1;
+	if (this -> container)
+		this -> container -> nodes_count += 1;
 }
 
 
@@ -124,31 +128,32 @@ typename Tree<D>::Node* Tree<D>::Node::rightPush(D data)
 template <class D>
 int Tree<D>::dumper(const char* filename, int mode)
 {
-	char* cmd = new char[2 * strlen(filename) + 1 + 8 + 16];
+	char* cmd = new char[2 * strlen(filename) + 1 + 8 + 29];
 	strcpy(cmd, filename);
 	strcat(cmd, ".txt");
-    FILE* file = fopen (cmd, "w");
-    fprintf(file, "digraph G{\n");
-    fprintf(file, "root [shape = box, style = filled, fillcolor = orange, color = black, label = \" Root = %p\"]\n", this -> head);
-    fprintf(file, "count [shape = box, style = filled, fillcolor = orange, color = black, label = \" Count of nodes = %lld\"]\n", this -> nodes_count);
+    std::ofstream file;
+    file.open(cmd);
+    file << "digraph G{\n";
+    file << "root [shape = box, style = filled, fillcolor = orange, color = black, label = \" Root = " << this -> head << "\"]\n";
+    file << "count [shape = box, style = filled, fillcolor = orange, color = black, label = \" Count of nodes = " << this -> nodes_count << "\"]\n";
     Tree<D>::Node* element = this -> head;
     
-    fprintf(file, "%d [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {", element);
+    file << (long int) element << " [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {";	// element interprying as int
     
     if ((mode / 1000) % 10 == 1)
-    	fprintf(file, "<adr> Address: %p | Data: ", element);
+    	file << "<adr> Address: " << element << " | Data: ";
     
-    fprintf(file, "%s", element -> data);
+    file << element -> data;
     
     if ((mode / 1000) % 10 == 1)
-    	fprintf(file, " |{<left> %p | <right> %p}", element -> left, element -> right);
+    	file << " |{<left> " << element -> left << " | <right> " << element -> right << "}";
     	
-    fprintf(file, "}\"]\n");
+    file << "}\"]\n";
     
-    fprintf(file, "root -> %d\n [color = black]", element);
+    file << "root -> " << (long int) element << "\n [color = black]";	// element as int
     element -> dumper(file, mode);
-    fprintf(file, "}");
-    fclose(file);
+    file << "}";
+    file.close();
     
     strcpy(cmd, "dot -Tpng ");
     strcat(cmd, filename);
@@ -188,50 +193,59 @@ int Tree<D>::dumper(const char* filename, int mode)
 
 
 template <class D>
-int Tree<D>::Node::dumper(FILE* file, int mode)
+int Tree<D>::Node::dumper(std::ofstream& file, int mode)
 {
+	
     if (this -> left)
     {
-        fprintf (file, "%d [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {", this -> left);
+        file << (long int) this -> left << " [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {";
         
         if ((mode / 1000) % 10 == 1)
-        	fprintf(file, "<adr> Address: %p | Data: ", this -> left);
+        	file << "<adr> Address: " << this -> left << " | Data: ";
         
-        fprintf(file, "%s", this -> left -> data);
-        
-        if ((mode / 1000) % 10 == 1)
-        	fprintf(file, " | <prev> Prev: %p |{<left> %p | <right> %p}", this, this -> left -> left, this -> left -> right);
-        
-        fprintf(file, "}\"]\n");
-        
-        fprintf (file, "%d:<left> -> %d [color = black]\n", this, this -> left);
+        file << this -> left -> data;
         
         if ((mode / 1000) % 10 == 1)
-        	fprintf (file, "%d:<prev> -> %d [color = gray]\n", this -> left, this);
+        	file << " | <prev> Prev: " << this << " |{<left> " << this -> left -> left << " | <right> " << this -> left -> right << "}";
+        
+        file << "}\"]\n";
+        
+        if ((mode / 1000) % 10 == 1)
+        {
+        	file << (long int) this << ":<left> -> " << (long int) this -> left << " [color = black]\n";
+        	file << (long int) this -> left << ":<prev> -> " << (long int) this << " [color = gray]\n";
+        }
+        	
+        else
+        	file << (long int) this << " -> " << (long int) this -> left << " [color = black]\n";
         	
         this -> left -> dumper(file, mode);
     }
 
     if (this -> right)
     {
-		fprintf (file, "%d [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {", this -> right);
+		file << (long int) this -> right << " [shape = record, style = filled, fillcolor = lightblue, color = black, label = \" {";
         
         if ((mode / 1000) % 10 == 1)
-        	fprintf(file, "<adr> Address: %p | Data: ", this -> right);
+        	file << "<adr> Address: " << this -> right << " | Data: ";
         
-        fprintf(file, "%s", this -> right -> data);
-        
-        if ((mode / 1000) % 10 == 1)
-        	fprintf(file, " | <prev> Prev: %p |{<left> %p | <right> %p}", this, this -> right -> left, this -> right -> right);
-        
-        fprintf(file, "}\"]\n");
-		
-        fprintf (file, "%d:<right> -> %d [color = black]\n", this, this -> right);
+        file << this -> right -> data;
         
         if ((mode / 1000) % 10 == 1)
-        	fprintf (file, "%d:<prev> -> %d [color = gray]\n", this -> right, this);
+        	file << " | <prev> Prev: " << this << " |{<left> " << this -> right -> left << " | <right> " << this -> right -> right << "}";
+        
+        file << "}\"]\n";
+        
+        if ((mode / 1000) % 10 == 1)
+        {
+        	file << (long int) this << ":<right> -> " << (long int) this -> right << " [color = black]\n";
+        	file << (long int) this -> right << ":<prev> -> " << (long int) this << " [color = gray]\n";
+        }
+        
+        else
+        	file << (long int) this << " -> " << (long int) this -> right << " [color = black]\n";
         	
-		this -> right -> dumper(file, mode);
+        this -> right -> dumper(file, mode);
     }
 
     return 0;
