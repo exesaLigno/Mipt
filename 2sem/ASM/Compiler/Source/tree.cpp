@@ -30,6 +30,7 @@ class Tree
 		
 		void leftConnect(Node* left);
 		void rightConnect(Node* right);
+		void fixContainer();
 		
 		Tree<D>::Node* leftPush(D data);
 		Tree<D>::Node* rightPush(D data);
@@ -71,7 +72,12 @@ Tree<D>::Node::Node (D data)
 
 template <class D>
 Tree<D>::Node::~Node()
-{}
+{
+	if (this -> left)
+		delete this -> left;
+	if (this -> right)
+		delete this -> right;
+}
 
 
 template <class D>
@@ -80,7 +86,11 @@ void Tree<D>::Node::leftConnect(Node* left)
 	this -> left = left;
 	left -> parent = this;
 	if (this -> container)
+	{
 		this -> container -> nodes_count += 1;
+		left -> container = this -> container;
+		left -> fixContainer();
+	}
 }
 
 template <class D>
@@ -89,7 +99,29 @@ void Tree<D>::Node::rightConnect(Node* right)
 	this -> right = right;
 	right -> parent = this;
 	if (this -> container)
+	{
 		this -> container -> nodes_count += 1;
+		right -> container = this -> container;
+		right -> fixContainer();
+	}
+}
+
+template <class D>
+void Tree<D>::Node::fixContainer()
+{
+	if (this -> right)
+	{
+		this -> container -> nodes_count += 1;
+		this -> right -> container = this -> container;
+		this -> right -> fixContainer();
+	}
+	
+	if (this -> left)
+	{
+		this -> container -> nodes_count += 1;
+		this -> left -> container = this -> container;
+		this -> left -> fixContainer();
+	}
 }
 
 
@@ -264,12 +296,16 @@ Tree<D>::Tree()
 
 template <class D>
 Tree<D>::~Tree()
-{}
+{
+	if (this -> head)
+		delete this -> head;
+}
 
 template <class D>
 typename Tree<D>::Node* Tree<D>::createNode(D data)
 {
 	Node* new_node = new Node(data);
+	this -> nodes_count++;
 	new_node -> container = this;
 	if (not this -> head)
 		this -> head = new_node;
