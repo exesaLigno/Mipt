@@ -13,6 +13,11 @@
 #include <cstdlib>
 #include <cmath>
 #include <fstream>
+#include <cctype>
+
+
+#define skip_spaces(where)	while (*where == ' ')	\
+								(where)++;			\
 
 
 typedef Tree<char*> PTree;
@@ -61,4 +66,17 @@ int calculateIndent(char* text);
 bool nextLine(char** _text);
 PNode* parseBlock(int indent, char** _text);
 PNode* parseLine(int indent, char** _text);
+
+PNode* getDef(char** _line);
+
+PNode* getAssignment(char** _line);
+PNode* getBranching(char** _line);
+PNode* getLogic(char** _line);
+PNode* getCmp(char** _line);
+PNode* getAddSub(char** _line);
+PNode* getMulDiv(char** _line);
+PNode* getPow(char** _line);
+PNode* getNumVarFunc(char** _line);
+
+PNode* getItemize(char** _line);
 

@@ -28,7 +28,6 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 	
-	//programm.makeTokens();
 	programm.makeTree(&settings);
 	//while(programm.optimize());
 	//programm.compile();
