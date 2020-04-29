@@ -3,4 +3,4 @@
 @define parameters a, b, c, result
 
 def print_res(parameters)
-	printf(%d + %d + %d = %d, parameters)
+	printf(parameters)

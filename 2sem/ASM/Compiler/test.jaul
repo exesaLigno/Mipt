@@ -2,7 +2,7 @@
 
 def sum(a, b, c)
 	d = a + b + c
-		return d
+	return d
 	test C
 	
 
