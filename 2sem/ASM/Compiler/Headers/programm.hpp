@@ -20,7 +20,7 @@
 								(where)++;			\
 
 
-typedef Tree<char*> PTree;
+typedef Tree<Token*> PTree;
 //typedef Tree<Token*> PTree;
 typedef PTree::Node PNode;
 
@@ -35,8 +35,6 @@ class Programm
   public:
 	char* text;
 	unsigned long long int text_length;
-	//Token* source_tokens;
-	//unsigned long long int tokens_length;
 	PTree programm_tree;
 	
 	int importLibraries();
@@ -48,19 +46,29 @@ class Programm
 	Programm();
 	~Programm();
 	
-	int readSource(const Settings* settings);
-	int preprocessor(const Settings* settings);
-	int makeTokens(const Settings* settings);
-	int makeTree(const Settings* settings);
-	int optimize(const Settings* settings);
-	int compile(const Settings* settings);
-	int write(const Settings* settings);
+	void readSource(const Settings* settings);
+	
+	void preprocessor(const Settings* settings);
+	
+	void makeTree(const Settings* settings);
+	void optimizeTree();
+	void rebuildTree();
+	
+	void makeNasm(const Settings* settings);
+	void optimizeNasm();
+	
+	void makeBinary(const Settings* settings);
+	void makeHeader(const Settings* settings);
+	
+	void write(const Settings* settings);
 };
 
 
 int strcount(char* str, const char* expression);
 bool isSpace(char symbol);
 int getHash(char*);
+
+const char* colorize(Token* token);
 
 int calculateIndent(char* text);
 bool nextLine(char** _text);
@@ -70,7 +78,7 @@ PNode* parseLine(int indent, char** _text);
 PNode* getDef(char** _line);
 
 PNode* getAssignment(char** _line);
-PNode* getBranching(char** _line);
+PNode* getOperators(char** _line);
 PNode* getLogic(char** _line);
 PNode* getCmp(char** _line);
 PNode* getAddSub(char** _line);

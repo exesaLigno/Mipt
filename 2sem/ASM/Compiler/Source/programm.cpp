@@ -1,12 +1,18 @@
 #include "../Headers/programm.hpp"
 
+
+#ifdef DEBUG_MODE
+	#define SWITCH
+#else
+	#define SWITCH if(0)
+#endif
+
+
 Programm::Programm()
 {
 	text = 0;
 	text_length = 0;
-	//source_tokens = 0;
-	//tokens_length = 0;
-	//programm_tree;
+	programm_tree.setType(DATA_POINTER);
 }
 
 
@@ -14,16 +20,12 @@ Programm::~Programm()
 {
 	if (this -> text)
 		delete[] text;
-
-
-	//if (this -> source_tokens)
-	//	delete source_tokens;
 }
 
 
 
 
-int Programm::readSource(const Settings* settings)
+void Programm::readSource(const Settings* settings)
 {
 	char* source_path = settings -> source_path;
 	
@@ -53,12 +55,10 @@ int Programm::readSource(const Settings* settings)
 
 	if (not settings -> silent)
 		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols readed from \x1b[1;32m%s\x1b[0m\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, source_path, this -> text);
-	
-	return this -> text_length;
 }
 
 
-int Programm::preprocessor(const Settings* settings)
+void Programm::preprocessor(const Settings* settings)
 {
 	while (importLibraries());
 
@@ -66,12 +66,8 @@ int Programm::preprocessor(const Settings* settings)
 
 	deleteComments();
 	
-	//deleteEmptiness();
-
 	if (not settings -> silent)
 		printf("\n\x1b[1;32m%lld\x1b[0;32m symbols preprocessed\n------------ \x1b[1;32mSOURCE CODE\x1b[0m ------------\n%s\n------------- \x1b[1;32mEND SOURCE\x1b[0m ------------\n\n", this -> text_length, this -> text);
-
-	return 0;
 }
 
 
@@ -235,18 +231,63 @@ int Programm::deleteComments()
 }
 
 
-int Programm::makeTree(const Settings* settings)
+void Programm::makeTree(const Settings* settings)
 {
 	int initial_indent = 0;
 	char* _text = this -> text;
-	PNode* entry = (this -> programm_tree).createNode("ENTRY");
+	Token* token = new Token(Token::ENTRY);
+	PNode* entry = (this -> programm_tree).createNode(token);
 	PNode* result = parseBlock(initial_indent, &_text);
 	entry -> leftConnect(result);
+	this -> rebuildTree();
 	if (not settings -> silent)
 	{
-		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT);
+		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT, colorize);
 		printf("Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n", settings -> source_path);
 	}
+}
+
+
+const char* colorize(Token* token)
+{
+	if (token -> type == Token::ENTRY)
+		return "green";
+		
+	else if (token -> type == Token::LINE or token -> type == Token::ITEM or token -> type == Token::DEF)
+		return "lightgray";
+		
+	else if (token -> type == Token::FUNC)
+		return "green";
+	
+	else if (token -> type == Token::ARITHM_OPERATOR)
+		return "pink";
+		
+	else if (token -> type == Token::CMP_OPERATOR)
+		return "\"#f8aeff\"";
+		
+	else if (token -> type == Token::CTRL_OPERATOR)
+		return "orange";
+		
+	else if (token -> type == Token::INT)
+		return "\"#D083FF\"";
+		
+	else if (token -> type == Token::CHAR)
+		return "\"#B3FFEF\"";
+		
+	else if (token -> type == Token::FLOAT)
+		return "\"#FF89A9\"";
+		
+	else if (token -> type == Token::STRING)
+		return "\"#9FFF88\"";
+		
+	else if (token -> type == Token::VARIABLE)
+		return "\"#64ADFF\"";
+		
+	else if (token -> type == Token::FUNCCALL)
+		return "\"#0B8AFF\"";
+		
+	else
+		return "lightblue";
 }
 
 
@@ -269,7 +310,8 @@ PNode* parseBlock(int indent, char** _text)
 		
 		if (line_founded)
 		{
-			PNode* newline = new PNode("line");
+			Token* token = new Token(Token::LINE);
+			PNode* newline = new PNode(token);
 			
 			if (previous)
 			{
@@ -362,21 +404,22 @@ PNode* parseLine(int indent, char** _text)
 	PNode* node = 0;
 	
 	if (!strncmp(line, "def ", 4))
-	{
-		node = new PNode("def");
-		node -> rightConnect(getDef(&_line));
-	}
+		node = getDef(&_line);
 	
 	else
 		node = getAssignment(&_line);
+
 	
 	(*_text) += length;
 		
-	if (!strncmp(node -> data, "wh", 2) or !strncmp(node -> data, "if", 2) or !strncmp(node -> data, "el", 2) or !strncmp(node -> data, "def", 3))
+	if ((node -> data -> type == Token::CTRL_OPERATOR and (node -> data -> ivalue == Token::WHILE or node -> data -> ivalue == Token::IF or node -> data -> ivalue == Token::ELSE)) or node -> data -> type == Token::FUNC)
 	{
 		PNode* internal = parseBlock(indent + 1, _text);
-		node -> right -> leftConnect(internal);
+		node -> leftConnect(internal);
 	}
+	
+	if (line)
+		delete[] line;
 
 	return node;
 }
@@ -385,14 +428,10 @@ PNode* parseLine(int indent, char** _text)
 PNode* getDef(char** _line)
 {
 	(*_line) += 4;
-	char* _line_bcp = *_line;
-	while (**_line != '(')
-		(*_line)++;
-		
-	char* defname = new char[*_line - _line_bcp + 1]{0};
-	strncpy(defname, _line_bcp, *_line - _line_bcp);
 	
-	PNode* def = new PNode(defname);
+	Token* token = new Token(Token::FUNC, _line);
+	
+	PNode* def = new PNode(token);
 	
 	(*_line)++;
 	def -> rightConnect(getItemize(_line));
@@ -404,19 +443,20 @@ PNode* getDef(char** _line)
 PNode* getAssignment(char** _line)	// get assignment
 {
 	skip_spaces(*_line);
-	PNode* left_branch = getBranching(_line);
+	PNode* left_branch = getOperators(_line);
 	
 	skip_spaces(*_line);
 	if (**_line == '=' and *(*_line + 1) != '=')
 	{
-		char* ass = new char[2]{0};
-		*ass = '=';
-		PNode* operand = new PNode(ass);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 1;
 		
 		skip_spaces(*_line);
-		PNode* right_branch = getBranching(_line);
+		PNode* right_branch = getOperators(_line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -426,18 +466,17 @@ PNode* getAssignment(char** _line)	// get assignment
 }
 
 
-PNode* getBranching(char** _line)
+PNode* getOperators(char** _line)
 {
 	PNode* left_branch = 0;
 
-	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "else", 4))
+	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "else", 4) or !strncmp(*_line, "return", 6))
 	{
-		char* branching = new char[3]{0};
-		strncpy(branching, *_line, 2);
-		PNode* operand = new PNode(branching);
+		Token* token = new Token(_line);
 		
-		while (**_line != ' ')
-			(*_line) += 1;
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getLogic(_line);
@@ -464,13 +503,14 @@ PNode* getLogic(char** _line)
 	PNode* left_branch = getCmp(_line);
 	
 	skip_spaces(*_line);
-	if (!strncmp(*_line, "||", 2) or !strncmp(*_line, "&&", 2))
+	while (!strncmp(*_line, "||", 2) or !strncmp(*_line, "&&", 2))
 	{
-		char* logic = new char[3]{0};
-		strncpy(logic, *_line, 2);
-		PNode* operand = new PNode(logic);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 2;
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getCmp(_line);
@@ -489,14 +529,16 @@ PNode* getCmp(char** _line)
 	PNode* left_branch = getAddSub(_line);
 	
 	skip_spaces(*_line);
-	if (!strncmp(*_line, "==", 2) or !strncmp(*_line, "!=", 2) or	\
-		!strncmp(*_line, ">=", 2) or !strncmp(*_line, "<=", 2))
+	while (!strncmp(*_line, "==", 2) or !strncmp(*_line, "!=", 2) or 
+		!strncmp(*_line, ">=", 2) or !strncmp(*_line, "<=", 2) or
+		!strncmp(*_line, ">", 1) or !strncmp(*_line, "<", 1))
 	{
-		char* logic = new char[3]{0};
-		strncpy(logic, *_line, 2);
-		PNode* operand = new PNode(logic);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 2;
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getAddSub(_line);
@@ -517,11 +559,12 @@ PNode* getAddSub(char** _line)
 	skip_spaces(*_line);
 	while (**_line == '+' or **_line == '-')
 	{
-		char* ass = new char[2]{0};
-		*ass = **_line;
-		PNode* operand = new PNode(ass);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 1;
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getMulDiv(_line);
@@ -540,13 +583,14 @@ PNode* getMulDiv(char** _line)
 	PNode* left_branch = getPow(_line);
 	
 	skip_spaces(*_line);
-	while (**_line == '*' or **_line == '/')
+	while (**_line == '*' or **_line == '/' or **_line == '%')
 	{
-		char* ass = new char[2]{0};
-		*ass = **_line;
-		PNode* operand = new PNode(ass);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 1;
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getPow(_line);
@@ -567,11 +611,12 @@ PNode* getPow(char** _line)
 	skip_spaces(*_line);
 	if (**_line == '^')
 	{
-		char* ass = new char[2]{0};
-		*ass = '^';
-		PNode* operand = new PNode(ass);
+		Token* token = new Token(_line);
+		
+		SWITCH std::cout << *token << std::endl;
+
+		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
-		(*_line) += 1;
 		
 		skip_spaces(*_line);
 		PNode* right_branch = getNumVarFunc(_line);
@@ -598,23 +643,14 @@ PNode* getNumVarFunc(char** _line)	// get numbers, variables and functions
 		return block;
 	}
 		
-	char* _line_bcp = *_line;
-	int token_length = 0;
-	while(isdigit(**_line) or isalpha(**_line) or **_line == '.' or **_line == '_')
-	{
-		token_length++;
-		(*_line)++;
-	}
+	skip_spaces(*_line);
+	Token* token = new Token(_line);
 	
-	char* token = new char[token_length + 1]{0};
-	strncpy(token, _line_bcp, token_length);
-	
-	//std::cout << token << std::endl;
+	SWITCH std::cout << *token << std::endl;
 	
 	PNode* parsed = new PNode(token);
 	
 	skip_spaces(*_line);
-	
 	if (**_line == '(')
 	{
 		(*_line)++;
@@ -630,7 +666,8 @@ PNode* getNumVarFunc(char** _line)	// get numbers, variables and functions
 
 PNode* getItemize(char** _line)
 {
-	PNode* item = new PNode("item");
+	Token* token = new Token(Token::ITEM);
+	PNode* item = new PNode(token);
 	item -> rightConnect(getLogic(_line));
 	
 	skip_spaces(*_line);
@@ -646,7 +683,84 @@ PNode* getItemize(char** _line)
 
 
 
-int Programm::write(const Settings* settings)
+void Programm::optimizeTree()
+{
+	std::cout << "\x1b[1;31mTree optimization is not implemented yet!\x1b[0m\n";
+}
+
+
+
+void Programm::rebuildTree()
+{
+	PNode* last_function = 0;
+	PNode* current_line = (this -> programm_tree).head;
+	while (current_line -> left)
+	{
+		current_line = current_line -> left;
+
+		if (current_line -> right -> data -> type == Token::FUNC)
+		{
+			PNode* function = current_line -> right;
+			PNode* deleting = current_line;
+
+			if (current_line -> left)
+				current_line -> parent -> leftConnect(current_line -> left);
+				
+			else
+				current_line -> parent -> left = 0;
+				
+			Token* def = new Token(Token::DEF);
+			PNode* def_node = new PNode(def);
+			def_node -> leftConnect(function);
+
+			if (not last_function)
+			{
+				(this -> programm_tree).head -> rightConnect(def_node);
+				last_function = function;
+			}
+			
+			else
+			{
+				last_function -> leftConnect(def_node);
+				last_function = function;
+			}
+			
+			deleting -> left = 0;
+			deleting -> right = 0;
+			delete deleting;
+		}
+	}
+}
+
+
+
+void Programm::makeNasm(const Settings* settings)
+{
+	std::cout << "\x1b[1;31mТы че дебил ебаный, сказано тебе, не написан еще компилятор\x1b[0m\n";
+}
+
+
+
+void Programm::optimizeNasm()
+{
+	std::cout << "\x1b[1;31mNasm optimization is not implemented yet!\x1b[0m\n";
+}
+
+
+void Programm::makeBinary(const Settings* settings)
+{
+	std::cout << "\x1b[1;31mBinary compilation not implemented yet!\x1b[0m\n";
+}
+
+
+void Programm::makeHeader(const Settings* settings)
+{
+	std::cout << "\x1b[1;31mHeader not implemented yet!\x1b[0m\n";
+}
+
+
+
+void Programm::write(const Settings* settings)
 {
 	char* filename = 0;
 	if (settings -> output_path)
@@ -684,8 +798,6 @@ int Programm::write(const Settings* settings)
 	fprintf(file, "%s", this -> text);
 	
 	fclose(file);
-	
-	return 0;
 }
 
 

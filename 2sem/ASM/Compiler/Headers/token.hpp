@@ -1,9 +1,19 @@
 #pragma once
 
+#include <iostream>
+#include <cstring>
+#include "debug.hpp"
+
+enum SYMTYPES
+{
+	LETTER = 1, NUMBER, SYMBOL, SPECSYMBOL,
+	COUNT_OF_SYMTYPES
+};
+
 
 class Token
 {
-  private:
+  public:
   	int type;
   	int ivalue;
   	float fvalue;
@@ -14,14 +24,49 @@ class Token
   public:
   	enum TYPES
   	{
-  		OPERATOR, NAME,				// CODE
-  		INT, FLOAT, STRING, CHAR,	// OPERANDS
-  		NEWLINE, NEWDEF, ENTRY,		// SPECIAL SYMBOLS
+  		UNKNOWN,
+  		ARITHM_OPERATOR, CMP_OPERATOR, CTRL_OPERATOR,		// OPERATORS
+  		VARIABLE, FUNCCALL, INT, FLOAT, STRING, CHAR,		// OPERANDS
+  		LINE, FUNC, ENTRY, ITEM, DEF,						// SPECIAL SYMBOLS
   		COUNT_OF_TYPES
   	};
+  	
+  	enum OPERATORS
+  	{
+  		PLUS, MINUS, MULTIPLY, DIVIDE, POWER,				// ariphmetics operators
+  		MODULO, INT_DIVISION,
+  		
+  		EQUAL, NOT_EQUAL, MORE, LESS, MORE_EQ, LESS_EQ,		// comparison operators
+  		AND, OR,
+  		
+  		IF, ELSE, WHILE, FOR, RETURN, ASSIGNMENT,			// control operators
+  		PLUS_ASSIGNMENT, MINUS_ASSIGNMENT,
+  		MULTIPLY_ASSIGNMENT, DIVIDE_ASSIGNMENT,
+  		POWER_ASSIGNMENT,
+  		
+  		COUNT_OF_OPERATORS
+  	};
+  	
   	Token();
-  	Token(char* text);
-  	Token(int type, int value);
-  	explicit Token(const Token&);
+  	Token(int type);
+  	Token(int type, char** text);
+  	Token(char** text);
+  	Token(const Token& that) = delete;
+  	friend std::ostream& operator<< (std::ostream &out, const Token &token);
   	~Token();
 };
+
+
+bool isLetter(char symbol);
+bool isNumber(char symbol);
+bool isOperand(char symbol);
+bool isEnd(char symbol);
+
+bool isInteger(char* string);
+bool isFloat(char* string);
+bool isChar(char* string);
+bool isString(char* string);
+
+
+
+
