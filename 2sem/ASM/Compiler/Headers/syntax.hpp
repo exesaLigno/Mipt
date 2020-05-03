@@ -1,2 +1,31 @@
+#include "token.hpp"
 
-// TOKEN( TYPE , )
+TOKEN("+", 	Token::ARITHM_OPERATOR, Token::PLUS, 	 "+")
+TOKEN("-", 	Token::ARITHM_OPERATOR, Token::MINUS, 	 "-")
+TOKEN("*", 	Token::ARITHM_OPERATOR, Token::MULTIPLY, "*")
+TOKEN("/", 	Token::ARITHM_OPERATOR, Token::DIVIDE, 	 "/")
+TOKEN("^", 	Token::ARITHM_OPERATOR, Token::POWER, 	 "^")
+TOKEN("%", 	Token::ARITHM_OPERATOR, Token::MODULO, 	 "%")
+TOKEN("//", Token::ARITHM_OPERATOR, Token::INT_DIVISION, "//")
+
+TOKEN("==", Token::CMP_OPERATOR, Token::EQUAL, "==")
+TOKEN("!=", Token::CMP_OPERATOR, Token::NOT_EQUAL, "!=")
+TOKEN(">=", Token::CMP_OPERATOR, Token::MORE_EQ, "More or equal")
+TOKEN("<=", Token::CMP_OPERATOR, Token::LESS_EQ, "Less or equal")
+TOKEN(">", Token::CMP_OPERATOR, Token::MORE, "More")
+TOKEN("<", Token::CMP_OPERATOR, Token::LESS, "Less")
+TOKEN("&&", Token::CMP_OPERATOR, Token::AND, "&&")
+TOKEN("||", Token::CMP_OPERATOR, Token::OR, "||")
+
+TOKEN("if", Token::CTRL_OPERATOR, Token::IF, "if")
+TOKEN("else", Token::CTRL_OPERATOR, Token::ELSE, "else")
+TOKEN("for", Token::CTRL_OPERATOR, Token::FOR, "for")
+TOKEN("while", Token::CTRL_OPERATOR, Token::WHILE, "while")
+TOKEN("return", Token::CTRL_OPERATOR, Token::RETURN, "return")
+TOKEN("=", Token::CTRL_OPERATOR, Token::ASSIGNMENT, "=")
+TOKEN("+=", Token::CTRL_OPERATOR, Token::PLUS_ASSIGNMENT, "+=")
+TOKEN("-=", Token::CTRL_OPERATOR, Token::MINUS_ASSIGNMENT, "-=")
+TOKEN("*=", Token::CTRL_OPERATOR, Token::MULTIPLY_ASSIGNMENT, "*=")
+TOKEN("/=", Token::CTRL_OPERATOR, Token::DIVIDE_ASSIGNMENT, "/=")
+TOKEN("^=", Token::CTRL_OPERATOR, Token::POWER_ASSIGNMENT, "^=")
+
