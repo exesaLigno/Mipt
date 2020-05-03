@@ -1,15 +1,13 @@
-@import library.jaul
+while condition1 && condition2
+	action
 
-def sum(a, b, c)
-	d = a + b + c
-	return d
-	test C
+def test(a)
+	line1
+	line2
 	
-
-x = 45
-y = x * 2
-z = 45 + 2
-
-t = sum(x, y, z)
-
-print_res(x, y, z, t)
+def psina(v)
+	x = 2
+	y -= 4
+	
+a = 56*7
+b = a^2
