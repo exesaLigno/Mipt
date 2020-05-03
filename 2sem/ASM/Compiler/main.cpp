@@ -29,9 +29,24 @@ int main(int argc, char* argv[])
 	}
 	
 	programm.makeTree(&settings);
-	//while(programm.optimize());
-	//programm.compile();
-	//programm.write();
+		
+	if (settings.optimization_level > 0)
+		programm.optimizeTree();
+
+	programm.makeNasm(&settings);
+	
+	if (settings.optimization_level > 1)
+		programm.optimizeNasm();
+	
+	if (settings.nasm_listing)
+	{
+		programm.write(&settings);
+		return 0;
+	}
+	
+	programm.makeBinary(&settings);
+	
+	programm.write(&settings);
 	
     return 0;
 }
