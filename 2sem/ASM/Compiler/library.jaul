@@ -1,6 +1,0 @@
-# Useless library for useless language
-
-@define parameters a, b, c, result
-
-def print_res(parameters)
-	printf(parameters)
