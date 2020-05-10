@@ -53,8 +53,11 @@ class Programm
 	void makeTree(const Settings* settings);
 	void optimizeTree();
 	void rebuildTree();
+	void prepareVariables();
+	void prepareVariables(PNode* node);
 	
 	void makeNasm(const Settings* settings);
+	void makeNasm(PNode* node);
 	void optimizeNasm();
 	
 	void makeBinary(const Settings* settings);
@@ -87,4 +90,7 @@ PNode* getPow(char** _line);
 PNode* getNumVarFunc(char** _line);
 
 PNode* getItemize(char** _line);
+
+char* getUnnumeratedVariable(PNode* node);
+void setVariables(PNode* node, const char* varname, int vartype, int varnumber);
 

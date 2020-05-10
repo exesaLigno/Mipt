@@ -11,6 +11,13 @@ enum SYMTYPES
 };
 
 
+enum VARTYPES
+{
+	LOCAL = 1,
+	PARAMETER
+};
+
+
 class Token
 {
   public:
@@ -19,6 +26,8 @@ class Token
   	float fvalue;
   	char cvalue;
   	char* svalue;
+  	bool LValue;
+  	int vartype;
   	
   	
   public:
@@ -28,11 +37,13 @@ class Token
   		ARITHM_OPERATOR, CMP_OPERATOR, CTRL_OPERATOR,		// OPERATORS
   		VARIABLE, FUNCCALL, INT, FLOAT, STRING, CHAR,		// OPERANDS
   		LINE, FUNC, ENTRY, ITEM, DEF,						// SPECIAL SYMBOLS
+  		_START,
   		COUNT_OF_TYPES
   	};
   	
   	enum OPERATORS
   	{
+  		NOP,
   		PLUS, MINUS, MULTIPLY, DIVIDE, POWER,				// ariphmetics operators
   		MODULO, INT_DIVISION,
   		
@@ -52,7 +63,10 @@ class Token
   	Token(int type, char** text);
   	Token(char** text);
   	Token(const Token& that) = delete;
+  	
   	friend std::ostream& operator<< (std::ostream &out, const Token &token);
+  	char* compileToken();
+  	
   	~Token();
 };
 

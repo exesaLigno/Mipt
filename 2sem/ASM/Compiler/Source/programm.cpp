@@ -1,6 +1,8 @@
 #include "../Headers/programm.hpp"
 
 
+//#define DEBUG_MODE
+
 #ifdef DEBUG_MODE
 	#define SWITCH
 #else
@@ -470,7 +472,7 @@ PNode* getOperators(char** _line)
 {
 	PNode* left_branch = 0;
 
-	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "else", 4) or !strncmp(*_line, "return", 6))
+	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "for", 4) or !strncmp(*_line, "return", 6))
 	{
 		Token* token = new Token(_line);
 		
@@ -483,6 +485,17 @@ PNode* getOperators(char** _line)
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
+	}
+	
+	else if (!strncmp(*_line, "else", 4))
+	{
+		Token* token = new Token(_line);
+		SWITCH std::cout << *token << std::endl;
+		
+		PNode* operand = new PNode(token);
+		
+		skip_spaces(*_line);
+		left_branch = operand;		
 	}
 	
 	else
@@ -654,7 +667,9 @@ PNode* getNumVarFunc(char** _line)	// get numbers, variables and functions
 	if (**_line == '(')
 	{
 		(*_line)++;
-		parsed -> rightConnect(getItemize(_line));
+		PNode* itemize = getItemize(_line);
+		if (itemize)
+			parsed -> rightConnect(itemize);
 		if (**_line != ')')
 			std::cout << "Error!\n";
 		(*_line)++;
@@ -666,6 +681,10 @@ PNode* getNumVarFunc(char** _line)	// get numbers, variables and functions
 
 PNode* getItemize(char** _line)
 {
+	skip_spaces(*_line);
+	if (**_line == ')')
+		return 0;
+	
 	Token* token = new Token(Token::ITEM);
 	PNode* item = new PNode(token);
 	item -> rightConnect(getLogic(_line));
@@ -694,51 +713,194 @@ void Programm::rebuildTree()
 {
 	PNode* last_function = 0;
 	PNode* current_line = (this -> programm_tree).head;
+	
+	PNode* deleting = 0;
 	while (current_line -> left)
 	{
 		current_line = current_line -> left;
-
+		
+		if (deleting)
+		{
+			deleting -> left = 0;
+			deleting -> right = 0;
+			delete deleting;
+			deleting = 0;
+		}
+		
 		if (current_line -> right -> data -> type == Token::FUNC)
 		{
 			PNode* function = current_line -> right;
-			PNode* deleting = current_line;
+			deleting = current_line;
 
 			if (current_line -> left)
 				current_line -> parent -> leftConnect(current_line -> left);
-				
 			else
 				current_line -> parent -> left = 0;
 				
 			Token* def = new Token(Token::DEF);
 			PNode* def_node = new PNode(def);
-			def_node -> leftConnect(function);
+			def_node -> rightConnect(function);
 
 			if (not last_function)
 			{
 				(this -> programm_tree).head -> rightConnect(def_node);
-				last_function = function;
+				last_function = def_node;
 			}
 			
 			else
 			{
 				last_function -> leftConnect(def_node);
-				last_function = function;
+				last_function = def_node;
 			}
-			
-			deleting -> left = 0;
-			deleting -> right = 0;
-			delete deleting;
 		}
 	}
+	
+	if ((this -> programm_tree).head -> left == 0)
+	{
+		std::cout << "\x1b[1mThis is not an executable programm\nAborting...\n\x1b[0m";
+		exit(1);
+	}
+	
+	PNode* _start = (this -> programm_tree).head -> left;
+	(this -> programm_tree).head -> left = 0;
+	
+	PNode* defs = (this -> programm_tree).head -> right;
+	(this -> programm_tree).head -> right = 0;
+
+	Token* _start_def_token = new Token(Token::DEF);
+	Token* _start_func_token = new Token(Token::_START);
+
+	PNode* _start_def = new PNode(_start_def_token);
+	PNode* _start_func = new PNode(_start_func_token);
+
+	(this -> programm_tree).head -> leftConnect(_start_def);
+
+	_start_def -> leftConnect(defs);
+
+	_start_def -> rightConnect(_start_func);
+
+	_start_func -> leftConnect(_start);
+	
+	PNode* def = (this -> programm_tree).head -> left;
+	
+	while (def)
+	{
+		PNode* function = def -> right;
+		
+		PNode* parameter = function -> right;
+		
+		
+		int varcounter = 0;
+		while (parameter)
+		{			
+			varcounter++;
+			setVariables(function, parameter -> right -> data -> svalue, PARAMETER, varcounter);
+			parameter = parameter -> left;
+		}
+		
+		
+		varcounter = 0;
+		while (true)
+		{
+			char* unnumerated_variable = getUnnumeratedVariable(function);
+			if (not unnumerated_variable)
+				break;
+				
+			varcounter++;
+			
+			setVariables(function, unnumerated_variable, LOCAL, varcounter);
+		}
+		function -> data -> ivalue = varcounter;
+		def = def -> left;
+	}
+}
+
+
+
+char* getUnnumeratedVariable(PNode* node)
+{
+	char* unnumerated_variable = 0;
+	
+	if (node -> data -> type == Token::VARIABLE and node -> data -> ivalue == 0 and node -> data -> vartype == 0)
+		unnumerated_variable = node -> data -> svalue;
+		
+	if (node -> right and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> right);
+		
+	if (node -> left and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> left);
+		
+	return unnumerated_variable;
+}
+
+
+
+void setVariables(PNode* node, const char* varname, int vartype, int varnumber)
+{
+	if (varname == 0)
+		return;
+	
+	if (node -> data -> type == Token::VARIABLE and node -> data -> svalue)
+	{
+		if (!strcmp(node -> data -> svalue, varname))
+		{
+			node -> data -> vartype = vartype;
+			node -> data -> ivalue = varnumber;
+		}
+	}
+	
+	if (node -> left)
+		setVariables(node -> left, varname, vartype, varnumber);
+		
+	if (node -> right)
+		setVariables(node -> right, varname, vartype, varnumber);
+	
+	return;
 }
 
 
 
 void Programm::makeNasm(const Settings* settings)
 {
-	std::cout << "\x1b[1;31mТы че дебил ебаный, сказано тебе, не написан еще компилятор\x1b[0m\n";
+	PNode* current_node = (this -> programm_tree).head;
+	while (current_node)
+	{
+		//compileDef(current_node);
+		current_node = current_node -> left;
+	}
 }
 
+/*
+void Programm::makeNasm(PNode* node)
+{
+	int type = node -> data -> type;
+	int optype = node -> data -> ivalue;	
+	
+	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
+		std::cout << ".cycle:\n";
+		
+	if (node -> right)										//| Compiling right branch
+		makeNasm(node -> right);							//|
+		
+	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
+		std::cout << "pop rax\ntest rax, rax\njz .exitcycle\n";
+		
+	if (optype == Token::IF and type == Token::CTRL_OPERATOR)
+		std::cout << "pop rax\ntest rax, rax\njz .endif\n";
+	
+	if (node -> left)										//| Compiling left branch
+		makeNasm(node -> left);								//|
+		
+	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
+		std::cout << "jmp .cycle\n\n";
+		
+	if (optype == Token::IF and type == Token::CTRL_OPERATOR)
+		std::cout << "jmp .exitif\n\n";
+	
+	if (not ((optype == Token::IF or optype == Token::WHILE or optype == Token::ELSE) and type == Token::CTRL_OPERATOR))
+		node -> data -> compileToken();
+}
+*/
 
 
 void Programm::optimizeNasm()
@@ -780,7 +942,7 @@ void Programm::write(const Settings* settings)
 		
 		else if (settings -> nasm_listing)
 		{
-			filename = new char[strlen(settings -> source_path) - 3]{0};
+			filename = new char[strlen(settings -> source_path) - 2]{0};
 			strncpy(filename, settings -> source_path, strlen(settings -> source_path) - 4);
 			filename[strlen(settings -> source_path) - 4] = 's';
 		}

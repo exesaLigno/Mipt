@@ -10,6 +10,14 @@ Token::Token(int type)
 	this -> fvalue = 0;
 	this -> cvalue = 0;
 	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
+	if (type == Token::_START)
+	{
+		this -> type = Token::FUNC;
+		this -> svalue = new char[10];
+		strcpy(this -> svalue, "_start");
+	}
 }
 
 Token::Token(char** text)
@@ -19,6 +27,8 @@ Token::Token(char** text)
 	this -> fvalue = 0;
 	this -> cvalue = 0;
 	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
 	
 	int first_sym = 0;
 	if (isLetter(**text))
@@ -50,7 +60,7 @@ Token::Token(char** text)
 	if(0)
 		std::cout << "\x1b[1;31mbullshit\n\x1b[0m";
 
-	#define TOKEN(string, token_type, token_number, dump)					\
+	#define TOKEN(string, token_type, token_number, dump, code)		\
 			else if (!strcmp(token, string))						\
 			{														\
 				this -> type = token_type;							\
@@ -86,22 +96,25 @@ Token::Token(char** text)
 	else if (isString(token))
 	{
 		this -> type = STRING;
-		this -> svalue = "fuck_string";
+		this -> svalue = "empty_string";
 		delete[] token;
 	}
 
 	else
 	{
-		char* test_bracket = *text;
+		char* test_next = *text;
 		
-		while (*test_bracket == ' ')
-			(test_bracket)++;
+		while (*test_next == ' ')
+			(test_next)++;
 			
-		if (*test_bracket == '(')
+		if (*test_next == '(')
 			this -> type = FUNCCALL;
 			
 		else
 			this -> type = VARIABLE;
+			
+		if (*test_next == '=' and *(test_next + 1) != '=')	
+			this -> LValue = true;
 			
 		this -> svalue = token;
 	}
@@ -115,6 +128,8 @@ Token::Token(int type, char** text)
 	this -> fvalue = 0;
 	this -> cvalue = 0;
 	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
 	
 	int first_sym = 0;
 	if (isLetter(**text))
@@ -161,12 +176,12 @@ std::ostream& operator<< (std::ostream &out, const Token &token)
 		out << "line";
 		
 	else if (token.type == Token::FUNC)
-		out << "function | " << token.svalue;
+		out << "function | " << token.svalue << " | { Mem | " << token.ivalue << " } ";
 		
 	else if (token.type == Token::ITEM)
 		out << "item";
 	
-	#define TOKEN(string, token_type, token_number, dump)												\
+	#define TOKEN(string, token_type, token_number, dump, code)									\
 			else if (token.type == token_type and token.ivalue == token_number)					\
 				out << "OPERATOR | " << dump;													\
 			
@@ -187,7 +202,17 @@ std::ostream& operator<< (std::ostream &out, const Token &token)
 		out << "string | " << token.svalue;
 		
 	else if (token.type == Token::VARIABLE)
+	{
+		if (token.LValue)
+			out << "L-";
 		out << "variable | " << token.svalue;
+			
+		if (token.vartype == LOCAL)
+			out << " | { Local | " << token.ivalue << " }";
+			
+		else if (token.vartype == PARAMETER)
+			out << " | { Parameter  | " << token.ivalue << " }";
+	}
 		
 	else if (token.type == Token::FUNCCALL)
 		out << "function | " << token.svalue;
@@ -295,6 +320,71 @@ bool isString(char* string)
 	
 	return result;
 }
+
+
+
+char* Token::compileToken()
+{
+	if (this -> type == ARITHM_OPERATOR or this -> type == CMP_OPERATOR or this -> type == CTRL_OPERATOR)
+	{
+		#define TOKEN(string, token_type, token_number, dump, code)		\
+				case token_number:										\
+				{														\
+					std::cout << code;									\
+					break;												\
+				}	
+		
+		switch (this -> ivalue)
+		{
+			#include "../Headers/syntax.hpp"
+			
+			default:
+			{
+				std::cout << "\x1b[1;31mUnknown operator\x1b[0m\n";
+				break;
+			}
+		}
+		
+		#undef TOKEN
+	}
+		
+	else if (this -> type == VARIABLE or this -> type == FUNC)
+	{
+		std::cout << "\x1b[1;31m" << this -> svalue << "\x1b[0m\n"; 
+	}
+		
+	else if (this -> type == FUNCCALL)
+	{
+		std::cout << "Function call compilation\n";
+	}
+		
+	else if (this -> type == INT)
+	{
+		std::cout << "mov rax, " << this -> ivalue << "\n"	\
+					 "push rax\n";
+	}
+		
+	else if (this -> type == FLOAT)
+	{
+		std::cout << "mov rax, " << this -> fvalue << "\n"	\
+					 "push rax\n";
+	}
+	
+	else if (this -> type == CHAR)
+	{
+		std::cout << "mov rax, " << this -> cvalue << "\n"	\
+					 "push rax\n";
+	}
+		
+	else if (this -> type == STRING)
+		std::cout << "String\n";
+		
+	return 0;
+}
+
+
+
+
 
 
 
