@@ -5,6 +5,7 @@
 //#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
+#include "../Headers/debug.hpp"
 
 static const int DEFAULT = 0;
 static const int SHOW = 1;
@@ -99,26 +100,32 @@ Tree<D>::Node::~Node()
 template <class D>
 void Tree<D>::Node::leftConnect(Node* left)
 {
-	this -> left = left;
-	left -> parent = this;
-	if (this -> container)
+	if (left)
 	{
-		this -> container -> nodes_count += 1;
-		left -> container = this -> container;
-		left -> fixContainer();
+		this -> left = left;
+		left -> parent = this;
+		if (this -> container)
+		{
+			this -> container -> nodes_count += 1;
+			left -> container = this -> container;
+			left -> fixContainer();
+		}
 	}
 }
 
 template <class D>
 void Tree<D>::Node::rightConnect(Node* right)
 {
-	this -> right = right;
-	right -> parent = this;
-	if (this -> container)
+	if (right)
 	{
-		this -> container -> nodes_count += 1;
-		right -> container = this -> container;
-		right -> fixContainer();
+		this -> right = right;
+		right -> parent = this;
+		if (this -> container)
+		{
+			this -> container -> nodes_count += 1;
+			right -> container = this -> container;
+			right -> fixContainer();
+		}
 	}
 }
 
