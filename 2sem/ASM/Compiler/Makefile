@@ -15,7 +15,11 @@ $(EXECUTABLE): $(OBJECTS)
 	
 .PHONY: clean
 clean:
-	rm -rf *.o Source/*.o $(EXECUTABLE) *.png
+	rm -rf *.o Source/*.o
+	
+.PHONY: rm
+rm:
+	rm -rf *.png *.out *.s
 	
 .PHONY: run
 run:
