@@ -65,7 +65,6 @@ class Token
   	Token(const Token& that) = delete;
   	
   	friend std::ostream& operator<< (std::ostream &out, const Token &token);
-  	char* compileToken();
   	
   	~Token();
 };

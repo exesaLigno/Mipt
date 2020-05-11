@@ -790,7 +790,7 @@ void Programm::rebuildTree()
 		PNode* parameter = function -> right;
 		
 		
-		int varcounter = 0;
+		int varcounter = -1;
 		while (parameter)
 		{			
 			varcounter++;
@@ -799,7 +799,7 @@ void Programm::rebuildTree()
 		}
 		
 		
-		varcounter = 0;
+		varcounter = -1;
 		while (true)
 		{
 			char* unnumerated_variable = getUnnumeratedVariable(function);
@@ -810,7 +810,7 @@ void Programm::rebuildTree()
 			
 			setVariables(function, unnumerated_variable, LOCAL, varcounter);
 		}
-		function -> data -> ivalue = varcounter;
+		function -> data -> ivalue = varcounter + 1;
 		def = def -> left;
 	}
 }
@@ -828,7 +828,7 @@ char* getUnnumeratedVariable(PNode* node)
 		unnumerated_variable = getUnnumeratedVariable(node -> right);
 		
 	if (node -> left and not unnumerated_variable)
-		unnumerated_variable = getUnnumeratedVariable(node -> left);
+		unnumerated_variable = getUnnumeratedVariable(node -> left);	
 		
 	return unnumerated_variable;
 }
@@ -849,11 +849,11 @@ void setVariables(PNode* node, const char* varname, int vartype, int varnumber)
 		}
 	}
 	
-	if (node -> left)
-		setVariables(node -> left, varname, vartype, varnumber);
-		
 	if (node -> right)
 		setVariables(node -> right, varname, vartype, varnumber);
+	
+	if (node -> left)
+		setVariables(node -> left, varname, vartype, varnumber);
 	
 	return;
 }
@@ -862,45 +862,198 @@ void setVariables(PNode* node, const char* varname, int vartype, int varnumber)
 
 void Programm::makeNasm(const Settings* settings)
 {
-	PNode* current_node = (this -> programm_tree).head;
+	PNode* current_node = (this -> programm_tree).head -> left;
+	
+	std::ofstream file;
+	file.open("temporary.s");
+	
+	file << "section .text\n\tglobal _start\n\n";
+	
 	while (current_node)
 	{
-		//compileDef(current_node);
+		compileDef(current_node -> right, file);
 		current_node = current_node -> left;
 	}
 }
 
-/*
-void Programm::makeNasm(PNode* node)
+
+
+void Programm::compileDef(PNode* node, std::ofstream& file)
+{
+	file << node -> data -> svalue << ":\n";
+	file << "\tpop r13\n";
+	file << "\tmov r15, rsp\n";			// r15 - parameters
+	file << "\tsub rsp, " << ((node -> data -> ivalue) * 8) << "\n";
+	file << "\tmov r14, rsp\n\n";			// r14 - local variables
+	
+	makeBody(node -> left, file);
+	
+	file << "\tadd rsp, " << ((node -> data -> ivalue) * 8) << "\n";
+	file << "\tpush r13\n";
+	if (!strcmp(node -> data -> svalue, "_start"))
+		file << "\tmov rdi, rax\n\tmov rax, 60\n\tsyscall\n\n\n";
+		
+	else
+		file << "\tret\n\n\n";
+}
+
+
+
+void Programm::makeBody(PNode* node, std::ofstream& file)
 {
 	int type = node -> data -> type;
-	int optype = node -> data -> ivalue;	
+	int optype = node -> data -> ivalue;
 	
-	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
-		std::cout << ".cycle:\n";
+	if (type == Token::FUNCCALL)
+	{
+		file << "\tpush r13\n\tpush r14\n\tpush r15\n\n";
 		
-	if (node -> right)										//| Compiling right branch
-		makeNasm(node -> right);							//|
+		if (node -> right)
+			pushParameters(node -> right, file);
+			
+		file << "\tcall " << node -> data -> svalue << "\n";
 		
-	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
-		std::cout << "pop rax\ntest rax, rax\njz .exitcycle\n";
+		PNode* param = node -> right;
 		
-	if (optype == Token::IF and type == Token::CTRL_OPERATOR)
-		std::cout << "pop rax\ntest rax, rax\njz .endif\n";
+		while (param)
+		{
+			file << "\tpop r15\n";
+			param = param -> left;
+		}
+		
+		file << "\tpop r15\n\tpop r14\n\tpop r13\n\n";
+		file << "\tpush rax\n";
+	}
 	
-	if (node -> left)										//| Compiling left branch
-		makeNasm(node -> left);								//|
+	else if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
+	{
+		file << ".cycle:\n";
 		
-	if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
-		std::cout << "jmp .cycle\n\n";
+		if (node -> right)
+			makeBody(node -> right, file);
+			
+		file << "\tpop rax\n\ttest rax, rax\n\tjz .exitcycle\n";
 		
-	if (optype == Token::IF and type == Token::CTRL_OPERATOR)
-		std::cout << "jmp .exitif\n\n";
+		if (node -> left)
+			makeBody(node -> left, file);
+			
+		file << "\tjmp .cycle\n\n";
+	}
 	
-	if (not ((optype == Token::IF or optype == Token::WHILE or optype == Token::ELSE) and type == Token::CTRL_OPERATOR))
-		node -> data -> compileToken();
+	else if (optype == Token::FOR and type == Token::CTRL_OPERATOR)
+	{
+		file << "\t\x1b[1;31mFor compilation\x1b[0m\n";
+	}
+	
+	else if (optype == Token::IF and type == Token::CTRL_OPERATOR)
+	{
+		if (node -> right)
+			makeBody(node -> right, file);
+			
+		file << "\tpop rax\n\ttest rax, rax\n\tjz .endif\n\n";
+		
+		if (node -> left)
+			makeBody(node -> left, file);
+			
+		file << "\tjmp .exitif\n\n";
+	}
+	
+	else if (optype == Token::ELSE and type == Token::CTRL_OPERATOR)
+	{
+		file << "\t\x1b[1;31mElse compilation\x1b[0m\n";
+	}
+	
+	else
+	{
+		if (node -> right)
+			makeBody(node -> right, file);
+		
+		if (node -> left)
+			makeBody(node -> left, file);
+		
+		compile(node, file);
+	}
 }
-*/
+
+
+
+void Programm::pushParameters(PNode* node, std::ofstream& file)
+{
+	if (node -> left)
+		pushParameters(node -> left, file);
+		
+	if (node -> right)
+		makeBody(node -> right, file);
+}
+
+
+
+void Programm::compile(PNode* node, std::ofstream& file)
+{
+	if (node -> data -> type == Token::ARITHM_OPERATOR or node -> data -> type == Token::CMP_OPERATOR or node -> data -> type == Token::CTRL_OPERATOR)
+	{
+		#define TOKEN(string, token_type, token_number, dump, code)		\
+				case token_number:										\
+				{														\
+					file << code;									\
+					break;												\
+				}	
+		
+		switch (node -> data -> ivalue)
+		{
+			#include "../Headers/syntax.hpp"
+			
+			default:
+			{
+				file << "\x1b[1;31mUnknown operator\x1b[0m\n";
+				break;
+			}
+		}
+		
+		#undef TOKEN
+	}
+	
+	else if (node -> data -> type == Token::VARIABLE)
+	{
+		if (node -> data -> LValue)
+		{
+			if (node -> data -> vartype == LOCAL)
+				file << "\tmov rax, r14\n\tadd rax, " << (node -> data -> ivalue) * 8 << "\n\tpush rax\n\n";
+			else if (node -> data -> vartype == PARAMETER)
+				file << "\tmov rax, r15\n\tadd rax, " << (node -> data -> ivalue) * 8 << "\n\tpush rax\n\n";
+		}
+		else
+		{
+			if (node -> data -> vartype == LOCAL)
+				file << "\tmov rax, [r14 + " << (node -> data -> ivalue) * 8 << "]\n\tpush rax\n\n";
+			else if (node -> data -> vartype == PARAMETER)
+				file << "\tmov rax, [r15 + " << (node -> data -> ivalue) * 8 << "]\n\tpush rax\n\n";
+		}
+	}
+		
+	else if (node -> data -> type == Token::INT)
+	{
+		file << "\tmov rax, " << node -> data -> ivalue << "\n"	\
+					 "\tpush rax\n\n";
+	}
+		
+	else if (node -> data -> type == Token::FLOAT)
+	{
+		file << "\tmov rax, " << node -> data -> fvalue << "\n"	\
+					 "\tpush rax\n\n";
+	}
+	
+	else if (node -> data -> type == Token::CHAR)
+	{
+		file << "\tmov rax, \'" << node -> data -> cvalue << "\'\n"	\
+					 "\tpush rax\n\n";
+	}
+		
+	else if (node -> data -> type == Token::STRING)
+		file << "\tString\n\n";
+}
+
+
 
 
 void Programm::optimizeNasm()

@@ -57,7 +57,10 @@ class Programm
 	void prepareVariables(PNode* node);
 	
 	void makeNasm(const Settings* settings);
-	void makeNasm(PNode* node);
+	void compileDef(PNode* node, std::ofstream& file);
+	void makeBody(PNode* node, std::ofstream& file);
+	void pushParameters(PNode* node, std::ofstream& file);
+	void compile(PNode* node, std::ofstream& file);
 	void optimizeNasm();
 	
 	void makeBinary(const Settings* settings);
@@ -93,4 +96,6 @@ PNode* getItemize(char** _line);
 
 char* getUnnumeratedVariable(PNode* node);
 void setVariables(PNode* node, const char* varname, int vartype, int varnumber);
+
+
 

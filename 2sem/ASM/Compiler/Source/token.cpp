@@ -323,68 +323,6 @@ bool isString(char* string)
 
 
 
-char* Token::compileToken()
-{
-	if (this -> type == ARITHM_OPERATOR or this -> type == CMP_OPERATOR or this -> type == CTRL_OPERATOR)
-	{
-		#define TOKEN(string, token_type, token_number, dump, code)		\
-				case token_number:										\
-				{														\
-					std::cout << code;									\
-					break;												\
-				}	
-		
-		switch (this -> ivalue)
-		{
-			#include "../Headers/syntax.hpp"
-			
-			default:
-			{
-				std::cout << "\x1b[1;31mUnknown operator\x1b[0m\n";
-				break;
-			}
-		}
-		
-		#undef TOKEN
-	}
-		
-	else if (this -> type == VARIABLE or this -> type == FUNC)
-	{
-		std::cout << "\x1b[1;31m" << this -> svalue << "\x1b[0m\n"; 
-	}
-		
-	else if (this -> type == FUNCCALL)
-	{
-		std::cout << "Function call compilation\n";
-	}
-		
-	else if (this -> type == INT)
-	{
-		std::cout << "mov rax, " << this -> ivalue << "\n"	\
-					 "push rax\n";
-	}
-		
-	else if (this -> type == FLOAT)
-	{
-		std::cout << "mov rax, " << this -> fvalue << "\n"	\
-					 "push rax\n";
-	}
-	
-	else if (this -> type == CHAR)
-	{
-		std::cout << "mov rax, " << this -> cvalue << "\n"	\
-					 "push rax\n";
-	}
-		
-	else if (this -> type == STRING)
-		std::cout << "String\n";
-		
-	return 0;
-}
-
-
-
-
 
 
 
