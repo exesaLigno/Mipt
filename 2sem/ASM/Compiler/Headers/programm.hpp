@@ -94,6 +94,7 @@ PNode* getNumVarFunc(char** _line);
 
 PNode* getItemize(char** _line);
 
+void enumerateBranching(PNode* node, int* number);
 char* getUnnumeratedVariable(PNode* node);
 void setVariables(PNode* node, const char* varname, int vartype, int varnumber);
 

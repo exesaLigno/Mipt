@@ -789,6 +789,9 @@ void Programm::rebuildTree()
 		
 		PNode* parameter = function -> right;
 		
+		int number = 0;
+		enumerateBranching(function, &number);
+		
 		
 		int varcounter = -1;
 		while (parameter)
@@ -813,6 +816,24 @@ void Programm::rebuildTree()
 		function -> data -> ivalue = varcounter + 1;
 		def = def -> left;
 	}
+}
+
+
+
+void enumerateBranching(PNode* node, int* number)
+{
+	if (node -> data -> type == Token::CTRL_OPERATOR and (node -> data -> ivalue == Token::IF or node -> data -> ivalue == Token::WHILE or node -> data -> ivalue == Token::FOR))
+	{
+		std::cout << *number << std::endl;
+		node -> data -> vartype = *number;
+		(*number)++;
+	}
+	
+	if (node -> right)
+		enumerateBranching(node -> right, number);
+		
+	if (node -> left)
+		enumerateBranching(node -> left, number);
 }
 
 
@@ -927,18 +948,18 @@ void Programm::makeBody(PNode* node, std::ofstream& file)
 	
 	else if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
 	{
-		file << ".cycle:\n";
+		file << ".cycle" << node -> data -> vartype << ":\n";
 		
 		if (node -> right)
 			makeBody(node -> right, file);
 			
-		file << "\tpop rax\n\ttest rax, rax\n\tjz .exitcycle\n";
+		file << "\tpop rax\n\ttest rax, rax\n\tjz .exitcycle" << node -> data -> vartype << "\n";
 		
 		if (node -> left)
 			makeBody(node -> left, file);
 			
-		file << "\tjmp .cycle\n";
-		file << "\t.exitcycle:\n\n";
+		file << "\tjmp .cycle" << node -> data -> vartype << "\n";
+		file << "\t.exitcycle" << node -> data -> vartype << ":\n\n";
 	}
 	
 	else if (optype == Token::FOR and type == Token::CTRL_OPERATOR)
@@ -951,19 +972,29 @@ void Programm::makeBody(PNode* node, std::ofstream& file)
 		if (node -> right)
 			makeBody(node -> right, file);
 			
-		file << "\tpop rax\n\ttest rax, rax\n\tjz .endif\n\n";
+		file << "\tpop rax\n\ttest rax, rax\n\tjz .endif" << node -> data -> vartype << "\n\n";
 		
 		if (node -> left)
 			makeBody(node -> left, file);
 			
-		file << "\tjmp .exitif\n\n";
+		file << "\tjmp .exitif" << node -> data -> vartype << "\n\n";
+		file << "\t.endif" << node -> data -> vartype << ":\n";
+		
+		// Else compilation
+		if (node -> parent -> left)
+		{
+			if (node -> parent -> left -> right -> data -> type == Token::CTRL_OPERATOR and node -> parent -> left -> right -> data -> ivalue == Token::ELSE)
+				makeBody(node -> parent -> left -> right -> left, file);
+		}
+		
+		file << "\t.exitif" << node -> data -> vartype << ":\n";
 	}
 	
 	else if (optype == Token::ELSE and type == Token::CTRL_OPERATOR)
 	{
-		file << "\t\x1b[1;31mElse compilation\x1b[0m\n";
+		file << "\tnop\n";
 	}
-	
+		
 	else
 	{
 		if (node -> right)
