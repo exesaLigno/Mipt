@@ -24,3 +24,8 @@ rm:
 .PHONY: run
 run:
 	./"$(EXECUTABLE)" 
+	
+.PHONY: nasm
+nasm:
+	nasm -f elf64 temporary.s -o temporary.o
+	ld -s -o temporary temporary.o

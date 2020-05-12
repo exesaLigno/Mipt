@@ -937,7 +937,8 @@ void Programm::makeBody(PNode* node, std::ofstream& file)
 		if (node -> left)
 			makeBody(node -> left, file);
 			
-		file << "\tjmp .cycle\n\n";
+		file << "\tjmp .cycle\n";
+		file << "\t.exitcycle:\n\n";
 	}
 	
 	else if (optype == Token::FOR and type == Token::CTRL_OPERATOR)
