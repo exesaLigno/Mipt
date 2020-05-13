@@ -57,16 +57,19 @@ class Programm
 	void prepareVariables(PNode* node);
 	
 	void makeNasm(const Settings* settings);
-	void compileDef(PNode* node, std::ofstream& file);
-	void makeBody(PNode* node, std::ofstream& file);
-	void pushParameters(PNode* node, std::ofstream& file);
-	void compile(PNode* node, std::ofstream& file);
+	void compileDef(PNode* node);
+	void makeBody(PNode* node);
+	void pushParameters(PNode* node);
+	void compile(PNode* node);
 	void optimizeNasm();
 	
 	void makeBinary(const Settings* settings);
 	void makeHeader(const Settings* settings);
 	
 	void write(const Settings* settings);
+	void add(const char* string);
+	void add(const int number);
+	void add(const float number);
 };
 
 

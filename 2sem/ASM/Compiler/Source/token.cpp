@@ -132,6 +132,7 @@ Token::Token(int type, char** text)
 	this -> LValue = false;
 	
 	int first_sym = 0;
+	char first_sym_char = **text;
 	if (isLetter(**text))
 		first_sym = LETTER;
 		

@@ -15,11 +15,11 @@ $(EXECUTABLE): $(OBJECTS)
 	
 .PHONY: clean
 clean:
-	rm -rf *.o Source/*.o
+	rm -rf *.o Source/*.o $(EXECUTABLE)
 	
 .PHONY: rm
 rm:
-	rm -rf *.png *.out *.s
+	rm -rf *.png *.out *.s *.out
 	
 .PHONY: run
 run:
@@ -27,5 +27,5 @@ run:
 	
 .PHONY: nasm
 nasm:
-	nasm -f elf64 temporary.s -o temporary.o
-	ld -s -o temporary temporary.o
+	nasm -f elf64 test.s -o test.o
+	ld -s -o a.out test.o

@@ -1,15 +1,6 @@
 #include "../Headers/programm.hpp"
 
 
-//#define DEBUG_MODE
-
-#ifdef DEBUG_MODE
-	#define SWITCH
-#else
-	#define SWITCH if(0)
-#endif
-
-
 Programm::Programm()
 {
 	text = 0;
@@ -452,8 +443,6 @@ PNode* getAssignment(char** _line)	// get assignment
 	{
 		Token* token = new Token(_line);
 		
-		SWITCH std::cout << *token << std::endl;
-		
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
 		
@@ -476,8 +465,6 @@ PNode* getOperators(char** _line)
 	{
 		Token* token = new Token(_line);
 		
-		SWITCH std::cout << *token << std::endl;
-		
 		PNode* operand = new PNode(token);
 		
 		skip_spaces(*_line);
@@ -490,7 +477,6 @@ PNode* getOperators(char** _line)
 	else if (!strncmp(*_line, "else", 4))
 	{
 		Token* token = new Token(_line);
-		SWITCH std::cout << *token << std::endl;
 		
 		PNode* operand = new PNode(token);
 		
@@ -520,8 +506,6 @@ PNode* getLogic(char** _line)
 	{
 		Token* token = new Token(_line);
 		
-		SWITCH std::cout << *token << std::endl;
-		
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
 		
@@ -547,8 +531,6 @@ PNode* getCmp(char** _line)
 		!strncmp(*_line, ">", 1) or !strncmp(*_line, "<", 1))
 	{
 		Token* token = new Token(_line);
-		
-		SWITCH std::cout << *token << std::endl;
 
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
@@ -570,11 +552,19 @@ PNode* getAddSub(char** _line)
 	PNode* left_branch = getMulDiv(_line);
 	
 	skip_spaces(*_line);
+	
 	while (**_line == '+' or **_line == '-')
 	{
-		Token* token = new Token(_line);
+		if (not left_branch)
+		{
+			Token* token = new Token;
+			token -> type = Token::INT;
+			token -> ivalue = 0;
+			
+			left_branch = new PNode(token);
+		}
 		
-		SWITCH std::cout << *token << std::endl;
+		Token* token = new Token(_line);
 		
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
@@ -600,8 +590,6 @@ PNode* getMulDiv(char** _line)
 	{
 		Token* token = new Token(_line);
 		
-		SWITCH std::cout << *token << std::endl;
-		
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
 		
@@ -625,8 +613,6 @@ PNode* getPow(char** _line)
 	if (**_line == '^')
 	{
 		Token* token = new Token(_line);
-		
-		SWITCH std::cout << *token << std::endl;
 
 		PNode* operand = new PNode(token);
 		operand -> leftConnect(left_branch);
@@ -657,9 +643,11 @@ PNode* getNumVarFunc(char** _line)	// get numbers, variables and functions
 	}
 		
 	skip_spaces(*_line);
-	Token* token = new Token(_line);
 	
-	SWITCH std::cout << *token << std::endl;
+	if (**_line == '-')
+		return 0;
+		
+	Token* token = new Token(_line);
 	
 	PNode* parsed = new PNode(token);
 	
@@ -824,7 +812,6 @@ void enumerateBranching(PNode* node, int* number)
 {
 	if (node -> data -> type == Token::CTRL_OPERATOR and (node -> data -> ivalue == Token::IF or node -> data -> ivalue == Token::WHILE or node -> data -> ivalue == Token::FOR))
 	{
-		std::cout << *number << std::endl;
 		node -> data -> vartype = *number;
 		(*number)++;
 	}
@@ -883,151 +870,181 @@ void setVariables(PNode* node, const char* varname, int vartype, int varnumber)
 
 void Programm::makeNasm(const Settings* settings)
 {
+	delete[] this -> text;
+	this -> text = 0;
+	this -> text_length = 0;
+	
 	PNode* current_node = (this -> programm_tree).head -> left;
 	
-	std::ofstream file;
-	file.open("temporary.s");
-	
-	file << "section .text\n\tglobal _start\n\n";
+	this -> add("section .text\n\tglobal _start\n\n");
 	
 	while (current_node)
 	{
-		compileDef(current_node -> right, file);
+		compileDef(current_node -> right);
 		current_node = current_node -> left;
 	}
 }
 
 
 
-void Programm::compileDef(PNode* node, std::ofstream& file)
+void Programm::compileDef(PNode* node)
 {
-	file << node -> data -> svalue << ":\n";
-	file << "\tpop r13\n";
-	file << "\tmov r15, rsp\n";			// r15 - parameters
-	file << "\tsub rsp, " << ((node -> data -> ivalue) * 8) << "\n";
-	file << "\tmov r14, rsp\n\n";			// r14 - local variables
+	this -> add(node -> data -> svalue);
+	this -> add(":\n");
 	
-	makeBody(node -> left, file);
+	this -> add("\tpop r13\n");
+	this -> add("\tmov r15, rsp\n");			// r15 - parameters
+	this -> add("\tsub rsp, ");
 	
-	file << "\tadd rsp, " << ((node -> data -> ivalue) * 8) << "\n";
-	file << "\tpush r13\n";
+	this -> add((node -> data -> ivalue) * 8);
+	this -> add("\n");
+	
+	this -> add("\tmov r14, rsp\n\n");			// r14 - local variables
+	
+	makeBody(node -> left);
+	
+	this -> add("\tadd rsp, ");
+	this -> add((node -> data -> ivalue) * 8);
+	this -> add("\n");
+	
+	this -> add("\tpush r13\n");
 	if (!strcmp(node -> data -> svalue, "_start"))
-		file << "\tmov rdi, rax\n\tmov rax, 60\n\tsyscall\n\n\n";
+		this -> add("\tmov rdi, rax\n\tmov rax, 60\n\tsyscall\n\n\n");
 		
 	else
-		file << "\tret\n\n\n";
+		this -> add("\tret\n\n\n");
 }
 
 
 
-void Programm::makeBody(PNode* node, std::ofstream& file)
+void Programm::makeBody(PNode* node)
 {
 	int type = node -> data -> type;
 	int optype = node -> data -> ivalue;
 	
 	if (type == Token::FUNCCALL)
 	{
-		file << "\tpush r13\n\tpush r14\n\tpush r15\n\n";
+		this -> add("\tpush r13\n\tpush r14\n\tpush r15\n\n");
 		
 		if (node -> right)
-			pushParameters(node -> right, file);
+			pushParameters(node -> right);
 			
-		file << "\tcall " << node -> data -> svalue << "\n";
+		this -> add("\tcall ");
+		this -> add(node -> data -> svalue);
+		this -> add("\n");
 		
 		PNode* param = node -> right;
 		
 		while (param)
 		{
-			file << "\tpop r15\n";
+			this -> add("\tpop r15\n");
 			param = param -> left;
 		}
 		
-		file << "\tpop r15\n\tpop r14\n\tpop r13\n\n";
-		file << "\tpush rax\n";
+		this -> add("\tpop r15\n\tpop r14\n\tpop r13\n\n");
+		this -> add("\tpush rax\n");
 	}
 	
 	else if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
 	{
-		file << ".cycle" << node -> data -> vartype << ":\n";
+		this -> add(".cycle");
+		this -> add(node -> data -> vartype);
+		this -> add(":\n");
 		
 		if (node -> right)
-			makeBody(node -> right, file);
+			makeBody(node -> right);
 			
-		file << "\tpop rax\n\ttest rax, rax\n\tjz .exitcycle" << node -> data -> vartype << "\n";
+		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .exitcycle");
+		this -> add(node -> data -> vartype);
+		this -> add("\n");
 		
 		if (node -> left)
-			makeBody(node -> left, file);
+			makeBody(node -> left);
 			
-		file << "\tjmp .cycle" << node -> data -> vartype << "\n";
-		file << "\t.exitcycle" << node -> data -> vartype << ":\n\n";
+		this -> add("\tjmp .cycle");
+		this -> add(node -> data -> vartype);
+		this -> add("\n");
+		
+		this -> add("\t.exitcycle");
+		this -> add(node -> data -> vartype);
+		this -> add(":\n\n");
 	}
 	
 	else if (optype == Token::FOR and type == Token::CTRL_OPERATOR)
 	{
-		file << "\t\x1b[1;31mFor compilation\x1b[0m\n";
+		this -> add("\t\x1b[1;31mFor compilation\x1b[0m\n");
 	}
 	
 	else if (optype == Token::IF and type == Token::CTRL_OPERATOR)
 	{
 		if (node -> right)
-			makeBody(node -> right, file);
+			makeBody(node -> right);
 			
-		file << "\tpop rax\n\ttest rax, rax\n\tjz .endif" << node -> data -> vartype << "\n\n";
+		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .endif");
+		this -> add(node -> data -> vartype);
+		this -> add("\n\n");
 		
 		if (node -> left)
-			makeBody(node -> left, file);
+			makeBody(node -> left);
 			
-		file << "\tjmp .exitif" << node -> data -> vartype << "\n\n";
-		file << "\t.endif" << node -> data -> vartype << ":\n";
+		this -> add("\tjmp .exitif");
+		this -> add(node -> data -> vartype);
+		this -> add("\n\n");
+		
+		this -> add("\t.endif");
+		this -> add(node -> data -> vartype);
+		this -> add(":\n");
 		
 		// Else compilation
 		if (node -> parent -> left)
 		{
 			if (node -> parent -> left -> right -> data -> type == Token::CTRL_OPERATOR and node -> parent -> left -> right -> data -> ivalue == Token::ELSE)
-				makeBody(node -> parent -> left -> right -> left, file);
+				makeBody(node -> parent -> left -> right -> left);
 		}
 		
-		file << "\t.exitif" << node -> data -> vartype << ":\n";
+		this -> add("\t.exitif");
+		this -> add(node -> data -> vartype);
+		this -> add(":\n");
 	}
 	
 	else if (optype == Token::ELSE and type == Token::CTRL_OPERATOR)
 	{
-		file << "\tnop\n";
+		this -> add("\tnop\n");
 	}
 		
 	else
 	{
 		if (node -> right)
-			makeBody(node -> right, file);
+			makeBody(node -> right);
 		
 		if (node -> left)
-			makeBody(node -> left, file);
+			makeBody(node -> left);
 		
-		compile(node, file);
+		compile(node);
 	}
 }
 
 
 
-void Programm::pushParameters(PNode* node, std::ofstream& file)
+void Programm::pushParameters(PNode* node)
 {
 	if (node -> left)
-		pushParameters(node -> left, file);
+		pushParameters(node -> left);
 		
 	if (node -> right)
-		makeBody(node -> right, file);
+		makeBody(node -> right);
 }
 
 
 
-void Programm::compile(PNode* node, std::ofstream& file)
+void Programm::compile(PNode* node)
 {
 	if (node -> data -> type == Token::ARITHM_OPERATOR or node -> data -> type == Token::CMP_OPERATOR or node -> data -> type == Token::CTRL_OPERATOR)
 	{
 		#define TOKEN(string, token_type, token_number, dump, code)		\
 				case token_number:										\
 				{														\
-					file << code;									\
+					this -> add(code);									\
 					break;												\
 				}	
 		
@@ -1037,7 +1054,7 @@ void Programm::compile(PNode* node, std::ofstream& file)
 			
 			default:
 			{
-				file << "\x1b[1;31mUnknown operator\x1b[0m\n";
+				this -> add("\x1b[1;31mUnknown operator\x1b[0m\n");
 				break;
 			}
 		}
@@ -1050,39 +1067,58 @@ void Programm::compile(PNode* node, std::ofstream& file)
 		if (node -> data -> LValue)
 		{
 			if (node -> data -> vartype == LOCAL)
-				file << "\tmov rax, r14\n\tadd rax, " << (node -> data -> ivalue) * 8 << "\n\tpush rax\n\n";
+			{
+				this -> add("\tmov rax, r14\n\tadd rax, ");
+				this -> add((node -> data -> ivalue) * 8);
+				this -> add("\n\tpush rax\n\n");
+			}
 			else if (node -> data -> vartype == PARAMETER)
-				file << "\tmov rax, r15\n\tadd rax, " << (node -> data -> ivalue) * 8 << "\n\tpush rax\n\n";
+			{
+				this -> add("\tmov rax, r15\n\tadd rax, ");
+				this -> add((node -> data -> ivalue) * 8);
+				this -> add("\n\tpush rax\n\n");
+			}
 		}
 		else
 		{
 			if (node -> data -> vartype == LOCAL)
-				file << "\tmov rax, [r14 + " << (node -> data -> ivalue) * 8 << "]\n\tpush rax\n\n";
+			{
+				this -> add("\tmov rax, [r14 + ");
+				this -> add((node -> data -> ivalue) * 8);
+				this -> add("]\n\tpush rax\n\n");
+			}
 			else if (node -> data -> vartype == PARAMETER)
-				file << "\tmov rax, [r15 + " << (node -> data -> ivalue) * 8 << "]\n\tpush rax\n\n";
+			{
+				this -> add("\tmov rax, [r15 + ");
+				this -> add((node -> data -> ivalue) * 8);
+				this -> add("]\n\tpush rax\n\n");
+			}
 		}
 	}
 		
 	else if (node -> data -> type == Token::INT)
 	{
-		file << "\tmov rax, " << node -> data -> ivalue << "\n"	\
-					 "\tpush rax\n\n";
+		this -> add("\tmov rax, ");
+		this -> add(node -> data -> ivalue);
+		this -> add("\n\tpush rax\n\n");
 	}
 		
 	else if (node -> data -> type == Token::FLOAT)
 	{
-		file << "\tmov rax, " << node -> data -> fvalue << "\n"	\
-					 "\tpush rax\n\n";
+		this -> add("\tmov rax, ");
+		this -> add(node -> data -> fvalue);
+		this -> add("\n\tpush rax\n\n");
 	}
 	
 	else if (node -> data -> type == Token::CHAR)
 	{
-		file << "\tmov rax, \'" << node -> data -> cvalue << "\'\n"	\
-					 "\tpush rax\n\n";
+		this -> add("\tmov rax, \'");
+		this -> add(node -> data -> cvalue);
+		this -> add("\'\n\tpush rax\n\n");
 	}
 		
 	else if (node -> data -> type == Token::STRING)
-		file << "\tString\n\n";
+		this -> add("\tString\n\n");
 }
 
 
@@ -1146,6 +1182,80 @@ void Programm::write(const Settings* settings)
 	
 	fclose(file);
 }
+
+
+void Programm::add(const char* string)
+{
+	int add_len = strlen(string);
+	int new_len = this -> text_length + add_len;
+	char* new_text = new char[new_len + 1]{0};
+	
+	if (this -> text)
+	{
+		strncpy(new_text, this -> text, this -> text_length);
+		strncat(new_text, string, add_len);
+		delete[] this -> text;
+	}
+	
+	else
+		strncpy(new_text, string, add_len);
+		
+	this -> text_length = new_len;
+	this -> text = new_text;
+}
+
+
+void Programm::add(const int number)
+{
+	char* string = new char[50]{0};
+	sprintf(string, "%d", number);
+	
+	int add_len = strlen(string);
+	int new_len = this -> text_length + add_len;
+	char* new_text = new char[new_len + 1]{0};
+	
+	if (this -> text)
+	{
+		strncpy(new_text, this -> text, this -> text_length);
+		strncat(new_text, string, add_len);
+		delete[] this -> text;
+	}
+	
+	else
+		strncpy(new_text, string, add_len);
+		
+	this -> text_length = new_len;
+	this -> text = new_text;
+	
+	delete[] string;
+}
+
+
+void Programm::add(const float number)
+{
+	char* string = new char[50]{0};
+	sprintf(string, "%f", number);
+	
+	int add_len = strlen(string);
+	int new_len = this -> text_length + add_len;
+	char* new_text = new char[new_len + 1]{0};
+	
+	if (this -> text)
+	{
+		strncpy(new_text, this -> text, this -> text_length);
+		strncat(new_text, string, add_len);
+		delete[] this -> text;
+	}
+	
+	else
+		strncpy(new_text, string, add_len);
+		
+	this -> text_length = new_len;
+	this -> text = new_text;
+	
+	delete[] string;
+}
+
 
 
 
