@@ -60,13 +60,13 @@ Token::Token(char** text)
 	if(0)
 		std::cout << "\x1b[1;31mbullshit\n\x1b[0m";
 
-	#define TOKEN(string, token_type, token_number, dump, code)		\
-			else if (!strcmp(token, string))						\
-			{														\
-				this -> type = token_type;							\
-				this -> ivalue = token_number;						\
-				delete[] token;										\
-			}														\
+	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
+			else if (!strcmp(token, string))										\
+			{																		\
+				this -> type = token_type;											\
+				this -> ivalue = token_number;										\
+				delete[] token;														\
+			}																		\
 			
 	#include "../Headers/syntax.hpp"
 	
@@ -182,7 +182,7 @@ std::ostream& operator<< (std::ostream &out, const Token &token)
 	else if (token.type == Token::ITEM)
 		out << "item";
 	
-	#define TOKEN(string, token_type, token_number, dump, code)									\
+	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)					\
 			else if (token.type == token_type and token.ivalue == token_number)					\
 				out << "OPERATOR | " << dump;													\
 			

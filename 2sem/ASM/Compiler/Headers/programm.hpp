@@ -57,10 +57,10 @@ class Programm
 	void prepareVariables(PNode* node);
 	
 	void makeNasm(const Settings* settings);
-	void compileDef(PNode* node);
-	void makeBody(PNode* node);
-	void pushParameters(PNode* node);
-	void compile(PNode* node);
+	void compileDef(PNode* node, bool nasm_compilation);
+	void makeBody(PNode* node, bool nasm_compilation);
+	void pushParameters(PNode* node, bool nasm_compilation);
+	void compile(PNode* node, bool nasm_compilation);
 	void optimizeNasm();
 	
 	void makeBinary(const Settings* settings);

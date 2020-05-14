@@ -870,24 +870,29 @@ void setVariables(PNode* node, const char* varname, int vartype, int varnumber)
 
 void Programm::makeNasm(const Settings* settings)
 {
+	bool nasm_compilation = false;
+	if (settings -> nasm_listing)
+		nasm_compilation = true;
+		
 	delete[] this -> text;
 	this -> text = 0;
 	this -> text_length = 0;
 	
 	PNode* current_node = (this -> programm_tree).head -> left;
 	
-	this -> add("section .text\n\tglobal _start\n\n");
+	if (nasm_compilation)
+		this -> add("section .text\n\tglobal _start\n\n");
 	
 	while (current_node)
 	{
-		compileDef(current_node -> right);
+		compileDef(current_node -> right, nasm_compilation);
 		current_node = current_node -> left;
 	}
 }
 
 
 
-void Programm::compileDef(PNode* node)
+void Programm::compileDef(PNode* node, bool nasm_compilation)
 {
 	this -> add(node -> data -> svalue);
 	this -> add(":\n");
@@ -901,7 +906,7 @@ void Programm::compileDef(PNode* node)
 	
 	this -> add("\tmov r14, rsp\n\n");			// r14 - local variables
 	
-	makeBody(node -> left);
+	makeBody(node -> left, nasm_compilation);
 	
 	this -> add("\tadd rsp, ");
 	this -> add((node -> data -> ivalue) * 8);
@@ -917,7 +922,7 @@ void Programm::compileDef(PNode* node)
 
 
 
-void Programm::makeBody(PNode* node)
+void Programm::makeBody(PNode* node, bool nasm_compilation)
 {
 	int type = node -> data -> type;
 	int optype = node -> data -> ivalue;
@@ -927,7 +932,7 @@ void Programm::makeBody(PNode* node)
 		this -> add("\tpush r13\n\tpush r14\n\tpush r15\n\n");
 		
 		if (node -> right)
-			pushParameters(node -> right);
+			pushParameters(node -> right, nasm_compilation);
 			
 		this -> add("\tcall ");
 		this -> add(node -> data -> svalue);
@@ -952,14 +957,14 @@ void Programm::makeBody(PNode* node)
 		this -> add(":\n");
 		
 		if (node -> right)
-			makeBody(node -> right);
+			makeBody(node -> right, nasm_compilation);
 			
 		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .exitcycle");
 		this -> add(node -> data -> vartype);
 		this -> add("\n");
 		
 		if (node -> left)
-			makeBody(node -> left);
+			makeBody(node -> left, nasm_compilation);
 			
 		this -> add("\tjmp .cycle");
 		this -> add(node -> data -> vartype);
@@ -978,14 +983,14 @@ void Programm::makeBody(PNode* node)
 	else if (optype == Token::IF and type == Token::CTRL_OPERATOR)
 	{
 		if (node -> right)
-			makeBody(node -> right);
+			makeBody(node -> right, nasm_compilation);
 			
 		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .endif");
 		this -> add(node -> data -> vartype);
 		this -> add("\n\n");
 		
 		if (node -> left)
-			makeBody(node -> left);
+			makeBody(node -> left, nasm_compilation);
 			
 		this -> add("\tjmp .exitif");
 		this -> add(node -> data -> vartype);
@@ -999,7 +1004,7 @@ void Programm::makeBody(PNode* node)
 		if (node -> parent -> left)
 		{
 			if (node -> parent -> left -> right -> data -> type == Token::CTRL_OPERATOR and node -> parent -> left -> right -> data -> ivalue == Token::ELSE)
-				makeBody(node -> parent -> left -> right -> left);
+				makeBody(node -> parent -> left -> right -> left, nasm_compilation);
 		}
 		
 		this -> add("\t.exitif");
@@ -1015,110 +1020,113 @@ void Programm::makeBody(PNode* node)
 	else
 	{
 		if (node -> right)
-			makeBody(node -> right);
+			makeBody(node -> right, nasm_compilation);
 		
 		if (node -> left)
-			makeBody(node -> left);
+			makeBody(node -> left, nasm_compilation);
 		
-		compile(node);
+		compile(node, nasm_compilation);
 	}
 }
 
 
 
-void Programm::pushParameters(PNode* node)
+void Programm::pushParameters(PNode* node, bool nasm_compilation)
 {
 	if (node -> left)
-		pushParameters(node -> left);
+		pushParameters(node -> left, nasm_compilation);
 		
 	if (node -> right)
-		makeBody(node -> right);
+		makeBody(node -> right, nasm_compilation);
 }
 
 
 
-void Programm::compile(PNode* node)
+void Programm::compile(PNode* node, bool nasm_compilation)
 {
-	if (node -> data -> type == Token::ARITHM_OPERATOR or node -> data -> type == Token::CMP_OPERATOR or node -> data -> type == Token::CTRL_OPERATOR)
+	if (nasm_compilation)
 	{
-		#define TOKEN(string, token_type, token_number, dump, code)		\
-				case token_number:										\
-				{														\
-					this -> add(code);									\
-					break;												\
-				}	
-		
-		switch (node -> data -> ivalue)
+		if (node -> data -> type == Token::ARITHM_OPERATOR or node -> data -> type == Token::CMP_OPERATOR or node -> data -> type == Token::CTRL_OPERATOR)
 		{
-			#include "../Headers/syntax.hpp"
+			#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
+					case token_number:														\
+					{																		\
+						this -> add(nasm_code);												\
+						break;																\
+					}	
 			
-			default:
+			switch (node -> data -> ivalue)
 			{
-				this -> add("\x1b[1;31mUnknown operator\x1b[0m\n");
-				break;
+				#include "../Headers/syntax.hpp"
+				
+				default:
+				{
+					this -> add("\x1b[1;31mUnknown operator\x1b[0m\n");
+					break;
+				}
 			}
+			
+			#undef TOKEN
 		}
 		
-		#undef TOKEN
-	}
-	
-	else if (node -> data -> type == Token::VARIABLE)
-	{
-		if (node -> data -> LValue)
+		else if (node -> data -> type == Token::VARIABLE)
 		{
-			if (node -> data -> vartype == LOCAL)
+			if (node -> data -> LValue)
 			{
-				this -> add("\tmov rax, r14\n\tadd rax, ");
-				this -> add((node -> data -> ivalue) * 8);
-				this -> add("\n\tpush rax\n\n");
+				if (node -> data -> vartype == LOCAL)
+				{
+					this -> add("\tmov rax, r14\n\tadd rax, ");
+					this -> add((node -> data -> ivalue) * 8);
+					this -> add("\n\tpush rax\n\n");
+				}
+				else if (node -> data -> vartype == PARAMETER)
+				{
+					this -> add("\tmov rax, r15\n\tadd rax, ");
+					this -> add((node -> data -> ivalue) * 8);
+					this -> add("\n\tpush rax\n\n");
+				}
 			}
-			else if (node -> data -> vartype == PARAMETER)
+			else
 			{
-				this -> add("\tmov rax, r15\n\tadd rax, ");
-				this -> add((node -> data -> ivalue) * 8);
-				this -> add("\n\tpush rax\n\n");
+				if (node -> data -> vartype == LOCAL)
+				{
+					this -> add("\tmov rax, [r14 + ");
+					this -> add((node -> data -> ivalue) * 8);
+					this -> add("]\n\tpush rax\n\n");
+				}
+				else if (node -> data -> vartype == PARAMETER)
+				{
+					this -> add("\tmov rax, [r15 + ");
+					this -> add((node -> data -> ivalue) * 8);
+					this -> add("]\n\tpush rax\n\n");
+				}
 			}
 		}
-		else
+			
+		else if (node -> data -> type == Token::INT)
 		{
-			if (node -> data -> vartype == LOCAL)
-			{
-				this -> add("\tmov rax, [r14 + ");
-				this -> add((node -> data -> ivalue) * 8);
-				this -> add("]\n\tpush rax\n\n");
-			}
-			else if (node -> data -> vartype == PARAMETER)
-			{
-				this -> add("\tmov rax, [r15 + ");
-				this -> add((node -> data -> ivalue) * 8);
-				this -> add("]\n\tpush rax\n\n");
-			}
+			this -> add("\tmov rax, ");
+			this -> add(node -> data -> ivalue);
+			this -> add("\n\tpush rax\n\n");
 		}
-	}
+			
+		else if (node -> data -> type == Token::FLOAT)
+		{
+			this -> add("\tmov rax, ");
+			this -> add(node -> data -> fvalue);
+			this -> add("\n\tpush rax\n\n");
+		}
 		
-	else if (node -> data -> type == Token::INT)
-	{
-		this -> add("\tmov rax, ");
-		this -> add(node -> data -> ivalue);
-		this -> add("\n\tpush rax\n\n");
+		else if (node -> data -> type == Token::CHAR)
+		{
+			this -> add("\tmov rax, \'");
+			this -> add(node -> data -> cvalue);
+			this -> add("\'\n\tpush rax\n\n");
+		}
+			
+		else if (node -> data -> type == Token::STRING)
+			this -> add("\tString\n\n");
 	}
-		
-	else if (node -> data -> type == Token::FLOAT)
-	{
-		this -> add("\tmov rax, ");
-		this -> add(node -> data -> fvalue);
-		this -> add("\n\tpush rax\n\n");
-	}
-	
-	else if (node -> data -> type == Token::CHAR)
-	{
-		this -> add("\tmov rax, \'");
-		this -> add(node -> data -> cvalue);
-		this -> add("\'\n\tpush rax\n\n");
-	}
-		
-	else if (node -> data -> type == Token::STRING)
-		this -> add("\tString\n\n");
 }
 
 
@@ -1254,6 +1262,26 @@ void Programm::add(const float number)
 	this -> text = new_text;
 	
 	delete[] string;
+}
+
+
+
+
+void Programm::addBin(const char* string)
+{
+	return;
+}
+
+
+void Programm::addBin(const int number)
+{
+	return;
+}
+
+
+void Programm::addBin(const float number)
+{
+	return;
 }
 
 
