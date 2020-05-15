@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <cstring>
+#include <iostream>
 
 
 class Library

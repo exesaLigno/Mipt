@@ -85,15 +85,24 @@ Tree<D>::Node::Node (D data)
 template <class D>
 Tree<D>::Node::~Node()
 {
-	if (this -> container)
-	{
-		if ((this -> container -> data_is_pointer or this -> container -> data_is_string) and this -> data)
-			delete this -> data;
-	}
+	//std::cout << "\nTree::Node object deleting...\n";
+	
 	if (this -> left)
 		delete this -> left;
+
 	if (this -> right)
 		delete this -> right;
+		
+	
+	if (this -> container)
+	{		
+		if (this -> container -> data_is_pointer and this -> data)
+			delete this -> data;
+		else if (this -> container -> data_is_string and this -> data)
+			delete[] this -> data;
+	}
+	
+	//std::cout << "Tree::Node object deleted\n";
 }
 
 

@@ -235,7 +235,7 @@ void Programm::makeTree(const Settings* settings)
 	this -> rebuildTree();
 	if (not settings -> silent)
 	{
-		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT, colorize);
+		(this -> programm_tree).dumper(settings -> source_path, DELETE_TXT + DETAILED, colorize);
 		printf("Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n", settings -> source_path);
 	}
 }
@@ -894,14 +894,22 @@ void Programm::makeNasm(const Settings* settings)
 	if (nasm_compilation)
 	{
 		print_text = readFile("AsmLibraries/print.s");
+		input_text = readFile("AsmLibraries/input.s");
+		
 		this -> add(print_text);
+		this -> add(input_text);
 	}
 	
 	else
 	{
 		print_text = readFile("AsmLibraries/print");
+		input_text = readFile("AsmLibraries/input");
+		
 		setLabelPosition("print", this -> text_length);
 		this -> addBin(print_text);
+		
+		setLabelPosition("input", this -> text_length);
+		this -> addBin(input_text);
 	}
 	
 	if (print_text)
@@ -909,6 +917,9 @@ void Programm::makeNasm(const Settings* settings)
 		
 	if (input_text)
 		delete[] input_text;
+		
+	if (not settings -> silent)
+		printf("\nCompiled \x1b[1m%d\x1b[0m bytes from \x1b[1;32m<%s>\x1b[0m\n\n", this -> text_length, settings -> source_path);
 	
 	if (not nasm_compilation)
 		this -> makeHeader();
@@ -1481,7 +1492,7 @@ void Programm::write(const Settings* settings)
 	char* filename = 0;
 	if (settings -> output_path)
 	{
-		filename = new char[strlen(settings -> output_path) + 1]{0};
+		filename = new char[strlen(settings -> output_path) + 2]{0};
 		strcpy(filename, settings -> output_path);
 	}
 	
@@ -1489,21 +1500,21 @@ void Programm::write(const Settings* settings)
 	{
 		if (settings -> only_preprocess)
 		{
-			filename = new char[strlen(settings -> source_path) + 2]{0};
+			filename = new char[strlen(settings -> source_path) + 4]{0};
 			strncpy(filename, settings -> source_path, strlen(settings -> source_path));
 			filename[strlen(settings -> source_path)] = 'p';
 		}
 		
 		else if (settings -> nasm_listing)
 		{
-			filename = new char[strlen(settings -> source_path) - 2]{0};
+			filename = new char[strlen(settings -> source_path) + 4]{0};
 			strncpy(filename, settings -> source_path, strlen(settings -> source_path) - 4);
 			filename[strlen(settings -> source_path) - 4] = 's';
 		}
 		
 		else
 		{
-			filename = new char[strlen(settings -> source_path) - 3]{0};
+			filename = new char[strlen(settings -> source_path) + 4]{0};
 			strncpy(filename, settings -> source_path, strlen(settings -> source_path) - 4);
 			strcpy(filename + strlen(settings -> source_path) - 4, "out");
 		}
@@ -1523,7 +1534,18 @@ void Programm::write(const Settings* settings)
 		FILE* file = fopen(filename, "wb");
 		fwrite(this -> text, sizeof(char), this -> text_length, file);
 		fclose(file);
+		
+		char* cmd = new char[strlen(settings -> source_path) + 4 + 10]{0};
+		strcpy(cmd, "chmod +x ");
+		strcat(cmd, filename);
+		system(cmd);
+		delete[] cmd;
 	}
+	
+	if (not settings -> silent)
+		printf("Compiled programm saved as \x1b[1;32m<%s>\x1b[0m\n", filename);
+		
+	delete[] filename;
 }
 
 

@@ -10,7 +10,7 @@ Library::Library()
 }
 
 Library::~Library()
-{
+{	
 	if (libname)
 		delete[] libname;
 	if (libtext)
