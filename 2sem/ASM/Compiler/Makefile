@@ -19,13 +19,20 @@ $(ELFPARSER):
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 	
+	
+.PHONY: examples
+examples: $(COMPILER)
+	./jc Examples/fibonacci.jaul -s
+	./jc Examples/power_of_two.jaul -s
+
+	
 .PHONY: clean
 clean:
 	rm -rf *.o Source/*.o $(COMPILER) $(ELFPARSER)
 	
 .PHONY: rm
 rm:
-	rm -rf *.png *.out *.s *.txt
+	rm -rf *.png *.out *.s *.txt Examples/*.out Examples/*.png Examples/*.s Examples/*.txt
 	
 .PHONY: nasm
 nasm:
