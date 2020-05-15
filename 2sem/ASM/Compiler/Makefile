@@ -1,29 +1,31 @@
 CC=g++
-CFLAGS=-c -Wall -std=c++2a -O3
+CFLAGS=-c -std=c++2a -O3
 LDFLAGS=
 SOURCES=main.cpp Source/settings.cpp Source/programm.cpp Source/token.cpp Source/library.cpp Source/definition.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=jc
+COMPILER=jc
+ELFPARSER=relf
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(SOURCES) $(COMPILER) $(ELFPARSER)
 	
-$(EXECUTABLE): $(OBJECTS) 
+	
+$(COMPILER): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	
+$(ELFPARSER):
+	$(CC) $(LDFLAGS) Accessory/readBinary.cpp -o $(ELFPARSER)
+
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
 	
 .PHONY: clean
 clean:
-	rm -rf *.o Source/*.o $(EXECUTABLE)
+	rm -rf *.o Source/*.o $(COMPILER) $(ELFPARSER)
 	
 .PHONY: rm
 rm:
-	rm -rf *.png *.out *.s *.out
-	
-.PHONY: run
-run:
-	./"$(EXECUTABLE)" 
+	rm -rf *.png *.out *.s *.txt
 	
 .PHONY: nasm
 nasm:

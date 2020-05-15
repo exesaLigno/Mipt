@@ -34,7 +34,7 @@ class Programm
 {
   public:
 	char* text;
-	unsigned long long int text_length;
+	long long int text_length;
 	PTree programm_tree;
 	
 	int importLibraries();

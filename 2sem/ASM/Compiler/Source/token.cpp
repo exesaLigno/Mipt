@@ -96,7 +96,6 @@ Token::Token(char** text)
 	else if (isString(token))
 	{
 		this -> type = STRING;
-		this -> svalue = "empty_string";
 		delete[] token;
 	}
 
@@ -132,7 +131,6 @@ Token::Token(int type, char** text)
 	this -> LValue = false;
 	
 	int first_sym = 0;
-	char first_sym_char = **text;
 	if (isLetter(**text))
 		first_sym = LETTER;
 		
