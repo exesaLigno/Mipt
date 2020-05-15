@@ -888,36 +888,61 @@ void Programm::makeNasm(const Settings* settings)
 		compileDef(current_node -> right, nasm_compilation);
 		current_node = current_node -> left;
 	}
+	
+	if (not nasm_compilation)
+		this -> makeHeader();
 }
 
 
 
 void Programm::compileDef(PNode* node, bool nasm_compilation)
 {
-	this -> add(node -> data -> svalue);
-	this -> add(":\n");
-	
-	this -> add("\tpop r13\n");
-	this -> add("\tmov r15, rsp\n");			// r15 - parameters
-	this -> add("\tsub rsp, ");
-	
-	this -> add((node -> data -> ivalue) * 8);
-	this -> add("\n");
-	
-	this -> add("\tmov r14, rsp\n\n");			// r14 - local variables
-	
-	makeBody(node -> left, nasm_compilation);
-	
-	this -> add("\tadd rsp, ");
-	this -> add((node -> data -> ivalue) * 8);
-	this -> add("\n");
-	
-	this -> add("\tpush r13\n");
-	if (!strcmp(node -> data -> svalue, "_start"))
-		this -> add("\tmov rdi, rax\n\tmov rax, 60\n\tsyscall\n\n\n");
+	if (nasm_compilation)
+	{
+		this -> add(node -> data -> svalue);
+		this -> add(":\n");
 		
+		this -> add("\tpop r13\n");
+		this -> add("\tmov r15, rsp\n");			// r15 - parameters
+		this -> add("\tsub rsp, ");
+		this -> add((node -> data -> ivalue) * 8);
+		this -> add("\n");
+		
+		this -> add("\tmov r14, rsp\n\n");			// r14 - local variables
+		
+		makeBody(node -> left, nasm_compilation);
+		
+		this -> add("\tadd rsp, ");
+		this -> add((node -> data -> ivalue) * 8);
+		this -> add("\n");
+		
+		this -> add("\tpush r13\n");
+		if (!strcmp(node -> data -> svalue, "_start"))
+			this -> add("\tmov rdi, rax\n\tmov rax, 60\n\tsyscall\n\n\n");
+			
+		else
+			this -> add("\tret\n\n\n");
+	}
+	
 	else
-		this -> add("\tret\n\n\n");
+	{
+		// store label position
+		this -> addBin("41 5d 49 89 e7 48 83 ec");
+		this -> addBin(1, (node -> data -> ivalue) * 8);
+		this -> addBin("49 89 e6");
+		
+		makeBody(node -> left, nasm_compilation);
+		
+		this -> addBin("48 83 c4");
+		this -> addBin(1, (node -> data -> ivalue) * 8);
+		this -> addBin("41 55");
+		
+		if (!strcmp(node -> data -> svalue, "_start"))
+			this -> addBin("48 89 c7 b8 3c 00 00 00 0f 05");
+			
+		else
+			this -> addBin("c3");
+	}
 }
 
 
@@ -929,50 +954,96 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 	
 	if (type == Token::FUNCCALL)
 	{
-		this -> add("\tpush r13\n\tpush r14\n\tpush r15\n\n");
+		if (nasm_compilation)
+			this -> add("\tpush r13\n\tpush r14\n\tpush r15\n\n");
+		else
+			this -> addBin("41 55 41 56 41 57");
 		
 		if (node -> right)
 			pushParameters(node -> right, nasm_compilation);
+		
+		if (nasm_compilation)
+		{
+			this -> add("\tcall ");
+			this -> add(node -> data -> svalue);
+			this -> add("\n");
+		}
+		
+		else
+		{
+			this -> addBin("e8"); 
+			// storing that label "svalue" calling from here to make addr later
+			this -> addBin("00 00 00 00");
 			
-		this -> add("\tcall ");
-		this -> add(node -> data -> svalue);
-		this -> add("\n");
+		}
 		
 		PNode* param = node -> right;
 		
 		while (param)
 		{
-			this -> add("\tpop r15\n");
+			if (nasm_compilation)
+				this -> add("\tpop r15\n");
+			else
+				this -> addBin("41 5f");
 			param = param -> left;
 		}
 		
-		this -> add("\tpop r15\n\tpop r14\n\tpop r13\n\n");
-		this -> add("\tpush rax\n");
+		if (nasm_compilation)
+			this -> add("\tpop r15\n\tpop r14\n\tpop r13\n\n\tpush rax\n");
+		else
+			this -> addBin("41 5f 41 5e 41 5d 50");
 	}
 	
 	else if (optype == Token::WHILE and type == Token::CTRL_OPERATOR)
 	{
-		this -> add(".cycle");
-		this -> add(node -> data -> vartype);
-		this -> add(":\n");
+		if (nasm_compilation)
+		{
+			this -> add(".cycle");
+			this -> add(node -> data -> vartype);
+			this -> add(":\n");
+		}
+		
+		// else storing label place
 		
 		if (node -> right)
 			makeBody(node -> right, nasm_compilation);
 			
-		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .exitcycle");
-		this -> add(node -> data -> vartype);
-		this -> add("\n");
+		if (nasm_compilation)
+		{
+			this -> add("\tpop rax\n\ttest rax, rax\n\tjz .exitcycle");
+			this -> add(node -> data -> vartype);
+			this -> add("\n");
+		}
+		
+		else
+		{
+			this -> addBin("58 48 85 c0 0f 84");
+			// storing jmp position label
+			this -> addBin("00 00 00 00");
+		}
 		
 		if (node -> left)
 			makeBody(node -> left, nasm_compilation);
-			
-		this -> add("\tjmp .cycle");
-		this -> add(node -> data -> vartype);
-		this -> add("\n");
 		
-		this -> add("\t.exitcycle");
-		this -> add(node -> data -> vartype);
-		this -> add(":\n\n");
+		if (nasm_compilation)
+		{
+			this -> add("\tjmp .cycle");
+			this -> add(node -> data -> vartype);
+			this -> add("\n");
+			
+			this -> add("\t.exitcycle");
+			this -> add(node -> data -> vartype);
+			this -> add(":\n\n");
+		}
+		
+		else
+		{
+			this -> addBin("e9");
+			// storing jmp position label
+			this -> addBin("00 00 00 00");
+			
+			// store label position
+		}
 	}
 	
 	else if (optype == Token::FOR and type == Token::CTRL_OPERATOR)
@@ -1014,7 +1085,11 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 	
 	else if (optype == Token::ELSE and type == Token::CTRL_OPERATOR)
 	{
-		this -> add("\tnop\n");
+		if (nasm_compilation)
+			this -> add("\tnop\n");
+			
+		else
+			this -> addBin("90");
 	}
 		
 	else
@@ -1127,6 +1202,90 @@ void Programm::compile(PNode* node, bool nasm_compilation)
 		else if (node -> data -> type == Token::STRING)
 			this -> add("\tString\n\n");
 	}
+	
+	else
+	{
+		if (node -> data -> type == Token::ARITHM_OPERATOR or node -> data -> type == Token::CMP_OPERATOR or node -> data -> type == Token::CTRL_OPERATOR)
+		{
+			#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
+					case token_number:														\
+					{																		\
+						this -> addBin(bin_code);												\
+						break;																\
+					}	
+			
+			switch (node -> data -> ivalue)
+			{
+				#include "../Headers/syntax.hpp"
+				
+				default:
+				{
+					this -> add("\x1b[1;31mUnknown operator\x1b[0m\n");
+					break;
+				}
+			}
+			
+			#undef TOKEN
+		}
+		
+		else if (node -> data -> type == Token::VARIABLE)
+		{
+			if (node -> data -> LValue)
+			{
+				if (node -> data -> vartype == LOCAL)
+				{
+					this -> addBin("4c 89 f0 48 83 c0");
+					this -> addBin(1, (node -> data -> ivalue) * 8);
+					this -> addBin("50");
+				}
+				else if (node -> data -> vartype == PARAMETER)
+				{
+					this -> addBin("4c 89 f8 48 83 c0");
+					this -> addBin(1, (node -> data -> ivalue) * 8);
+					this -> addBin("50");
+				}
+			}
+			else
+			{
+				if (node -> data -> vartype == LOCAL)
+				{
+					this -> addBin("49 8b 46");
+					this -> addBin(1, (node -> data -> ivalue) * 8);
+					this -> addBin("50");
+				}
+				else if (node -> data -> vartype == PARAMETER)
+				{
+					this -> addBin("49 8b 47");
+					this -> addBin(1, (node -> data -> ivalue) * 8);
+					this -> addBin("50");
+				}
+			}
+		}
+			
+		else if (node -> data -> type == Token::INT)
+		{
+			this -> addBin("b8");
+			this -> addBin(4, node -> data -> ivalue);
+			this -> addBin("50");
+		}
+			
+		else if (node -> data -> type == Token::FLOAT)
+		{
+			this -> addBin("b8");
+			this -> addBin(4, node -> data -> fvalue);
+			this -> addBin("50");
+		}
+		
+		else if (node -> data -> type == Token::CHAR)
+		{
+			this -> addBin("b8");
+			this -> addBin(4, node -> data -> cvalue);
+			this -> addBin("50");
+		}
+			
+		else if (node -> data -> type == Token::STRING)
+			this -> add("\tString\n\n");
+	}
 }
 
 
@@ -1138,15 +1297,73 @@ void Programm::optimizeNasm()
 }
 
 
-void Programm::makeBinary(const Settings* settings)
+void Programm::makeHeader()
 {
-	std::cout << "\x1b[1;31mBinary compilation not implemented yet!\x1b[0m\n";
+	char* compiled_text = this -> text;
+	long long int compiled_text_length = this -> text_length;
+	
+	this -> text = 0;
+	this -> text_length = 0;
+	
+	this -> addBin("7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 02 00 3e 00 01 00 00 00 00 10 40 00 00 00 00 00 40 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 38 00 02 00 40 00 03 00 02 00 01 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00 40 00 00 00 00 00 b0 00 00 00 00 00 00 00 b0 00 00 00 00 00 00 00 00 10 00 00 00 00 00 00 01 00 00 00 05 00 00 00 00 10 00 00 00 00 00 00 00 10 40 00 00 00 00 00 00 10 40 00 00 00 00 00"); 
+	this -> addBin(8, compiled_text_length);
+	this -> addBin(8, compiled_text_length);
+	this -> addBin("00 10 00 00 00 00 00 00");
+	
+	for (int counter = 0; counter < 3920; counter++)
+		this -> addBin("00");
+		
+	long long int new_text_length = compiled_text_length + (this -> text_length);
+	char* new_text = new char[new_text_length];
+	
+	for (long long int i = 0; i < this -> text_length; i++)
+		new_text[i] = (this -> text)[i];
+		
+	for (long long int i = 0; i < compiled_text_length; i++)
+		new_text[(this -> text_length) + i] = compiled_text[i];
+		
+	delete[] this -> text;
+	
+	this -> text = new_text;
+	this -> text_length = new_text_length;
+	
+	long long int shstrtab_indent = this -> text_length;
+	
+	this -> addBin("00 2e 73 68 73 74 72 74 61 62 00 2e 74 65 78 74");
+	
+	while (this -> text_length % 8 != 0)
+		this -> addBin("00");
+		
+	long long int section_header_offset = this -> text_length;
+		
+	this -> addBin("00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+	this -> addBin("0b 00 00 00 01 00 00 00 06 00 00 00 00 00 00 00 00 10 40 00 00 00 00 00 00 10 00 00 00 00 00 00");
+	this -> addBin(8, compiled_text_length);
+	this -> addBin("00 00 00 00 00 00 00 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+	this -> addBin("01 00 00 00 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+	this -> addBin(8, shstrtab_indent);//52 10 00 00    00 00 00 00    
+	this -> addBin("11 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+	
+	this -> substituteNumber(40, 8, section_header_offset);
+		
+	delete[] compiled_text;
 }
 
 
-void Programm::makeHeader(const Settings* settings)
+void Programm::substituteNumber(long long int position, int bytes_count, int number)
 {
-	std::cout << "\x1b[1;31mHeader not implemented yet!\x1b[0m\n";
+	int quotient = number;
+	char balance = 0;
+	int counter = 0;
+	while (counter < bytes_count)
+	{
+		balance = quotient % 256;
+		quotient = quotient / 256;		
+		(this -> text)[position + counter] = balance;
+		
+		counter++;
+	}
+	return;
 }
 
 
@@ -1184,11 +1401,21 @@ void Programm::write(const Settings* settings)
 		}
 	}
 
-	FILE* file = fopen(filename, "w");
+	if (settings -> only_preprocess or settings -> nasm_listing)
+	{
+		FILE* file = fopen(filename, "w");
 
-	fprintf(file, "%s", this -> text);
+		fprintf(file, "%s", this -> text);
+		
+		fclose(file);
+	}
 	
-	fclose(file);
+	else
+	{
+		FILE* file = fopen(filename, "wb");
+		fwrite(this -> text, sizeof(char), this -> text_length, file);
+		fclose(file);
+	}
 }
 
 
@@ -1269,12 +1496,72 @@ void Programm::add(const float number)
 
 void Programm::addBin(const char* string)
 {
+	int counter = 0;
+	char symbol = 0;
+	while (true)
+	{
+		int number = 0;
+		if (string[counter] >= '0' and string[counter] <= '9')
+			number = string[counter] - '0';
+		else if (string[counter] >= 'a' and string[counter] <= 'f')
+			number = string[counter] - 'a' + 10;
+			
+		if (counter % 3 == 0)
+			symbol = 16 * number;
+			
+		else if (counter % 3 == 1)
+			symbol += number;
+			
+		else
+		{
+			long long int new_length = this -> text_length + 1;
+			char* new_text = new char[new_length];
+			
+			for (int i = 0; i < this -> text_length; i++)
+				new_text[i] = (this -> text)[i];
+			new_text[this -> text_length] = symbol;
+			
+			if (this -> text)
+				delete[] this -> text;
+			
+			this -> text = new_text;
+			this -> text_length = new_length;
+		}
+		
+		if (string[counter] == '\0')
+			break;
+		
+		counter++;
+	}
 	return;
 }
 
 
-void Programm::addBin(const int number)
+void Programm::addBin(const int bytes_count, const int number)
 {
+	int quotient = number;
+	char balance = 0;
+	int counter = 0;
+	while (counter < bytes_count)
+	{
+		balance = quotient % 256;
+		quotient = quotient / 256;
+		counter++;
+		
+		long long int new_length = this -> text_length + 1;
+		char* new_text = new char[new_length];
+		
+		for (int i = 0; i < this -> text_length; i++)
+			new_text[i] = (this -> text)[i];
+		new_text[this -> text_length] = balance;
+		
+		if (this -> text)
+			delete[] this -> text;
+		
+		this -> text = new_text;
+		this -> text_length = new_length;
+		
+	}
 	return;
 }
 

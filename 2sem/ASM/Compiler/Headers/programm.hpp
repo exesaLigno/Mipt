@@ -63,13 +63,18 @@ class Programm
 	void compile(PNode* node, bool nasm_compilation);
 	void optimizeNasm();
 	
-	void makeBinary(const Settings* settings);
-	void makeHeader(const Settings* settings);
+	void makeHeader();
 	
 	void write(const Settings* settings);
+	
 	void add(const char* string);
 	void add(const int number);
 	void add(const float number);
+	
+	void addBin(const char* string);
+	void addBin(const int bytes_count, const int number);
+	void substituteNumber(long long int position, int count_of_bytes, int number);
+	void addBin(const float number);
 };
 
 

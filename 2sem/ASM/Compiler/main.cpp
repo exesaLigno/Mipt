@@ -38,14 +38,6 @@ int main(int argc, char* argv[])
 	if (settings.optimization_level > 1)
 		programm.optimizeNasm();
 	
-	if (settings.nasm_listing)
-	{
-		programm.write(&settings);
-		return 0;
-	}
-	
-	programm.makeBinary(&settings);
-	
 	programm.write(&settings);
 	
     return 0;
