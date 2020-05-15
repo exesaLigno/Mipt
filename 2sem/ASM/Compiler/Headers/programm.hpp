@@ -112,6 +112,7 @@ void enumerateBranching(PNode* node, int* number);
 char* getUnnumeratedVariable(PNode* node);
 void setVariables(PNode* node, const char* varname, int vartype, int varnumber);
 char* makeLable(const char* string, int number);
+char* readFile(const char* filename);
 
 
 

@@ -888,6 +888,28 @@ void Programm::makeNasm(const Settings* settings)
 		current_node = current_node -> left;
 	}
 	
+	char* print_text = 0;
+	char* input_text = 0;
+	
+	if (nasm_compilation)
+	{
+		print_text = readFile("AsmLibraries/print.s");
+		this -> add(print_text);
+	}
+	
+	else
+	{
+		print_text = readFile("AsmLibraries/print");
+		setLabelPosition("print", this -> text_length);
+		this -> addBin(print_text);
+	}
+	
+	if (print_text)
+		delete[] print_text;
+		
+	if (input_text)
+		delete[] input_text;
+	
 	if (not nasm_compilation)
 		this -> makeHeader();
 }
@@ -1691,6 +1713,24 @@ char* makeLable(const char* string, int number)
 	char* label = new char[strlen(string) + 7];
 	sprintf(label, "%s%d", string, number);
 	return label;
+}
+
+
+char* readFile(const char* filename)
+{
+	FILE* source_file = fopen(filename, "r");
+	
+	fseek(source_file, 0, SEEK_END);
+	long long text_length = ftell(source_file);
+	rewind(source_file);
+
+	char* text = new char[text_length + 1]{0};
+
+	text_length = fread(text, sizeof(char), text_length, source_file);
+	
+	fclose(source_file);
+	
+	return text;
 }
 
 
