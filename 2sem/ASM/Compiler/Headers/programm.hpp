@@ -7,6 +7,7 @@
 #include "definition.hpp"
 #include "debug.hpp"
 #include "errcodes.hpp"
+#include "label_storage.hpp"
 
 #include <cstring>
 #include <cstdio>
@@ -36,6 +37,7 @@ class Programm
 	char* text;
 	long long int text_length;
 	PTree programm_tree;
+	LabelsStorage labels_storage;
 	
 	int importLibraries();
 	int setDefinitions();
@@ -51,7 +53,7 @@ class Programm
 	void preprocessor(const Settings* settings);
 	
 	void makeTree(const Settings* settings);
-	void optimizeTree();
+	void optimizeTree(const Settings* settings);
 	void rebuildTree();
 	void prepareVariables();
 	void prepareVariables(PNode* node);
@@ -61,7 +63,11 @@ class Programm
 	void makeBody(PNode* node, bool nasm_compilation);
 	void pushParameters(PNode* node, bool nasm_compilation);
 	void compile(PNode* node, bool nasm_compilation);
-	void optimizeNasm();
+	
+	void setLabelPosition(const char* label_name, long long int position);
+	long long int getLabelPosition(const char* label_name, long long int position);
+	
+	void optimizeNasm(const Settings* settings);
 	
 	void makeHeader();
 	
@@ -105,6 +111,7 @@ PNode* getItemize(char** _line);
 void enumerateBranching(PNode* node, int* number);
 char* getUnnumeratedVariable(PNode* node);
 void setVariables(PNode* node, const char* varname, int vartype, int varnumber);
+char* makeLable(const char* string, int number);
 
 
 

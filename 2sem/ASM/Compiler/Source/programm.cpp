@@ -690,7 +690,7 @@ PNode* getItemize(char** _line)
 
 
 
-void Programm::optimizeTree()
+void Programm::optimizeTree(const Settings* settings)
 {
 	std::cout << "\x1b[1;31mTree optimization is not implemented yet!\x1b[0m\n";
 }
@@ -775,11 +775,7 @@ void Programm::rebuildTree()
 	{
 		PNode* function = def -> right;
 		
-		PNode* parameter = function -> right;
-		
-		int number = 0;
-		enumerateBranching(function, &number);
-		
+		PNode* parameter = function -> right;		
 		
 		int varcounter = -1;
 		while (parameter)
@@ -804,6 +800,9 @@ void Programm::rebuildTree()
 		function -> data -> ivalue = varcounter + 1;
 		def = def -> left;
 	}
+	
+	int number = 0;
+	enumerateBranching((this -> programm_tree).head, &number);
 }
 
 
@@ -926,7 +925,8 @@ void Programm::compileDef(PNode* node, bool nasm_compilation)
 	
 	else
 	{
-		// store label position
+		this -> setLabelPosition(node -> data -> svalue, this -> text_length);
+		
 		this -> addBin("41 5d 49 89 e7 48 83 ec");
 		this -> addBin(1, (node -> data -> ivalue) * 8);
 		this -> addBin("49 89 e6");
@@ -972,9 +972,8 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 		else
 		{
 			this -> addBin("e8"); 
-			// storing that label "svalue" calling from here to make addr later
-			this -> addBin("00 00 00 00");
-			
+			int label_position = getLabelPosition(node -> data -> svalue, this -> text_length);
+			this -> addBin(4, label_position);
 		}
 		
 		PNode* param = node -> right;
@@ -983,8 +982,10 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 		{
 			if (nasm_compilation)
 				this -> add("\tpop r15\n");
+				
 			else
 				this -> addBin("41 5f");
+				
 			param = param -> left;
 		}
 		
@@ -1003,7 +1004,12 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 			this -> add(":\n");
 		}
 		
-		// else storing label place
+		else
+		{
+			char* label_name = makeLable(".cycle", node -> data -> vartype);
+			setLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+		}
 		
 		if (node -> right)
 			makeBody(node -> right, nasm_compilation);
@@ -1018,8 +1024,11 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 		else
 		{
 			this -> addBin("58 48 85 c0 0f 84");
+			char* label_name = makeLable(".exitcycle", node -> data -> vartype);
+			int label_position = getLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
 			// storing jmp position label
-			this -> addBin("00 00 00 00");
+			this -> addBin(4, label_position);
 		}
 		
 		if (node -> left)
@@ -1039,10 +1048,14 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 		else
 		{
 			this -> addBin("e9");
-			// storing jmp position label
-			this -> addBin("00 00 00 00");
+			char* label_name = makeLable(".cycle", node -> data -> vartype);
+			int label_position = getLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+			this -> addBin(4, label_position);
 			
-			// store label position
+			label_name = makeLable(".exitcycle", node -> data -> vartype);
+			setLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
 		}
 	}
 	
@@ -1056,20 +1069,49 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 		if (node -> right)
 			makeBody(node -> right, nasm_compilation);
 			
-		this -> add("\tpop rax\n\ttest rax, rax\n\tjz .endif");
-		this -> add(node -> data -> vartype);
-		this -> add("\n\n");
+		if (nasm_compilation)
+		{
+			this -> add("\tpop rax\n\ttest rax, rax\n\tjz .endif");
+			this -> add(node -> data -> vartype);
+			this -> add("\n\n");
+		}
+		
+		else
+		{
+			this -> addBin("58 48 85 c0 0f 84");
+			char* label_name = makeLable(".endif", node -> data -> vartype);
+			int label_position = getLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+			// storing jmp position label
+			this -> addBin(4, label_position);
+		}
 		
 		if (node -> left)
 			makeBody(node -> left, nasm_compilation);
 			
-		this -> add("\tjmp .exitif");
-		this -> add(node -> data -> vartype);
-		this -> add("\n\n");
+		if (nasm_compilation)
+		{
+			this -> add("\tjmp .exitif");
+			this -> add(node -> data -> vartype);
+			this -> add("\n\n");
+			
+			this -> add("\t.endif");
+			this -> add(node -> data -> vartype);
+			this -> add(":\n");
+		}
 		
-		this -> add("\t.endif");
-		this -> add(node -> data -> vartype);
-		this -> add(":\n");
+		else
+		{
+			this -> addBin("e9");
+			char* label_name = makeLable(".exitif", node -> data -> vartype);
+			int label_position = getLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+			this -> addBin(4, label_position);
+			
+			label_name = makeLable(".endif", node -> data -> vartype);
+			setLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+		}
 		
 		// Else compilation
 		if (node -> parent -> left)
@@ -1078,9 +1120,19 @@ void Programm::makeBody(PNode* node, bool nasm_compilation)
 				makeBody(node -> parent -> left -> right -> left, nasm_compilation);
 		}
 		
-		this -> add("\t.exitif");
-		this -> add(node -> data -> vartype);
-		this -> add(":\n");
+		if (nasm_compilation)
+		{
+			this -> add("\t.exitif");
+			this -> add(node -> data -> vartype);
+			this -> add(":\n");
+		}
+		
+		else
+		{
+			char* label_name = makeLable(".exitif", node -> data -> vartype);
+			setLabelPosition(label_name, this -> text_length);
+			delete[] label_name;
+		}
 	}
 	
 	else if (optype == Token::ELSE and type == Token::CTRL_OPERATOR)
@@ -1290,8 +1342,42 @@ void Programm::compile(PNode* node, bool nasm_compilation)
 
 
 
+void Programm::setLabelPosition(const char* label_name, long long int position)
+{
+	int label_number = labels_storage.findLabel(label_name);
+	labels_storage.setPosition(label_number, position);
+	
+	int references_count = labels_storage.getReferencesCount(label_number);
+	long long int* references = labels_storage.getReferences(label_number);
+	
+	for (int i = 0; i < references_count; i++)
+	{
+		substituteNumber(references[i], 4, (position - references[i] - 4));
+	}
+	
+	labels_storage.clearReferences(label_number);
+}
 
-void Programm::optimizeNasm()
+
+
+long long int Programm::getLabelPosition(const char* label_name, long long int position)
+{
+	int label_number = labels_storage.findLabel(label_name);
+	long long int adress = labels_storage.getPosition(label_number);
+	
+	if (not adress)
+	{
+		labels_storage.addReference(label_number, position);
+		return 0;
+	}
+	
+	return (adress - position - 4);
+}
+
+
+
+
+void Programm::optimizeNasm(const Settings* settings)
 {
 	std::cout << "\x1b[1;31mNasm optimization is not implemented yet!\x1b[0m\n";
 }
@@ -1352,7 +1438,7 @@ void Programm::makeHeader()
 
 void Programm::substituteNumber(long long int position, int bytes_count, int number)
 {
-	int quotient = number;
+	unsigned int quotient = number;
 	char balance = 0;
 	int counter = 0;
 	while (counter < bytes_count)
@@ -1539,7 +1625,7 @@ void Programm::addBin(const char* string)
 
 void Programm::addBin(const int bytes_count, const int number)
 {
-	int quotient = number;
+	unsigned int quotient = number;
 	char balance = 0;
 	int counter = 0;
 	while (counter < bytes_count)
@@ -1597,6 +1683,14 @@ int strcount(char* str, const char* expression)
 bool isSpace(char symbol)
 {
 	return (symbol == ' ' or symbol == '\n' or symbol == '\t' or symbol == '\0');
+}
+
+
+char* makeLable(const char* string, int number)
+{
+	char* label = new char[strlen(string) + 7];
+	sprintf(label, "%s%d", string, number);
+	return label;
 }
 
 

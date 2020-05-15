@@ -31,12 +31,12 @@ int main(int argc, char* argv[])
 	programm.makeTree(&settings);
 		
 	if (settings.optimization_level > 0)
-		programm.optimizeTree();
+		programm.optimizeTree(&settings);
 
 	programm.makeNasm(&settings);
 	
 	if (settings.optimization_level > 1)
-		programm.optimizeNasm();
+		programm.optimizeNasm(&settings);
 	
 	programm.write(&settings);
 	
