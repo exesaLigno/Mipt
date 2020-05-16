@@ -1,11 +1,11 @@
-* **J**ust **A**nother **U**seless **L**anguage compiler
+# **J**ust **A**nother **U**seless **L**anguage compiler
 
 Programm compiling Hi-level source code into NASM or directly into binary ELF-64 file.
 To assembly programm use `make` or `make jc` in repo directory. 
 `make` building all programms in repository inlcuding readBinary ([see more](../blob/master/Accessory/README.md)).
 
 
-** Using
+## Using
 
 Compiler supports compilation keys:
 `-s` - silent compilation,
