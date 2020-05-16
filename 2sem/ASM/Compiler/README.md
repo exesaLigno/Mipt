@@ -2,7 +2,7 @@
 
 Programm compiling Hi-level source code into NASM or directly into binary ELF-64 file.
 To assembly programm use `make` or `make jc` in repo directory. 
-`make` building all programms in repository inlcuding readBinary ([see more](../blob/master/Accessory/README.md)).
+`make` building all programms in repository inlcuding readBinary ([see more](/Accessory/README.md)).
 
 
 ## Using
@@ -14,4 +14,4 @@ Compiler supports compilation keys:
 `-o <filename>` - set output file name to `<filename>`.
 If keys `-p` or `-l` not given, compiling directly into ELF-64.
 
-Examples of programms on jaul are given in "[Examples](../blob/master/Examples)" folder.
+Examples of programms on jaul are given in "[Examples](/Examples)" folder.
