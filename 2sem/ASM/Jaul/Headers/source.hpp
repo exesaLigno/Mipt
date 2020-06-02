@@ -12,6 +12,7 @@ class Source
 	char* text_pointer;
 	
   public:
+	Source();
 	Source(const char* name);
 	~Source();
 	

@@ -1,17 +1,26 @@
 #include "../Headers/source.hpp"
 
 
+Source::Source()
+{
+	this -> name = NULL;
+	this -> text = NULL;
+	this -> text_length = 0;
+	this -> text_pointer = NULL;
+	this -> source_type = 0;
+}
+
 Source::Source(const char* name)
 {
 	this -> name = new char[strlen(name) + 1]{0};
 	strcpy(this -> name, name);
 	
 	this -> text = NULL;
-	this -> text_length = NULL;
+	this -> text_length = 0;
 	
 	this -> text_pointer = NULL;
 	
-	this -> source_type = NULL;
+	this -> source_type = 0;
 }
 
 Source::~Source()
@@ -107,9 +116,17 @@ int getDefCount()
 	return def_count;
 }
 
-Source* Source::getDefinition()
+Source* Source::getDefinition()	// Rewrite to \n processing
 {
-	char* text_pointer = strstr(this -> text_pointer, "define ");
+	this -> text_pointer = strstr(this -> text_pointer, "define ");
+	this -> text_pointer += 7;
+	
+	Source* definition = new Source;
+	
+	definition -> name = new char[strchr(this -> text_pointer, ' ') - this -> text_pointer + 1]{0};
+	strncpy(definition -> name, this -> text_pointer, strchr(this -> text_pointer, ' ') - this -> text_pointer);
+	
+	this -> text_pointer = strchr(this -> text_pointer, ' ') - this -> text_pointer + 1
 }
 
 int Source::substitute(const Source& source)
