@@ -12,6 +12,10 @@ Source::Source()
 
 Source::Source(const char* name)
 {
+	short int type = getType(name);
+	
+	this -> source_type = type;
+	
 	this -> name = new char[strlen(name) + 1]{0};
 	strcpy(this -> name, name);
 	
@@ -36,14 +40,6 @@ short int Source::open()
 {
 	if (this -> source_type == DEFINITION)
 		return OPENNING_PROHIBITED;
-
-	short int type = getType(this -> name);
-	
-	if (type == ERRTYPE)
-		return UNSUPPORTED_FILE_EXTENSION;
-	
-	else
-		this -> source_type = type;
 		
 	FILE* source_file = fopen(this -> name, "r");	// Trying to open file
 	
@@ -80,7 +76,7 @@ short int Source::open()
 
 short int Source::getType(const char* name)
 {
-	char* extension = strchr(name, '.');
+	const char* extension = strchr(name, '.');
 	
 	if (extension == nullptr)
 		return OBJ_SOURCE;
@@ -101,83 +97,16 @@ short int Source::getType(const char* name)
 	}
 }
 
-int getDefCount()
+
+void Source::print()
 {
-	int def_count = 0
-
-	char* finded = strstr(this -> text, "define ");
-	
-	while (finded != nullptr)
-	{
-		def_count++;
-		finded = strstr(++finded, "define ");
-	}
-	
-	return def_count;
-}
-
-Source* Source::getDefinition()	// Rewrite to \n processing
-{
-	this -> text_pointer = strstr(this -> text_pointer, "define ");
-	this -> text_pointer += 7;
-	
-	Source* definition = new Source;
-	
-	definition -> name = new char[strchr(this -> text_pointer, ' ') - this -> text_pointer + 1]{0};
-	strncpy(definition -> name, this -> text_pointer, strchr(this -> text_pointer, ' ') - this -> text_pointer);
-	
-	this -> text_pointer = strchr(this -> text_pointer, ' ') - this -> text_pointer + 1
-}
-
-int Source::substitute(const Source& source)
-{
-	if (source.source_type != DEFINITION)
-		return NOT_SUBSTITUTABLE_TYPE;
+	if (this -> name)
+		printf("\n\x1b[1;32m%s\x1b[0m\n\n", this -> name);
 		
-	int name_length = strlen(source.name);
-	int substitution_length = source.text_length;
-		
-	long long int new_text_length = this -> text_length;
-	
-	char* finded = strstr(this -> text, source.name);
-	
-	while (finded != nullptr)
-	{
-		new_text_length = new_text_length - name_length + substitution_length;
-		finded = strstr(++finded, source.name);
-	}
-	
-	char* new_text = new char[new_text_length + 1]{0};
-	char* _new_text = new_text;
-	char* _text = this -> text;
-	
-	finded = strstr(this -> text, source.name);
-	
-	while (finded != nullptr)
-	{
-		strncat(_new_text, _text, finded - _text);
-		_new_text += finded - _text;
-		_text = finded + name_length;
-		
-		strcat(_new_text, source.text);
-		_new_text += substitution_length;
-		
-		finded = strstr(finded, source.name);
-	}
-	
-	delete[] this -> text;
-	
-	this -> text = new_text;
-	this -> text_length = new_text_length;
-	
-	return OK;
+	if (this -> text)
+		printf("%s\n", this -> text);
+	else 
+		printf("\x1b[2mEmpty\x1b[0m\n");
 }
-
-void Source::rewind()
-{
-	this -> text_pointer = this -> text;
-}
-
-
 
 

@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -std=c++2a -O3
 LDFLAGS=
-SOURCES=main.cpp Source/settings.cpp Source/programm.cpp Source/token.cpp Source/library.cpp Source/definition.cpp Source/label_storage.cpp
+SOURCES=main.cpp Source/compiler.cpp Source/source.cpp Source/ast.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 COMPILER=jc
 ELFPARSER=relf

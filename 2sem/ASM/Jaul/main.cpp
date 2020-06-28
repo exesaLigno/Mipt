@@ -2,8 +2,10 @@
 #include <iostream>
 #include <unistd.h>
 #include <cstring>
-#include "Headers/programm.hpp"
-#include "Headers/settings.hpp"
+#include "Headers/compiler.hpp"
+
+//#define release
+
 
 
 /*----------------------------------------------|
@@ -15,30 +17,19 @@
 
 int main(int argc, char* argv[])
 {
-	Settings settings(argc, argv);
-
-	Programm programm;
-
-	programm.readSource(&settings);
-	programm.preprocessor(&settings);
+	Compiler compiler(argc, argv);
 	
-	if (settings.only_preprocess)
+	if (not compiler.validate())
 	{
-		programm.write(&settings);
-		return 0;
+		compiler.showHelp();
+		return Compiler::UNKNOWN_PARAMETER;
 	}
+	compiler.showSettings();
 	
-	programm.makeTree(&settings);
-		
-	if (settings.optimization_level > 0)
-		programm.optimizeTree(&settings);
-
-	programm.makeNasm(&settings);
+	compiler.readSource();
+	compiler.showSource();
 	
-	if (settings.optimization_level > 1)
-		programm.optimizeNasm(&settings);
-	
-	programm.write(&settings);
+	compiler.makeAst();
 	
     return 0;
 }

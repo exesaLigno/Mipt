@@ -1,4 +1,9 @@
 #include <cstring>
+#include <fstream>
+#include "ast.hpp"
+
+typedef AbstractSyntaxTree AST;
+typedef AST::Node ASN;
 
 class Source
 {
@@ -7,6 +12,7 @@ class Source
 	short int source_type;
 	char* text;
 	long long int text_length;
+	AbstractSyntaxTree ast;
 	
   private:
 	char* text_pointer;
@@ -18,12 +24,9 @@ class Source
 	
 	short int open();
 	short int getType(const char* name);
+	void print();
 	
-	int getDefCount();
-	Source* getDefinition();
-	int substitute(Source& source);
-	
-	void rewind();
+	void makeAST();
 	
 	enum SourceTypes
 	{
@@ -43,4 +46,5 @@ class Source
 		UNSUPPORTED_FILE_EXTENSION = -3,
 		NOT_SUBSTITUTABLE_TYPE = -4
 	};
-}
+};
+
