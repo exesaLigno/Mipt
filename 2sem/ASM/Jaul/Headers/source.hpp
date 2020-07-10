@@ -1,40 +1,64 @@
+#pragma once
+
 #include <cstring>
 #include <fstream>
 #include "ast.hpp"
-
-typedef AbstractSyntaxTree AST;
-typedef AST::Node ASN;
+#include "debug.hpp"
 
 class Source
 {
   protected:
-	char* name;
-	short int source_type;
-	char* text;
-	long long int text_length;
-	AbstractSyntaxTree ast;
+	char* name = nullptr;
+	char* text = nullptr;
+	long long int text_length = 0;
+	AST ast;
+	int current_line = 1;
 	
   private:
-	char* text_pointer;
+	char* text_pointer = nullptr;
 	
   public:
+	short int source_type = 0;
+	
 	Source();
 	Source(const char* name);
 	~Source();
 	
 	short int open();
-	short int getType(const char* name);
+	short int getType();
 	void print();
 	
 	void makeAST();
 	
+	int calculateIndent(char* text);
+	bool nextLine(char** _text);
+	
+  private:
+	ASN* parseBlock(int indent, char** _text);
+	ASN* parseLine(int indent, char** _text);
+	ASN* getInclude(char** _line);
+	ASN* getDef(char** _line);
+	ASN* getAssignment(char** _line);
+	ASN* getOperators(char** _line);
+	ASN* getLogic(char** _line);
+	ASN* getCmp(char** _line);
+	ASN* getAddSub(char** _line);
+	ASN* getMulDiv(char** _line);
+	ASN* getPow(char** _line);
+	ASN* getNumVarFunc(char** _line);
+	ASN* getItemize(char** _line);
+	
+  public:
+	void rebuildTree();
+	void dumpAST();
+	
 	enum SourceTypes
 	{
-		JAUL_SOURCE = 1,		// .jaul
-		NASM_SOURCE,			// .s
-		OBJ_SOURCE,				// no extension
-		VIRTUAL_EXECUTABLE,		// .jaulv
-		DEFINITION,				// fileless type
+		JAUL_SOURCE = 1,		// .j		| Simple hi-level source
+		JASM_SOURCE,			// .jasm	| Special assembler (like nasm, but without macroses etc)
+		JAUL_OBJ,				// .jo		| Object format
+		VIRTUAL_EXECUTABLE,		// .jv		| Virtual executable format
+		DEFINITION,				// fileless	| Not implemented fuck
 		ERRTYPE
 	};
 	
