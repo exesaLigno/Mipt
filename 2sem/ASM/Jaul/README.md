@@ -2,10 +2,10 @@
 
 JAUL means **J**ust **A**nother **U**seless **L**anguage.
 
-## Contents
+### Contents
 
 [Using - Compiler launch](#jc_usage)  
-[Using - Running JVM](#jvm_usage)
+[Using - Running JVM](#jvm_usage)  
 [Compilation principle](#principle)  
 [Object files](#object)  
 [JAUL Virtual Mashine](#jvm)  
@@ -49,16 +49,16 @@ Using of [JVM](#jvm)
 
 All source files importing to `Source` objects.
 
-### JAUL Source
+#### JAUL Source
 First of all, `Source` class building Abstract Syntax Tree and by which compiling instructions to `Binary` class object. 
 After that `Binary` object optimizing and calculating local labels, byte code unites function by function 
 (one function in one `Binary::Token`)
 
-### JAUL Object
+#### JAUL Object
 `Source` class just keeping byte code of object file, after that transmits it to `Binary` object. 
 It builds object file function by function (one function in one `Binary::Token`).
 
-### JAUL Assebler Language
+#### JAUL Assebler Language
 It works like object files, but building `Binary` object basing on JASM code 
 and after that optimizing and calculating local labels like in JAUL source compilation.
 
