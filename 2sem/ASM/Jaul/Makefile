@@ -1,19 +1,31 @@
 CC=g++
 CFLAGS=-c -std=c++2a -O3
 LDFLAGS=
-SOURCES=main.cpp Source/compiler.cpp Source/source.cpp Source/ast.cpp
-OBJECTS=$(SOURCES:.cpp=.o)
-COMPILER=jc
+
+JC_SOURCES=jc.cpp Source/compiler.cpp Source/source.cpp Source/ast.cpp Source/binary.cpp
+JC_OBJECTS=$(JC_SOURCES:.cpp=.o)
+JC=jc
+
+JVM_SOURCES=jvm.cpp
+JVM_OBJECTS=$(JVM_SOURCES:.cpp=.o)
+JVM=jvm
+
+ELFPARSER_SOURCES=Accessory/readBinary.cpp
+ELFPARSER_OBJECTS=$(ELFPARSER_SOURCES:.cpp=.o)
 ELFPARSER=relf
 
-all: $(SOURCES) $(COMPILER) $(ELFPARSER)
+
+all: $(JC) $(JVM) $(ELFPARSER)
 	
 	
-$(COMPILER): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+$(JC): $(JC_OBJECTS) 
+	$(CC) $(LDFLAGS) $(JC_OBJECTS) -o $@
 	
-$(ELFPARSER):
-	$(CC) $(LDFLAGS) Accessory/readBinary.cpp -o $(ELFPARSER)
+$(JVM): $(JVM_OBJECTS)
+	$(CC) $(LDFLAGS) $(JVM_OBJECTS) -o $@
+	
+$(ELFPARSER): $(ELFPARSER_OBJECTS)
+	$(CC) $(LDFLAGS) $(ELFPARSER_OBJECTS) -o $@
 
 
 .cpp.o:
@@ -22,18 +34,14 @@ $(ELFPARSER):
 	
 .PHONY: examples
 examples: $(COMPILER)
-	./jc Examples/fibonacci.jaul -s
-	./jc Examples/power_of_two.jaul -s
+	
 
 	
 .PHONY: clean
 clean:
-	rm -rf *.o Source/*.o $(COMPILER) $(ELFPARSER)
+	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER)
 	
-.PHONY: rm
-rm:
-	rm -rf *.png *.out *.s *.txt Examples/*.out Examples/*.png Examples/*.s Examples/*.txt
-	
+
 .PHONY: nasm
 nasm:
 	nasm -f elf64 test.s -o test.o
