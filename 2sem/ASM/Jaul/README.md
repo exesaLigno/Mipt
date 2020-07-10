@@ -4,14 +4,16 @@ JAUL means **J**ust **A**nother **U**seless **L**anguage.
 
 ## Contents
 
-[Using - Compiler launch](#using)
-[Compilation principle](#principle)
-[Object files](#object)
-[JAUL Virtual Mashine](#jvm)
-[Assembly](#assembly)
+[Using - Compiler launch](#jc_usage)  
+[Using - Running JVM](#jvm_usage)
+[Compilation principle](#principle)  
+[Object files](#object)  
+[JAUL Virtual Mashine](#jvm)  
+[Assembly](#assembly)  
+[Examples](#examples)  
 
 
-<a name="using"><h2>Using - Compiler launch</h2></a>
+<a name="jc_usage"><h2>Using - Compiler launch</h2></a>
 
 Compiler supports compilation keys:
 `-v` or `--verbose` - verbose compilation (by default compiler shows only errors/warnings)
@@ -36,6 +38,11 @@ Compiler takes three file types as input:
 * .j - simple hi-level source ([Examples](#examples))
 * .jo - [object files](#object)
 * .jasm - special JAUL assembler language (Example of .jasm files at .std folder)
+
+
+<a name="jvm_usage"><h2>Using - JVM</h2></a>
+
+Using of [JVM](#jvm)
 
 
 <a name="principle"><h2>Compilation principle</h2></a>
