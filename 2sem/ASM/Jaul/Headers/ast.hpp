@@ -1,6 +1,9 @@
+#pragma once
+
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include "debug.hpp"
 
 
 class AbstractSyntaxTree
@@ -26,9 +29,21 @@ class AbstractSyntaxTree
 	  	int ivalue = 0;
 	  	float fvalue = 0;
 	  	char cvalue = 0;
-	  	char* svalue = 0;
-	  	bool LValue = 0;
+	  	char* svalue = nullptr;
+	  	bool LValue = false;
 	  	int vartype = 0;
+	  	
+	  	enum SYMTYPES
+		{
+			LETTER = 1, NUMBER, SYMBOL, SPECSYMBOL,
+			COUNT_OF_SYMTYPES
+		};
+	  	
+	  	enum VARTYPES
+		{
+			LOCAL = 1,
+			PARAMETER
+		};
 	  	
 	  	enum TYPES
 	  	{
@@ -36,7 +51,7 @@ class AbstractSyntaxTree
 	  		ARITHM_OPERATOR, CMP_OPERATOR, CTRL_OPERATOR,		// OPERATORS
 	  		VARIABLE, FUNCCALL, INT, FLOAT, STRING, CHAR,		// OPERANDS
 	  		LINE, FUNC, ENTRY, ITEM, DEF,						// SPECIAL SYMBOLS
-	  		_START,
+	  		_START, INCLUDE, DEFINE,
 	  		COUNT_OF_TYPES
 	  	};
 	  	
@@ -57,10 +72,12 @@ class AbstractSyntaxTree
 	  		COUNT_OF_OPERATORS
 	  	};
 		
-		Node* parent;
-		Node* left;
-		Node* right;
+		Node* parent = nullptr;
+		Node* left = nullptr;
+		Node* right = nullptr;
 	
+		Node(int type);
+  		Node(int type, char** text);
 		Node(char** text);
 		Node(const Node& that) = delete;
 		~Node();
@@ -76,10 +93,10 @@ class AbstractSyntaxTree
 		int dumper(std::ofstream& file, int mode);
 		
 		const char* colorize();
-		friend std::ostream& operator<< (std::ostream &out, const Node &node);
+		void write(std::ofstream& out);
 		
 	  private:
-		AbstractSyntaxTree* container;
+		AbstractSyntaxTree* container = nullptr;
 	};
 	
 	AbstractSyntaxTree();
@@ -87,13 +104,18 @@ class AbstractSyntaxTree
 	
 	int dumper(const char* filename, int mode);
 
+	Node* createNode(int type);
+	Node* createNode(int type, char** text);
 	Node* createNode(char** text);
 	
-	Node* head;
+	Node* head = nullptr;
 	
   private:
-	unsigned long long int nodes_count;	
+	unsigned long long int nodes_count = 0;	
 };
+
+typedef AbstractSyntaxTree AST;
+typedef AST::Node ASN;
 
 
 bool isLetter(char symbol);

@@ -1,9 +1,162 @@
 #include "../Headers/ast.hpp"
 
 
-AbstractSyntaxTree::Node::Node (char** text)
+AbstractSyntaxTree::Node::Node(char** text)
 {
+	this -> type = UNKNOWN;
+	this -> ivalue = 0;
+	this -> fvalue = 0;
+	this -> cvalue = 0;
+	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
 	
+	int first_sym = 0;
+	if (isLetter(**text))
+		first_sym = LETTER;
+		
+	if (isNumber(**text))
+		first_sym = NUMBER;
+		
+	if (isOperand(**text))
+		first_sym = SPECSYMBOL;
+		
+	int token_len = 0;
+	char* token_start = *text;
+	bool in_token = true;
+	
+	while (in_token)
+	{
+		token_len++;
+		(*text)++;
+		
+		if (((first_sym == LETTER or first_sym == NUMBER) and (isOperand(**text) or isEnd(**text))) or	\
+		   (first_sym == SPECSYMBOL and (not isOperand(**text))))
+			in_token = false;
+	}
+	
+	char* token = new char[token_len + 1]{0};
+	strncpy(token, token_start, token_len);
+	
+	if(0)
+		std::cout << "\x1b[1;31mbullshit\n\x1b[0m";
+
+	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
+			else if (!strcmp(token, string))										\
+			{																		\
+				this -> type = token_type;											\
+				this -> ivalue = token_number;										\
+				delete[] token;														\
+			}																		\
+			
+	#include "../Headers/syntax.hpp"
+	
+	#undef TOKEN
+	
+	else if (isInteger(token))
+	{
+		this -> type = INT;
+		this -> ivalue = atoi(token);
+		delete[] token;
+	}
+	
+	else if (isFloat(token))
+	{
+		this -> type = FLOAT;
+		this -> fvalue = atof(token);
+		delete[] token;
+	}
+	
+	else if (isChar(token))
+	{
+		this -> type = CHAR;
+		this -> cvalue = token[1];
+		delete[] token;
+	}
+	
+	else if (isString(token))
+	{
+		this -> type = STRING;
+		delete[] token;
+	}
+
+	else
+	{
+		char* test_next = *text;
+		
+		while (*test_next == ' ')
+			(test_next)++;
+			
+		if (*test_next == '(')
+			this -> type = FUNCCALL;
+			
+		else
+			this -> type = VARIABLE;
+			
+		if (*test_next == '=' and *(test_next + 1) != '=')	
+			this -> LValue = true;
+			
+		this -> svalue = token;
+	}
+}
+
+
+AbstractSyntaxTree::Node::Node(int type)
+{
+	this -> type = type;
+	this -> ivalue = 0;
+	this -> fvalue = 0;
+	this -> cvalue = 0;
+	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
+	if (type == _START)
+	{
+		this -> type = FUNC;
+		this -> svalue = new char[10];
+		strcpy(this -> svalue, "_start");
+	}
+}
+
+
+AbstractSyntaxTree::Node::Node(int type, char** text)
+{
+	this -> type = type;
+	this -> ivalue = 0;
+	this -> fvalue = 0;
+	this -> cvalue = 0;
+	this -> svalue = 0;
+	this -> vartype = 0;
+	this -> LValue = false;
+	
+	int first_sym = 0;
+	if (isLetter(**text))
+		first_sym = LETTER;
+		
+	if (isNumber(**text))
+		first_sym = NUMBER;
+		
+	if (isOperand(**text))
+		first_sym = SPECSYMBOL;
+		
+	int token_len = 0;
+	char* token_start = *text;
+	bool in_token = true;
+	
+	while (in_token)
+	{
+		token_len++;
+		(*text)++;
+		
+		if (((first_sym == LETTER or first_sym == NUMBER) and (isOperand(**text) or isEnd(**text))) or	\
+		   (first_sym == SPECSYMBOL and (not isOperand(**text))))
+			in_token = false;
+	}
+	
+	char* token = new char[token_len + 1]{0};
+	strncpy(token, token_start, token_len);
+	
+	this -> svalue = token;
 }
 
 
@@ -17,19 +170,25 @@ AbstractSyntaxTree::Node::~Node()
 		
 	if (this -> svalue)
 		delete[] this -> svalue;
+		
+	if (this -> container)
+		(this -> container -> nodes_count)--;
 }
 
 
 void AbstractSyntaxTree::Node::leftConnect(Node* left)
 {
+	this -> left = left;
 	if (left)
 	{
-		this -> left = left;
 		left -> parent = this;
 		if (this -> container)
 		{
-			this -> container -> nodes_count += 1;
-			left -> container = this -> container;
+			if (this -> left -> container != this -> container)
+			{
+				this -> container -> nodes_count += 1;
+				this -> left -> container = this -> container;
+			}
 			left -> fixContainer();
 		}
 	}
@@ -38,14 +197,17 @@ void AbstractSyntaxTree::Node::leftConnect(Node* left)
 
 void AbstractSyntaxTree::Node::rightConnect(Node* right)
 {
+	this -> right = right;
 	if (right)
 	{
-		this -> right = right;
 		right -> parent = this;
 		if (this -> container)
 		{
-			this -> container -> nodes_count += 1;
-			right -> container = this -> container;
+			if (this -> right -> container != this -> container)
+			{
+				this -> container -> nodes_count += 1;
+				this -> right -> container = this -> container;
+			}
 			right -> fixContainer();
 		}
 	}
@@ -57,15 +219,21 @@ void AbstractSyntaxTree::Node::fixContainer()
 {
 	if (this -> right)
 	{
-		this -> container -> nodes_count += 1;
-		this -> right -> container = this -> container;
+		if (this -> right -> container != this -> container)
+		{
+			this -> container -> nodes_count += 1;
+			this -> right -> container = this -> container;
+		}
 		this -> right -> fixContainer();
 	}
 	
 	if (this -> left)
 	{
-		this -> container -> nodes_count += 1;
-		this -> left -> container = this -> container;
+		if (this -> left -> container != this -> container)
+		{
+			this -> container -> nodes_count += 1;
+			this -> left -> container = this -> container;
+		}
 		this -> left -> fixContainer();
 	}
 }
@@ -74,7 +242,7 @@ void AbstractSyntaxTree::Node::fixContainer()
 
 const char* AbstractSyntaxTree::Node::colorize()
 {
-	if (this -> type == ENTRY)
+	if (this -> type == ENTRY or this -> type == INCLUDE)
 		return "green";
 		
 	else if (this -> type == LINE or this -> type == ITEM or this -> type == DEF)
@@ -115,6 +283,77 @@ const char* AbstractSyntaxTree::Node::colorize()
 }
 
 
+void AbstractSyntaxTree::Node::write(std::ofstream& out)
+{
+	if (this -> type == UNKNOWN)
+		out << "unknown | " << this -> svalue;
+		
+	else if (this -> type == ENTRY)
+		out << "entry";
+		
+	else if (this -> type == LINE)
+	{
+		out << "line " << this -> ivalue;
+		out << " | " << this -> svalue;
+	}
+	
+	else if (this -> type == INCLUDE)
+	{
+		out << "include";
+		out << " | " << this -> svalue;
+	}
+		
+	else if (this -> type == FUNC)
+		out << "function | " << this -> svalue << " | { Mem | " << this -> ivalue << " } ";
+		
+	else if (this -> type == ITEM)
+		out << "item";
+
+	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)					\
+			else if (this -> type == token_type and this -> ivalue == token_number)				\
+				out << "OPERATOR | " << dump;													\
+			
+	#include "../Headers/syntax.hpp"
+	
+	#undef TOKEN
+
+	else if (this -> type == INT)
+		out << "int | " << this -> ivalue;
+		
+	else if (this -> type == FLOAT)
+		out << "float | " << this -> fvalue;
+		
+	else if (this -> type == CHAR)
+		out << "char | " << this -> cvalue;
+		
+	else if (this -> type == STRING)
+		out << "string | " << this -> svalue;
+		
+	else if (this -> type == VARIABLE)
+	{
+		if (this -> LValue)
+			out << "L-";
+		out << "variable | " << this -> svalue;
+			
+		if (this -> vartype == LOCAL)
+			out << " | { Local | " << this -> ivalue << " }";
+			
+		else if (this -> vartype == PARAMETER)
+			out << " | { Parameter  | " << this -> ivalue << " }";
+	}
+		
+	else if (this -> type == FUNCCALL)
+		out << "funccall | " << this -> svalue;
+		
+	else if (this -> type == DEF)
+	{
+		out << "def";
+		out << " | line " << this -> ivalue;
+		if (this -> svalue)
+			out << " | " << this -> svalue;
+	}
+}
+
 
 int AbstractSyntaxTree::dumper(const char* filename, int mode)
 {
@@ -133,10 +372,7 @@ int AbstractSyntaxTree::dumper(const char* filename, int mode)
     if ((mode / DETAILED) % 10 == 1)
     	file << "<adr> Address: " << element << " | Data: ";
     
-//    if (this -> data_is_pointer)
-//		file << *(element -> data);
-//	else
-//		file << element -> data;
+	element -> write(file);
     
     if ((mode / DETAILED) % 10 == 1)
     	file << " |{<left> " << element -> left << " | <right> " << element -> right << "}";
@@ -144,6 +380,7 @@ int AbstractSyntaxTree::dumper(const char* filename, int mode)
     file << "}\"]\n";
     
     file << "root -> " << (long int) element << "\n [color = black]";	// element as int
+	
     element -> dumper(file, mode);
     file << "}";
     file.close();
@@ -196,10 +433,7 @@ int AbstractSyntaxTree::Node::dumper(std::ofstream& file, int mode)
         if ((mode / DETAILED) % 10 == 1)
         	file << "<adr> Address: " << this -> left << " | Data: ";
         
-//        if (this -> container -> data_is_pointer)
-//			file << *(this -> left -> data);
-//		else
-//			file << this -> left -> data;
+		this -> left -> write(file);
         
         if ((mode / DETAILED) % 10 == 1)
         	file << " | <prev> Prev: " << this << " |{<left> " << this -> left -> left << " | <right> " << this -> left -> right << "}";
@@ -225,10 +459,7 @@ int AbstractSyntaxTree::Node::dumper(std::ofstream& file, int mode)
         if ((mode / DETAILED) % 10 == 1)
         	file << "<adr> Address: " << this -> right << " | Data: ";
         
-//        if (this -> container -> data_is_pointer)
-//			file << *(this -> right -> data);
-//		else
-//			file << this -> right -> data;
+		this -> right -> write(file);
         
         if ((mode / DETAILED) % 10 == 1)
         	file << " | <prev> Prev: " << this << " |{<left> " << this -> right -> left << " | <right> " << this -> right -> right << "}";
@@ -273,6 +504,28 @@ AbstractSyntaxTree::~AbstractSyntaxTree()
 typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(char** text)
 {
 	Node* new_node = new Node(text);
+	this -> nodes_count++;
+	new_node -> container = this;
+	if (not this -> head)
+		this -> head = new_node;
+	
+	return new_node;
+}
+
+typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type, char** text)
+{
+	Node* new_node = new Node(type, text);
+	this -> nodes_count++;
+	new_node -> container = this;
+	if (not this -> head)
+		this -> head = new_node;
+	
+	return new_node;
+}
+
+typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type)
+{
+	Node* new_node = new Node(type);
 	this -> nodes_count++;
 	new_node -> container = this;
 	if (not this -> head)
