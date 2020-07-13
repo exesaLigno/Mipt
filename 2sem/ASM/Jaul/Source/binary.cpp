@@ -8,7 +8,26 @@ Binary::Binary(Source* source)
 Binary::~Binary()
 {}
 
-void Binary::compileAst()
+
+
+void Binary::compile(bool verbose)
+{
+	if (this -> source -> source_type == Source::JAUL_SOURCE)
+		this -> compileAst(verbose);
+		
+	else if (this -> source -> source_type == Source::JASM_SOURCE)
+		this -> importNasm(verbose);
+		
+	else if (this -> source -> source_type == Source::JAUL_OBJ)
+		this -> importObj(verbose);
+		
+	else
+		printf("\x1b[1;31merror:\x1b[0m trying to compile non-compilable source \x1b[1m<%s>\x1b[0m\n", this -> source -> name);
+}
+
+
+
+void Binary::compileAst(bool verbose)
 {
 	ASN* current_def = (this -> source -> ast).head -> left;
 	
@@ -17,6 +36,9 @@ void Binary::compileAst()
 		compileDef(current_def -> right);
 		current_def = current_def -> left;
 	}
+	
+	if (verbose)
+		printf("\x1b[1m%s:\x1b[0m JAUL source compiled and imported to binary\n", this -> source -> name);
 }
 
 void Binary::compileDef(ASN* node)
@@ -27,7 +49,7 @@ void Binary::compileDef(ASN* node)
 	this -> pushBack("sub rsp, %d", (node -> ivalue) * 8);
 	this -> pushBack("mov r14, rsp");
 	
-	makeBody(node -> left);
+	compileBody(node -> left);
 	
 	this -> pushBack("add rsp, %d", (node -> ivalue) * 8);
 	this -> pushBack("push r13");
@@ -43,7 +65,7 @@ void Binary::compileDef(ASN* node)
 		this -> pushBack("ret");
 }
 
-void Binary::makeBody(ASN* node)
+void Binary::compileBody(ASN* node)
 {
 	int type = node -> type;
 	int optype = node -> ivalue;
@@ -55,7 +77,7 @@ void Binary::makeBody(ASN* node)
 		this -> pushBack("push r15");
 		
 		if (node -> right)
-			pushParameters(node -> right);
+			compileParameters(node -> right);
 
 		this -> pushBack("call %s", node -> svalue);
 		
@@ -78,14 +100,14 @@ void Binary::makeBody(ASN* node)
 		this -> pushBack(Token::LOCAL_LABEL, ".cycle%d", node -> vartype);
 		
 		if (node -> right)
-			makeBody(node -> right);
+			compileBody(node -> right);
 			
 		this -> pushBack("pop rax");
 		this -> pushBack("test rax, rax");
 		this -> pushBack("jz .exitcycle%d", node -> vartype);
 		
 		if (node -> left)
-			makeBody(node -> left);
+			compileBody(node -> left);
 
 		this -> pushBack("jmp .cycle%d", node -> vartype);
 		
@@ -100,14 +122,14 @@ void Binary::makeBody(ASN* node)
 	else if (optype == ASN::IF and type == ASN::CTRL_OPERATOR)
 	{
 		if (node -> right)
-			makeBody(node -> right);
+			compileBody(node -> right);
 
 		this -> pushBack("pop rax");
 		this -> pushBack("test rax, rax");
 		this -> pushBack("jz .endif%d", node -> vartype);
 		
 		if (node -> left)
-			makeBody(node -> left);
+			compileBody(node -> left);
 
 		this -> pushBack("jmp .exitif%d", node -> vartype);
 		
@@ -118,7 +140,7 @@ void Binary::makeBody(ASN* node)
 		if (node -> parent -> left)
 		{
 			if (node -> parent -> left -> right -> type == ASN::CTRL_OPERATOR and node -> parent -> left -> right -> ivalue == ASN::ELSE)
-				makeBody(node -> parent -> left -> right -> left);
+				compileBody(node -> parent -> left -> right -> left);
 		}
 
 		this -> pushBack(Token::LOCAL_LABEL, ".exitif%d", node -> vartype);
@@ -130,22 +152,22 @@ void Binary::makeBody(ASN* node)
 	else
 	{
 		if (node -> right)
-			makeBody(node -> right);
+			compileBody(node -> right);
 		
 		if (node -> left)
-			makeBody(node -> left);
+			compileBody(node -> left);
 		
 		compileNode(node);
 	}
 }
 
-void Binary::pushParameters(ASN* node)
+void Binary::compileParameters(ASN* node)
 {
 	if (node -> left)
-		pushParameters(node -> left);
+		compileParameters(node -> left);
 		
 	if (node -> right)
-		makeBody(node -> right);
+		compileBody(node -> right);
 }
 
 void Binary::compileNode(ASN* node)
@@ -165,7 +187,7 @@ void Binary::compileNode(ASN* node)
 			
 			default:
 			{
-				this -> pushBack("\x1b[1;31mUnknown operator\x1b[0m\n");
+				this -> pushBack("nop");
 				break;
 			}
 		}
@@ -227,15 +249,25 @@ void Binary::compileNode(ASN* node)
 		this -> pushBack("String");
 }
 
-int Binary::compileNasm()
+
+
+void Binary::importNasm(bool verbose)
 {
-	return 0;
+	printf("\x1b[1;31mNASM import is not implemented yet!\x1b[0m\n");
+	
+	if (verbose)
+		printf("\x1b[1m%s:\x1b[0m JASM code imported to binary\n", this -> source -> name);
 }
 
-int Binary::importObj()
+void Binary::importObj(bool verbose)
 {
-	return 0;
+	printf("\x1b[1;31mObjects import is not implemented yet!\x1b[0m\n");
+	
+	if (verbose)
+		printf("\x1b[1m%s:\x1b[0m object imported to binary\n", this -> source -> name);
 }
+
+
 
 void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue)
 {
@@ -264,7 +296,33 @@ void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char
 
 void Binary::pushBack(const char* nasm_code)
 {
-	this -> pushBack(Token::NASM_CODE, nasm_code, 0, 0, 0, 0);
+	int indent = 0;
+	
+	while (*(nasm_code + indent) != '\0')
+	{
+		if (*(nasm_code + indent) == '\n')
+			indent++;
+			
+		const char* endline = strchr(nasm_code + indent, '\n');
+		const char* endcode = strchr(nasm_code + indent, '\0');
+		
+		int length = 0;
+		
+		if (endline)
+			length = endline - (nasm_code + indent);
+		
+		else
+			length = endcode - (nasm_code + indent);
+			
+		char* nasm_token = new char[length + 1]{0};
+		strncpy(nasm_token, nasm_code + indent, length);
+		
+		this -> pushBack(Token::NASM_CODE, nasm_token, 0, 0, 0, 0);
+		
+		delete[] nasm_token;
+		
+		indent += length;
+	}
 }
 
 void Binary::pushBack(const char* nasm_code, int ivalue)
@@ -297,6 +355,8 @@ void Binary::pushBack(int type, const char* text, int ivalue)
 	this -> pushBack(type, text, ivalue, 0, 0, 0);
 }
 
+
+
 int Binary::exportNasm(const char* filename)
 {
 	FILE* export_file = fopen(filename, "a");
@@ -305,29 +365,42 @@ int Binary::exportNasm(const char* filename)
 	
 	while (current)
 	{
-		if (current -> type == Token::FUNCTION_LABEL)
-			fprintf(export_file, "\n\n");
+		if (current -> type != Token::BYTE_CODE)
+		{
+			if (current -> type == Token::FUNCTION_LABEL)
+				fprintf(export_file, "\n\n");
 			
-		if (current -> type == Token::NASM_CODE)
-			fprintf(export_file, "\t");
+			if (current -> type == Token::NASM_CODE)
+				fprintf(export_file, "\t");
+				
 			
+			if (strstr(current -> text, "%d") != nullptr)
+				fprintf(export_file, current -> text, current -> ivalue);
+				
+			else if (strstr(current -> text, "%f") != nullptr)
+				fprintf(export_file, current -> text, current -> fvalue);
+				
+			else if (strstr(current -> text, "%c") != nullptr)
+				fprintf(export_file, current -> text, current -> cvalue);
+				
+			else if (strstr(current -> text, "%s") != nullptr)
+				fprintf(export_file, current -> text, current -> svalue);
+			
+			else
+				fprintf(export_file, current -> text);
+			
+				
+			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
+				fprintf(export_file, ":\n");
+				
+			if (current -> type == Token::NASM_CODE)
+				fprintf(export_file, "\n");
+		}
 		
-		if (strstr(current -> text, "%d") != nullptr)
-			fprintf(export_file, current -> text, current -> ivalue);
-			
-		if (strstr(current -> text, "%f") != nullptr)
-			fprintf(export_file, current -> text, current -> fvalue);
-			
-		if (strstr(current -> text, "%c") != nullptr)
-			fprintf(export_file, current -> text, current -> cvalue);
-			
-			
-		if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
-			fprintf(export_file, ":\n");
-			
-		if (current -> type == Token::NASM_CODE)
-			fprintf(export_file, "\n");
+		current = current -> next;
 	}
+	
+	fclose(export_file);
 	
 	return 0;
 }

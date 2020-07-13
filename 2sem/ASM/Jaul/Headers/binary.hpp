@@ -18,9 +18,18 @@ class Binary
 	Binary(Source* source);
 	~Binary();
 	
-	void compileAst();		// push back and generate byte code
-	int compileNasm();		// push back and generate byte code
-	int importObj();		// manual - taking name of func, byte code of func and creating new token
+	void compile(bool verbose);
+	
+	//---- Abstract syntax tree compilation ----//
+	void compileAst(bool verbose);							//
+	void compileDef(ASN* node);					//
+	void compileBody(ASN* node);				//
+	void compileParameters(ASN* node);			//
+	void compileNode(ASN* node);				//
+	//------------------------------------------//
+	
+	void importNasm(bool verbose);		// push back and generate byte code
+	void importObj(bool verbose);		// manual - taking name of func, byte code of func and creating new token
 	
 	void pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue);
 	
@@ -39,14 +48,6 @@ class Binary
 	int exportObj();
 	int exportExecutable();
 	int exportVirtualExecutable();
-	
-	/// rewrite /// rewrite /// rewrite //
-	void makeNasm();					//
-	void compileDef(ASN* node);			//
-	void makeBody(ASN* node);			//
-	void pushParameters(ASN* node);		//
-	void compileNode(ASN* node);		//
-	//////////////////////////////////////
 };
 
 
