@@ -96,7 +96,7 @@ Compile both: `make jcp`
 
 If you want to install **JAUL Compiler Pack** to `/usr/bin` type `sudo make install`
 
-`make` builds all programms in repository (inlcuding [readBinary](Accessory/README.md)).
+`make` builds all programms in repository (inlcuding [readBinary](Accessory/ReadBinary)).
 
 `make clean` - Delete all compilation results  
 `sudo make uninstall` - Uninstall all programms and delete all compilation results

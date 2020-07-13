@@ -33,8 +33,19 @@ $(ELFPARSER): $(ELFPARSER_OBJECTS)
 	
 	
 .PHONY: examples
-examples: $(COMPILER)
+examples: $(JC) $(JVM)
+
+
+.PHONY: install
+install: $(JC) $(JVM)
+	cp $(JC) /usr/bin/$(JC)
+	cp $(JVM) /usr/bin/$(JVM)
+	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER)
 	
+	
+.PHONY: uninstall
+uninstall:
+	rm -rf /usr/bin/$(JC) /usr/bin/$(JVM)
 
 	
 .PHONY: clean
