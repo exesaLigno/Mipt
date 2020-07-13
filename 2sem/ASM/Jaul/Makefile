@@ -15,7 +15,7 @@ ELFPARSER_OBJECTS=$(ELFPARSER_SOURCES:.cpp=.o)
 ELFPARSER=relf
 
 
-all: $(JC) $(JVM) $(ELFPARSER)
+all: $(JC) $(JVM) $(ELFPARSER) Documentation
 	
 	
 $(JC): $(JC_OBJECTS) 
@@ -26,6 +26,10 @@ $(JVM): $(JVM_OBJECTS)
 	
 $(ELFPARSER): $(ELFPARSER_OBJECTS)
 	$(CC) $(LDFLAGS) $(ELFPARSER_OBJECTS) -o $@
+
+.PHONY: Documentation
+Documentation:
+	doxygen Doxyfile
 
 
 .cpp.o:
