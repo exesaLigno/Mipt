@@ -49,7 +49,7 @@ AbstractSyntaxTree::Node::Node(char** text)
 				delete[] token;														\
 			}																		\
 			
-	#include "../Headers/syntax.hpp"
+	#include "../Syntax/jaul_syntax.hpp"
 	
 	#undef TOKEN
 	
@@ -313,7 +313,7 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 			else if (this -> type == token_type and this -> ivalue == token_number)				\
 				out << "OPERATOR | " << dump;													\
 			
-	#include "../Headers/syntax.hpp"
+	#include "../Syntax/jaul_syntax.hpp"
 	
 	#undef TOKEN
 
