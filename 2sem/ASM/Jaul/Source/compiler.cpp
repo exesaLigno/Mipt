@@ -226,4 +226,33 @@ void Compiler::dumpAST()
 }
 
 
+void Compiler::createBinaries()
+{
+	this -> binary_list = new Binary*[this -> source_count];
+	
+	for (int counter = 0; counter < this -> source_count; counter++)
+		(this -> binary_list)[counter] = new Binary((this -> source_list)[counter]);
+}
+
+
+void Compiler::compile()
+{
+	for (int counter; counter < source_count; counter++)
+	{
+		(this -> binary_list)[counter] -> compile(this -> verbose);
+	}
+}
+
+
+void Compiler::assemble()
+{
+	
+}
+
+
+void Compiler::write()
+{
+	
+}
+
 

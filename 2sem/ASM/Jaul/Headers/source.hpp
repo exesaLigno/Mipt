@@ -7,7 +7,7 @@
 
 class Source
 {
-  protected:
+  public:
 	char* name = nullptr;
 	char* text = nullptr;
 	long long int text_length = 0;

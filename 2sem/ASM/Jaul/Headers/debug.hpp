@@ -1,6 +1,11 @@
 #pragma once
 
 
+/*!
+ *	\brief Debug library for easy SEGFAULT search
+ */
+
+
 #ifndef release
 	#define DEBUG printf("\x1b[35m>> debug from <%s::%d>\n\x1b[0m", __FILE__, __LINE__);
 #else

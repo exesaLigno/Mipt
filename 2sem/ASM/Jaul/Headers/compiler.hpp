@@ -5,8 +5,15 @@
 #include <iostream>
 
 #include "source.hpp"
-#include "ast.hpp"
+#include "binary.hpp"
 
+/*!
+ *	@brief Compiler class, created for organizing compiler work
+ *	@date July 2020
+ *	@bug Rarely can not compile JAUL source to AbstractSyntaxTree
+ *
+ *	Main compiler class, control all compiler processes and stores all compilation information and source/compiled code
+ */
 class Compiler
 {
   public:	// protected
@@ -32,24 +39,24 @@ class Compiler
 	//------------------------------------//
 	
 	Source** source_list = nullptr;
-	
-	AST ast;
-	bool ast_associated = false;
+	Binary** binary_list = nullptr;
 		
 	
   public:
   
+	//! Compiler work modes
   	enum Modes
   	{
-  		COMPILATION,
-  		HELP,
-  		ERROR
+  		COMPILATION,	///< Compiler working in default mode
+  		HELP,			///< Just show help and exit
+  		ERROR			///< Compiler catch an error and exited urgently
   	};
 	
+	//! Errors list
 	enum Errors
 	{
-		OK,
-		UNKNOWN_PARAMETER,
+		OK,					///< No error, all goes well
+		UNKNOWN_PARAMETER,	///< Unknown parameter in terminal call
 		ERRORS_COUNT
 	};
 	
@@ -66,5 +73,10 @@ class Compiler
 	
 	void makeAST();
 	void dumpAST();
+	
+	void createBinaries();
+	void compile();
+	void assemble();
+	void write();
 };
 
