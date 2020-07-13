@@ -127,6 +127,7 @@ void Source::makeAST()
 	
 	entry -> leftConnect(result);
 	this -> rebuildTree();
+	this -> prepareAST();
 }
 
 
@@ -626,6 +627,124 @@ void Source::rebuildTree()
 		else
 			line = line -> left;
 	}
+	
+	ASN* tmp = (this -> ast).head -> left;
+	(this -> ast).head -> left = (this -> ast).head -> right;
+	(this -> ast).head -> right = tmp;
+	
+	if ((this -> ast).head -> right)
+	{
+		ASN* _start = (this -> ast).head -> right;
+		(this -> ast).head -> right = 0;
+		
+		ASN* _start_function_node = (this -> ast).createNode(ASN::_START);
+		ASN* _start_def_node = (this -> ast).createNode(ASN::DEF);
+		
+		_start_def_node -> leftConnect((this -> ast).head -> left);
+		_start_def_node -> rightConnect(_start_function_node);
+		_start_function_node -> leftConnect(_start);
+		
+		(this -> ast).head -> leftConnect(_start_def_node);
+	}
+}
+
+
+void Source::prepareAST()
+{
+	ASN* def = (this -> ast).head -> left;
+	
+	while (def)
+	{
+		ASN* function = def -> right;
+		
+		ASN* parameter = function -> right;		
+		
+		int varcounter = -1;
+		while (parameter)
+		{			
+			varcounter++;
+			setVariables(function, parameter -> right -> svalue, ASN::PARAMETER, varcounter);
+			parameter = parameter -> left;
+		}
+		
+		
+		varcounter = -1;
+		while (true)
+		{
+			char* unnumerated_variable = getUnnumeratedVariable(function);
+			if (not unnumerated_variable)
+				break;
+				
+			varcounter++;
+			
+			setVariables(function, unnumerated_variable, ASN::LOCAL, varcounter);
+		}
+		function -> ivalue = varcounter + 1;
+		def = def -> left;
+	}
+	
+	int number = 0;
+	enumerateBranching((this -> ast).head, &number);
+}
+
+
+
+void Source::enumerateBranching(ASN* node, int* number)
+{
+	if (node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::IF or node -> ivalue == ASN::WHILE or node -> ivalue == ASN::FOR))
+	{
+		node -> vartype = *number;
+		(*number)++;
+	}
+	
+	if (node -> right)
+		enumerateBranching(node -> right, number);
+		
+	if (node -> left)
+		enumerateBranching(node -> left, number);
+}
+
+
+
+char* Source::getUnnumeratedVariable(ASN* node)
+{
+	char* unnumerated_variable = 0;
+	
+	if (node -> type == ASN::VARIABLE and node -> ivalue == 0 and node -> vartype == 0)
+		unnumerated_variable = node -> svalue;
+		
+	if (node -> right and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> right);
+		
+	if (node -> left and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> left);	
+		
+	return unnumerated_variable;
+}
+
+
+
+void Source::setVariables(ASN* node, const char* varname, int vartype, int varnumber)
+{
+	if (varname == 0)
+		return;
+	
+	if (node -> type == ASN::VARIABLE and node -> svalue)
+	{
+		if (!strcmp(node -> svalue, varname))
+		{
+			node -> vartype = vartype;
+			node -> ivalue = varnumber;
+		}
+	}
+	
+	if (node -> right)
+		setVariables(node -> right, varname, vartype, varnumber);
+	
+	if (node -> left)
+		setVariables(node -> left, varname, vartype, varnumber);
+	
+	return;
 }
 
 

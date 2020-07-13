@@ -11,7 +11,6 @@ class Source
 	char* name = nullptr;
 	char* text = nullptr;
 	long long int text_length = 0;
-	AST ast;
 	int current_line = 1;
 	
   private:
@@ -19,6 +18,7 @@ class Source
 	
   public:
 	short int source_type = 0;
+	AST ast;
 	
 	Source();
 	Source(const char* name);
@@ -48,8 +48,13 @@ class Source
 	ASN* getNumVarFunc(char** _line);
 	ASN* getItemize(char** _line);
 	
+	void enumerateBranching(ASN* node, int* number);
+	char* getUnnumeratedVariable(ASN* node);
+	void setVariables(ASN* node, const char* varname, int vartype, int varnumber);
+	
   public:
 	void rebuildTree();
+	void prepareAST();
 	void dumpAST();
 	
 	enum SourceTypes
