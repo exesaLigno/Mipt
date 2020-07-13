@@ -4,8 +4,11 @@
 #include <cstring>
 #include "Headers/compiler.hpp"
 
-//#define release
-
+/*!
+ *	@file
+ *	@brief Main file of JAUL compiler
+ *	@mainpage JCP - JAUL Compiler Pack
+ */
 
 
 /*----------------------------------------------|
@@ -15,6 +18,13 @@
 
 #include "Headers/debug.hpp"
 
+
+/*!
+ *	Main logic of compiler
+ *	@param[in] argc Count of terminal arguments
+ *	@param[in] argv Terminal arguments
+ *	@return Status of compiler work
+ */
 int main(int argc, char* argv[])
 {
 	int status = Compiler::OK;
@@ -42,6 +52,8 @@ int main(int argc, char* argv[])
 		
 		compiler.makeAST();
 		compiler.dumpAST();
+		compiler.createBinaries();
+		compiler.compile();
 	}
 
     return status;
