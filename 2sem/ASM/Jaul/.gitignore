@@ -2,9 +2,12 @@
 *.txt
 *.o
 jc
+jvm
 relf
 
 test*.jaul
 *.out
 
 *~
+
+.docs
