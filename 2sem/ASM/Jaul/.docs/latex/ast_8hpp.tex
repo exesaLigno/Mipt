@@ -1,0 +1,73 @@
+\hypertarget{ast_8hpp}{}\doxysection{Файл Headers/ast.hpp}
+\label{ast_8hpp}\index{Headers/ast.hpp@{Headers/ast.hpp}}
+
+
+Описание класса абстрактного синтаксического дерева  
+
+
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include \char`\"{}debug.\+hpp\char`\"{}}\newline
+Граф включаемых заголовочных файлов для ast.\+hpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=346pt]{ast_8hpp__incl}
+\end{center}
+\end{figure}
+Граф файлов, в которые включается этот файл\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{ast_8hpp__dep__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Классы}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classAbstractSyntaxTree}{Abstract\+Syntax\+Tree}}
+\item 
+class \mbox{\hyperlink{classAbstractSyntaxTree_1_1Node}{Abstract\+Syntax\+Tree\+::\+Node}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Определения типов}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{ast_8hpp_ad9b2e12b06416a997627ee26dbac6a78}\label{ast_8hpp_ad9b2e12b06416a997627ee26dbac6a78}} 
+typedef \mbox{\hyperlink{classAbstractSyntaxTree}{Abstract\+Syntax\+Tree}} {\bfseries A\+ST}
+\item 
+\mbox{\Hypertarget{ast_8hpp_a7b97880fac661992005e156b47a64ccf}\label{ast_8hpp_a7b97880fac661992005e156b47a64ccf}} 
+typedef \mbox{\hyperlink{classAbstractSyntaxTree_1_1Node}{A\+S\+T\+::\+Node}} {\bfseries A\+SN}
+\end{DoxyCompactItemize}
+\doxysubsection*{Функции}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{ast_8hpp_a89e482a6a179e97230a52e6921678e09}\label{ast_8hpp_a89e482a6a179e97230a52e6921678e09}} 
+bool {\bfseries is\+Letter} (char symbol)
+\item 
+\mbox{\Hypertarget{ast_8hpp_af56c0f2d79437e2c66273194e135705e}\label{ast_8hpp_af56c0f2d79437e2c66273194e135705e}} 
+bool {\bfseries is\+Number} (char symbol)
+\item 
+\mbox{\Hypertarget{ast_8hpp_ac9aea257d9651ccb0da04a4eab7d8926}\label{ast_8hpp_ac9aea257d9651ccb0da04a4eab7d8926}} 
+bool {\bfseries is\+Operand} (char symbol)
+\item 
+\mbox{\Hypertarget{ast_8hpp_ac136a1f94ec0352a2c079628607e9b8b}\label{ast_8hpp_ac136a1f94ec0352a2c079628607e9b8b}} 
+bool {\bfseries is\+End} (char symbol)
+\item 
+\mbox{\Hypertarget{ast_8hpp_a35cb66b79766e924e731388bf4404f9e}\label{ast_8hpp_a35cb66b79766e924e731388bf4404f9e}} 
+bool {\bfseries is\+Integer} (char $\ast$string)
+\item 
+\mbox{\Hypertarget{ast_8hpp_a750ff17c50d91ce07a636e2cdbbe4c2e}\label{ast_8hpp_a750ff17c50d91ce07a636e2cdbbe4c2e}} 
+bool {\bfseries is\+Float} (char $\ast$string)
+\item 
+\mbox{\Hypertarget{ast_8hpp_abf8996619929172b7d8d3d9cd6fb8e09}\label{ast_8hpp_abf8996619929172b7d8d3d9cd6fb8e09}} 
+bool {\bfseries is\+Char} (char $\ast$string)
+\item 
+\mbox{\Hypertarget{ast_8hpp_a1afd9d6d919dc89eb5fd3f48d4878f97}\label{ast_8hpp_a1afd9d6d919dc89eb5fd3f48d4878f97}} 
+bool {\bfseries is\+String} (char $\ast$string)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Подробное описание}
+Описание класса абстрактного синтаксического дерева 
+

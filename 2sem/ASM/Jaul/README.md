@@ -13,6 +13,8 @@
 * [Examples](#examples)  
 * [Performance tests](#performance)  
 
+* [Source documentation](.docs/html/index.html)
+
 
 <a name="jc_usage"><h2>Using - Compiler</h2></a>
 

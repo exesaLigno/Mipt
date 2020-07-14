@@ -1,0 +1,5 @@
+<map id="Syntax/jaul_syntax.hpp" name="Syntax/jaul_syntax.hpp">
+<area shape="rect" id="node1" title="Инструкции для компиляции высокоуровневых операций в ассемблерный код" alt="" coords="51,5,210,32"/>
+<area shape="rect" id="node2" href="$ast_8cpp.html" title="Исполняемый код класса AbstractSyntaxTree." alt="" coords="5,80,115,107"/>
+<area shape="rect" id="node3" href="$binary_8cpp.html" title="Исполняемый код класса Binary и вложенных классов" alt="" coords="139,80,266,107"/>
+</map>

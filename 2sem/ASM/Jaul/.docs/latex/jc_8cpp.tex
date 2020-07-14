@@ -1,0 +1,99 @@
+\hypertarget{jc_8cpp}{}\doxysection{Файл jc.\+cpp}
+\label{jc_8cpp}\index{jc.cpp@{jc.cpp}}
+
+
+Основной файл компилятора  
+
+
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+{\ttfamily \#include \char`\"{}Headers/compiler.\+hpp\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}Headers/debug.\+hpp\char`\"{}}\newline
+Граф включаемых заголовочных файлов для jc.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{jc_8cpp__incl}
+\end{center}
+\end{figure}
+\doxysubsection*{Функции}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{jc_8cpp_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Подробное описание}
+Основной файл компилятора 
+
+\begin{DoxyAuthor}{Автор}
+Карцев Вадим 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Функции}
+\mbox{\Hypertarget{jc_8cpp_a0ddf1224851353fc92bfbff6f499fa97}\label{jc_8cpp_a0ddf1224851353fc92bfbff6f499fa97}} 
+\index{jc.cpp@{jc.cpp}!main@{main}}
+\index{main@{main}!jc.cpp@{jc.cpp}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+Основная логика компилятора 
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\texttt{ in}}  & {\em argc} & Количество параметров командной строки \\
+\hline
+\mbox{\texttt{ in}}  & {\em argv} & Параметры командной строки \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Возвращает}
+Статус работы компилятора 
+\end{DoxyReturn}
+
+
+См. определение в файле jc.\+cpp строка 28
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{29 \{}
+\DoxyCodeLine{30     \textcolor{keywordtype}{int} status = \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}{Compiler::OK}};}
+\DoxyCodeLine{31     }
+\DoxyCodeLine{32     \mbox{\hyperlink{classCompiler}{Compiler}} compiler(argc, argv);}
+\DoxyCodeLine{33 }
+\DoxyCodeLine{34     \textcolor{keywordflow}{if} (compiler.mode() == \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}{Compiler::ERROR}})}
+\DoxyCodeLine{35     \{}
+\DoxyCodeLine{36         compiler.showHelp();}
+\DoxyCodeLine{37         status = \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457}{Compiler::UNKNOWN\_PARAMETER}};}
+\DoxyCodeLine{38     \}}
+\DoxyCodeLine{39     }
+\DoxyCodeLine{40     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (compiler.mode() == \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}{Compiler::HELP}})}
+\DoxyCodeLine{41     \{}
+\DoxyCodeLine{42         compiler.showHelp();}
+\DoxyCodeLine{43         status = \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}{Compiler::OK}};}
+\DoxyCodeLine{44     \}}
+\DoxyCodeLine{45     }
+\DoxyCodeLine{46     \textcolor{keywordflow}{else}}
+\DoxyCodeLine{47     \{}
+\DoxyCodeLine{48         compiler.showSettings();}
+\DoxyCodeLine{49         }
+\DoxyCodeLine{50         compiler.readSource();}
+\DoxyCodeLine{51         compiler.showSource();}
+\DoxyCodeLine{52         }
+\DoxyCodeLine{53         compiler.makeAST();}
+\DoxyCodeLine{54         compiler.dumpAST();}
+\DoxyCodeLine{55         compiler.createBinaries();}
+\DoxyCodeLine{56         compiler.compile();}
+\DoxyCodeLine{57     \}}
+\DoxyCodeLine{58 }
+\DoxyCodeLine{59     \textcolor{keywordflow}{return} status;}
+\DoxyCodeLine{60 \}}
+
+\end{DoxyCode}
+Граф вызовов\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=278pt]{jc_8cpp_a0ddf1224851353fc92bfbff6f499fa97_cgraph}
+\end{center}
+\end{figure}

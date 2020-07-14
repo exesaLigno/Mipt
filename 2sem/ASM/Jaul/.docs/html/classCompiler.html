@@ -1,0 +1,667 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>JCP - Jaul Compiler Pack: Класс Compiler</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">JCP - Jaul Compiler Pack
+   </div>
+   <div id="projectbrief">JAUL Compiler Pack</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.17 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Поиск');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classCompiler.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Открытые типы</a> &#124;
+<a href="#pub-methods">Открытые члены</a> &#124;
+<a href="#pub-attribs">Открытые атрибуты</a> &#124;
+<a href="classCompiler-members.html">Полный список членов класса</a>  </div>
+  <div class="headertitle">
+<div class="title">Класс Compiler</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>Класс компилятора  
+ <a href="classCompiler.html#details">Подробнее...</a></p>
+
+<p><code>#include &lt;<a class="el" href="compiler_8hpp_source.html">compiler.hpp</a>&gt;</code></p>
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Граф связей класса Compiler:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler__coll__graph.svg" width="352" height="430"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">см. легенду</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Открытые типы</h2></td></tr>
+<tr class="memitem:a6a270f1ece6ba6b1f72e0fa4527e84fe"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fe">Modes</a> { <a class="el" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612">COMPILATION</a>, 
+<a class="el" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0">HELP</a>, 
+<a class="el" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d">ERROR</a>
+ }</td></tr>
+<tr class="memdesc:a6a270f1ece6ba6b1f72e0fa4527e84fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Режимы работы компилятора  <a href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fe">Подробнее...</a><br /></td></tr>
+<tr class="separator:a6a270f1ece6ba6b1f72e0fa4527e84fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e1db16fbfa018b606e0aeb44ec36f29"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29">Errors</a> { <a class="el" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc">OK</a>, 
+<a class="el" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457">UNKNOWN_PARAMETER</a>, 
+<a class="el" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e">ERRORS_COUNT</a>
+ }</td></tr>
+<tr class="memdesc:a4e1db16fbfa018b606e0aeb44ec36f29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ошибки  <a href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29">Подробнее...</a><br /></td></tr>
+<tr class="separator:a4e1db16fbfa018b606e0aeb44ec36f29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Открытые члены</h2></td></tr>
+<tr class="memitem:ac7b42b46f0cfa326034767a724ba88f4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#ac7b42b46f0cfa326034767a724ba88f4">Compiler</a> (int argc, char *argv[])</td></tr>
+<tr class="memdesc:ac7b42b46f0cfa326034767a724ba88f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Конструктор класса <a class="el" href="classCompiler.html" title="Класс компилятора">Compiler</a>.  <a href="classCompiler.html#ac7b42b46f0cfa326034767a724ba88f4">Подробнее...</a><br /></td></tr>
+<tr class="separator:ac7b42b46f0cfa326034767a724ba88f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac06e6b6aa74c6da15efa3f0416df53b2"><td class="memItemLeft" align="right" valign="top"><a id="ac06e6b6aa74c6da15efa3f0416df53b2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#ac06e6b6aa74c6da15efa3f0416df53b2">~Compiler</a> ()</td></tr>
+<tr class="memdesc:ac06e6b6aa74c6da15efa3f0416df53b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Деструктор класса <a class="el" href="classCompiler.html" title="Класс компилятора">Compiler</a>. <br /></td></tr>
+<tr class="separator:ac06e6b6aa74c6da15efa3f0416df53b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae0a96a2f210854dc2ae58dca56c3bfd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#aae0a96a2f210854dc2ae58dca56c3bfd">addPath</a> (const char *source_path)</td></tr>
+<tr class="memdesc:aae0a96a2f210854dc2ae58dca56c3bfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция добавления нового файла в список исходников  <a href="classCompiler.html#aae0a96a2f210854dc2ae58dca56c3bfd">Подробнее...</a><br /></td></tr>
+<tr class="separator:aae0a96a2f210854dc2ae58dca56c3bfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26f35099c0f75a6ef4143d4a5869a1de"><td class="memItemLeft" align="right" valign="top"><a id="a26f35099c0f75a6ef4143d4a5869a1de"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a26f35099c0f75a6ef4143d4a5869a1de">showSettings</a> ()</td></tr>
+<tr class="memdesc:a26f35099c0f75a6ef4143d4a5869a1de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Показ настроек компилятора <br /></td></tr>
+<tr class="separator:a26f35099c0f75a6ef4143d4a5869a1de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a412d44764d0286257248c6d61d2fc05c"><td class="memItemLeft" align="right" valign="top"><a id="a412d44764d0286257248c6d61d2fc05c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a412d44764d0286257248c6d61d2fc05c">showHelp</a> ()</td></tr>
+<tr class="memdesc:a412d44764d0286257248c6d61d2fc05c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Показ страницы помощи <br /></td></tr>
+<tr class="separator:a412d44764d0286257248c6d61d2fc05c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae397f04247f8297fbc1c847a747571d7"><td class="memItemLeft" align="right" valign="top">short int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#ae397f04247f8297fbc1c847a747571d7">mode</a> ()</td></tr>
+<tr class="memdesc:ae397f04247f8297fbc1c847a747571d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Проверка режима работы компилятора  <a href="classCompiler.html#ae397f04247f8297fbc1c847a747571d7">Подробнее...</a><br /></td></tr>
+<tr class="separator:ae397f04247f8297fbc1c847a747571d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6927dbdf123c014426df45b5f2d9d034"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a6927dbdf123c014426df45b5f2d9d034">readSource</a> ()</td></tr>
+<tr class="memdesc:a6927dbdf123c014426df45b5f2d9d034"><td class="mdescLeft">&#160;</td><td class="mdescRight">Оболочка для вызова метода Source::open()  <a href="classCompiler.html#a6927dbdf123c014426df45b5f2d9d034">Подробнее...</a><br /></td></tr>
+<tr class="separator:a6927dbdf123c014426df45b5f2d9d034"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f68e8c12daa7c9f6480092035189d80"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a9f68e8c12daa7c9f6480092035189d80">showSource</a> ()</td></tr>
+<tr class="memdesc:a9f68e8c12daa7c9f6480092035189d80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Показ всех считанных исходных кодов  <a href="classCompiler.html#a9f68e8c12daa7c9f6480092035189d80">Подробнее...</a><br /></td></tr>
+<tr class="separator:a9f68e8c12daa7c9f6480092035189d80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6990c4cd92935d8eaa7c59926004440d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a6990c4cd92935d8eaa7c59926004440d">makeAST</a> ()</td></tr>
+<tr class="memdesc:a6990c4cd92935d8eaa7c59926004440d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Оболочка для вызова метода Source::makeAST()  <a href="classCompiler.html#a6990c4cd92935d8eaa7c59926004440d">Подробнее...</a><br /></td></tr>
+<tr class="separator:a6990c4cd92935d8eaa7c59926004440d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46ba28db0dc240d2c5f2c00e35220a41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a46ba28db0dc240d2c5f2c00e35220a41">dumpAST</a> ()</td></tr>
+<tr class="memdesc:a46ba28db0dc240d2c5f2c00e35220a41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Дамп синтаксических деревьев в файлы  <a href="classCompiler.html#a46ba28db0dc240d2c5f2c00e35220a41">Подробнее...</a><br /></td></tr>
+<tr class="separator:a46ba28db0dc240d2c5f2c00e35220a41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6f8735308e80c9b2fa260484de0667d"><td class="memItemLeft" align="right" valign="top"><a id="ad6f8735308e80c9b2fa260484de0667d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#ad6f8735308e80c9b2fa260484de0667d">createBinaries</a> ()</td></tr>
+<tr class="memdesc:ad6f8735308e80c9b2fa260484de0667d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Создание массива скомпилированных исходников <br /></td></tr>
+<tr class="separator:ad6f8735308e80c9b2fa260484de0667d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4eb6d2076006863fc52116489c7b4ec8"><td class="memItemLeft" align="right" valign="top"><a id="a4eb6d2076006863fc52116489c7b4ec8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a4eb6d2076006863fc52116489c7b4ec8">compile</a> ()</td></tr>
+<tr class="memdesc:a4eb6d2076006863fc52116489c7b4ec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Компиляция всех объектов <a class="el" href="classBinary.html">Binary</a> в байт код <br /></td></tr>
+<tr class="separator:a4eb6d2076006863fc52116489c7b4ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3fb032e1934fdd437fff8b9fb74322b"><td class="memItemLeft" align="right" valign="top"><a id="ac3fb032e1934fdd437fff8b9fb74322b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#ac3fb032e1934fdd437fff8b9fb74322b">assemble</a> ()</td></tr>
+<tr class="memdesc:ac3fb032e1934fdd437fff8b9fb74322b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Линковка всех <a class="el" href="classBinary.html">Binary</a> объектов в один <br /></td></tr>
+<tr class="separator:ac3fb032e1934fdd437fff8b9fb74322b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97f5044124f8c68bf103aeb8eebddad8"><td class="memItemLeft" align="right" valign="top"><a id="a97f5044124f8c68bf103aeb8eebddad8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCompiler.html#a97f5044124f8c68bf103aeb8eebddad8">write</a> ()</td></tr>
+<tr class="memdesc:a97f5044124f8c68bf103aeb8eebddad8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Экспорт полученного кода в файл <br /></td></tr>
+<tr class="separator:a97f5044124f8c68bf103aeb8eebddad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Открытые атрибуты</h2></td></tr>
+<tr class="memitem:a0f31ab6d26032d9f2b3f7853653e9761"><td class="memItemLeft" align="right" valign="top"><a id="a0f31ab6d26032d9f2b3f7853653e9761"></a>
+char **&#160;</td><td class="memItemRight" valign="bottom"><b>source_pathes</b> = nullptr</td></tr>
+<tr class="separator:a0f31ab6d26032d9f2b3f7853653e9761"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a525094cf2b7f3671869bb52677d5a20d"><td class="memItemLeft" align="right" valign="top"><a id="a525094cf2b7f3671869bb52677d5a20d"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>source_count</b> = 0</td></tr>
+<tr class="separator:a525094cf2b7f3671869bb52677d5a20d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71570f1e9c84c223940217841232fef2"><td class="memItemLeft" align="right" valign="top"><a id="a71570f1e9c84c223940217841232fef2"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><b>output_path</b> = nullptr</td></tr>
+<tr class="separator:a71570f1e9c84c223940217841232fef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b87e3adc33d4200739e60db80d85630"><td class="memItemLeft" align="right" valign="top"><a id="a8b87e3adc33d4200739e60db80d85630"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>verbose</b> = false</td></tr>
+<tr class="separator:a8b87e3adc33d4200739e60db80d85630"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10536b87820af1fca06068b722e757c5"><td class="memItemLeft" align="right" valign="top"><a id="a10536b87820af1fca06068b722e757c5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>only_preprocess</b> = false</td></tr>
+<tr class="separator:a10536b87820af1fca06068b722e757c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2bdffe28579ac1da5cb40f9e7eb0d48"><td class="memItemLeft" align="right" valign="top"><a id="af2bdffe28579ac1da5cb40f9e7eb0d48"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>nasm_listing</b> = false</td></tr>
+<tr class="separator:af2bdffe28579ac1da5cb40f9e7eb0d48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1cd991c3a4a2a4fdea4388ba4805766"><td class="memItemLeft" align="right" valign="top"><a id="aa1cd991c3a4a2a4fdea4388ba4805766"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>virtual_compilation</b> = false</td></tr>
+<tr class="separator:aa1cd991c3a4a2a4fdea4388ba4805766"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb5a26d227df98fbf25f734674bdd2ef"><td class="memItemLeft" align="right" valign="top"><a id="aeb5a26d227df98fbf25f734674bdd2ef"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>obj_generation</b> = false</td></tr>
+<tr class="separator:aeb5a26d227df98fbf25f734674bdd2ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7212cfe195132dfa8dc1ba28efcbd346"><td class="memItemLeft" align="right" valign="top"><a id="a7212cfe195132dfa8dc1ba28efcbd346"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>show_help</b> = false</td></tr>
+<tr class="separator:a7212cfe195132dfa8dc1ba28efcbd346"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac649b515ce2b549c9b2c2f611c36bb46"><td class="memItemLeft" align="right" valign="top"><a id="ac649b515ce2b549c9b2c2f611c36bb46"></a>
+short&#160;</td><td class="memItemRight" valign="bottom"><b>optimization_level</b> = 2</td></tr>
+<tr class="separator:ac649b515ce2b549c9b2c2f611c36bb46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9be3f5f7202f68cf4adc6f25cf08401"><td class="memItemLeft" align="right" valign="top"><a id="aa9be3f5f7202f68cf4adc6f25cf08401"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>correct_usage</b> = true</td></tr>
+<tr class="separator:aa9be3f5f7202f68cf4adc6f25cf08401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a748276b67d30e6094211e936473f22f5"><td class="memItemLeft" align="right" valign="top"><a id="a748276b67d30e6094211e936473f22f5"></a>
+<a class="el" href="classSource.html">Source</a> **&#160;</td><td class="memItemRight" valign="bottom"><b>source_list</b> = nullptr</td></tr>
+<tr class="separator:a748276b67d30e6094211e936473f22f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0d60e311061e66d56dd0c8b822938a0"><td class="memItemLeft" align="right" valign="top"><a id="ab0d60e311061e66d56dd0c8b822938a0"></a>
+<a class="el" href="classBinary.html">Binary</a> **&#160;</td><td class="memItemRight" valign="bottom"><b>binary_list</b> = nullptr</td></tr>
+<tr class="separator:ab0d60e311061e66d56dd0c8b822938a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Подробное описание</h2>
+<div class="textblock"><p>Класс компилятора </p>
+<dl class="section date"><dt>Дата</dt><dd>Июль 2020 года </dd></dl>
+<dl class="bug"><dt><b><a class="el" href="bug.html#_bug000001">Ошибка:</a></b></dt><dd>Иногда некорректно преобразует исходный код в абстрактное синтаксическое дерево. Пока не понятно, в каких случаях возникает ошибка и как ее исправить.</dd></dl>
+<p>Основной класс компилятора, созданный для предоставления пользователю удобного api для компиляции/сборки программ. Также хранит в себе исходный и скомпилированный код программ и параметры компиляции. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8hpp_source.html">compiler.hpp</a> строка <a class="el" href="compiler_8hpp_source.html#l00024">24</a></p>
+</div><h2 class="groupheader">Перечисления</h2>
+<a id="a4e1db16fbfa018b606e0aeb44ec36f29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e1db16fbfa018b606e0aeb44ec36f29">&#9670;&nbsp;</a></span>Errors</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29">Compiler::Errors</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Ошибки </p>
+<table class="fieldtable">
+<tr><th colspan="2">Элементы перечислений</th></tr><tr><td class="fieldname"><a id="a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc"></a>OK&#160;</td><td class="fielddoc"><p>Ошибок при выполнении не было </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457"></a>UNKNOWN_PARAMETER&#160;</td><td class="fielddoc"><p>Неверный ключ компиляции </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e"></a>ERRORS_COUNT&#160;</td><td class="fielddoc"><p>Количество ошибок </p>
+</td></tr>
+</table>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8hpp_source.html">compiler.hpp</a> строка <a class="el" href="compiler_8hpp_source.html#l00063">63</a></p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc">OK</a>,                 </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <a class="code" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457">UNKNOWN_PARAMETER</a>,  </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <a class="code" href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e">ERRORS_COUNT</a>        </div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a6a270f1ece6ba6b1f72e0fa4527e84fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a270f1ece6ba6b1f72e0fa4527e84fe">&#9670;&nbsp;</a></span>Modes</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fe">Compiler::Modes</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Режимы работы компилятора </p>
+<table class="fieldtable">
+<tr><th colspan="2">Элементы перечислений</th></tr><tr><td class="fieldname"><a id="a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612"></a>COMPILATION&#160;</td><td class="fielddoc"><p>Компилятору передан исходный код и он может его скомпилировать </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0"></a>HELP&#160;</td><td class="fielddoc"><p>Показ страницы помощи </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d"></a>ERROR&#160;</td><td class="fielddoc"><p>Неверный аргумент или их отсутствие </p>
+</td></tr>
+</table>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8hpp_source.html">compiler.hpp</a> строка <a class="el" href="compiler_8hpp_source.html#l00055">55</a></p>
+<div class="fragment"><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    {</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612">COMPILATION</a>,    </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0">HELP</a>,           </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d">ERROR</a>           </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    };</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Конструктор(ы)</h2>
+<a id="ac7b42b46f0cfa326034767a724ba88f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7b42b46f0cfa326034767a724ba88f4">&#9670;&nbsp;</a></span>Compiler()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Compiler::Compiler </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>argc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>argv</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Конструктор класса <a class="el" href="classCompiler.html" title="Класс компилятора">Compiler</a>. </p>
+<dl class="params"><dt>Аргументы</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">argc</td><td>Количество аргументов командной строки </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Парметры командной строки</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Конструирует класс на основе переданных ключей запуска, выставляет параметры запуска и сохраняет имена исходников. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00016">16</a></p>
+<div class="fragment"><div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keywordflow">if</span> (argc &lt;= 1)</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        <span class="keyword">this</span> -&gt; correct_usage = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    </div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 1; counter &lt; argc; counter++)</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        {</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-v&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;--verbose&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;                <span class="keyword">this</span> -&gt; verbose = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;            </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-p&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;--only-preprocess&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                <span class="keyword">this</span> -&gt; only_preprocess = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;            </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-l&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;--nasm-listing&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;                <span class="keyword">this</span> -&gt; nasm_listing = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                </div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;--virtual&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;                <span class="keyword">this</span> -&gt; virtual_compilation = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-h&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;--help&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;                <span class="keyword">this</span> -&gt; show_help = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;                </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;--obj&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                <span class="keyword">this</span> -&gt; obj_generation = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-o&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                counter++;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                <span class="keyword">this</span> -&gt; output_path = <span class="keyword">new</span> <span class="keywordtype">char</span>[strlen(argv[counter]) + 1]{0};</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                strcpy(<span class="keyword">this</span> -&gt; output_path, argv[counter]);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            }</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!strcmp(<span class="stringliteral">&quot;-o0&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;-o1&quot;</span>, argv[counter]) or !strcmp(<span class="stringliteral">&quot;-o2&quot;</span>, argv[counter]))</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                <span class="keyword">this</span> -&gt; optimization_level = argv[counter][2] - <span class="charliteral">&#39;0&#39;</span>;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (argv[counter][0] != <span class="charliteral">&#39;-&#39;</span>)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                <span class="keyword">this</span> -&gt; <a class="code" href="classCompiler.html#aae0a96a2f210854dc2ae58dca56c3bfd">addPath</a>(argv[counter]);</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                printf(<span class="stringliteral">&quot;\x1b[1;31mError:\x1b[0m Unknown parameter \x1b[3m\&#39;%s\&#39;\x1b[0m\n&quot;</span>, argv[counter]);</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keyword">this</span> -&gt; correct_usage = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordflow">if</span> (<span class="keyword">this</span> -&gt; output_path == <span class="keyword">nullptr</span>)</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        {</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;            <span class="keyword">this</span> -&gt; output_path = <span class="keyword">new</span> <span class="keywordtype">char</span>[6];</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            strcpy(<span class="keyword">this</span> -&gt; output_path, <span class="stringliteral">&quot;a.out&quot;</span>);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    }</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-1" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="closed.png" alt="+"/> Граф вызовов:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_ac7b42b46f0cfa326034767a724ba88f4_cgraph.svg" width="324" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<h2 class="groupheader">Методы</h2>
+<a id="aae0a96a2f210854dc2ae58dca56c3bfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae0a96a2f210854dc2ae58dca56c3bfd">&#9670;&nbsp;</a></span>addPath()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Compiler::addPath </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>source_path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Функция добавления нового файла в список исходников </p>
+<dl class="params"><dt>Аргументы</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">source_path</td><td>Имя исходника</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Расширяет массив имен исходников на 1 элемент и копирует в этот элемент имя исходника. Так же увеличивает счетчик исходников на 1. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00110">110</a></p>
+<div class="fragment"><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;{</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordtype">int</span> new_source_count = <span class="keyword">this</span> -&gt; source_count + 1;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    <span class="keywordtype">char</span>** new_source_pathes = <span class="keyword">new</span> <span class="keywordtype">char</span>*[new_source_count];</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 0; counter &lt; <span class="keyword">this</span> -&gt; source_count; counter++)</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        new_source_pathes[counter] = (<span class="keyword">this</span> -&gt; source_pathes)[counter];</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    </div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    new_source_pathes[<span class="keyword">this</span> -&gt; source_count] = <span class="keyword">new</span> <span class="keywordtype">char</span>[strlen(source_path) + 1];</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    strcpy(new_source_pathes[<span class="keyword">this</span> -&gt; source_count], source_path);</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="keyword">delete</span>[] <span class="keyword">this</span> -&gt; source_pathes;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keyword">this</span> -&gt; source_pathes = new_source_pathes;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="keyword">this</span> -&gt; source_count = new_source_count;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-2" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd_icgraph.svg" width="324" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a46ba28db0dc240d2c5f2c00e35220a41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a46ba28db0dc240d2c5f2c00e35220a41">&#9670;&nbsp;</a></span>dumpAST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Compiler::dumpAST </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Дамп синтаксических деревьев в файлы </p>
+<p>Для каждого исходника, для которого это возможно, сохраняет графический дамп дерева в файл. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00261">261</a></p>
+<div class="fragment"><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;{</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    <span class="keywordflow">if</span> (not <span class="keyword">this</span> -&gt; verbose)</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;        <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;        </div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;    <span class="keywordtype">bool</span> dumped = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;    </div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">this</span> -&gt; source_list)</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    {</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 0; counter &lt; <span class="keyword">this</span> -&gt; source_count; counter++)</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        {</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;            <span class="keywordflow">if</span> ((<span class="keyword">this</span> -&gt; source_list)[counter] -&gt; source_type == Source::JAUL_SOURCE)</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;            {</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;                (<span class="keyword">this</span> -&gt; source_list)[counter] -&gt; <a class="code" href="classCompiler.html#a46ba28db0dc240d2c5f2c00e35220a41">dumpAST</a>();</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;                dumped = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            }</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;        }</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    }</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    </div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    <span class="keywordflow">if</span> (not dumped)</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        printf(<span class="stringliteral">&quot;No abstract syntax tree builded! Maybe you not listed .j file with code or trying to compile code to object library?\n&quot;</span>);</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-3" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-3-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-3-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-3-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_a46ba28db0dc240d2c5f2c00e35220a41_icgraph.svg" width="250" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a6990c4cd92935d8eaa7c59926004440d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6990c4cd92935d8eaa7c59926004440d">&#9670;&nbsp;</a></span>makeAST()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Compiler::makeAST </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Оболочка для вызова метода Source::makeAST() </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Необходимо сделать:</a></b></dt><dd>Добавить проверку, можно ли сгенерировать AST для конкретного исходника</dd></dl>
+<p>Для каждого объекта <a class="el" href="classSource.html">Source</a> создает абстрактное синтаксическое дерево. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00245">245</a></p>
+<div class="fragment"><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;{</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">this</span> -&gt; source_list)</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;    {</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 0; counter &lt; <span class="keyword">this</span> -&gt; source_count; counter++)</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;            (<span class="keyword">this</span> -&gt; source_list)[counter] -&gt; <a class="code" href="classCompiler.html#a6990c4cd92935d8eaa7c59926004440d">makeAST</a>();</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;    }</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-4" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-4-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-4-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-4-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_a6990c4cd92935d8eaa7c59926004440d_icgraph.svg" width="248" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="ae397f04247f8297fbc1c847a747571d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae397f04247f8297fbc1c847a747571d7">&#9670;&nbsp;</a></span>mode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">short int Compiler::mode </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Проверка режима работы компилятора </p>
+<p>Возвращает код ошибочного запуска если не передан ни один параметр, не передан ни один исходник или передан неверный параметр. Информация о корректности ключей сохраняется в поле correct_usage в процессе конструирования объекта. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00190">190</a></p>
+<div class="fragment"><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;{</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordflow">if</span> (show_help)</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0">HELP</a>;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        </div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (not correct_usage or not source_pathes)</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d">ERROR</a>;</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        </div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">else</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612">COMPILATION</a>;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-5" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-5-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-5-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-5-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_ae397f04247f8297fbc1c847a747571d7_icgraph.svg" width="224" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a6927dbdf123c014426df45b5f2d9d034"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6927dbdf123c014426df45b5f2d9d034">&#9670;&nbsp;</a></span>readSource()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Compiler::readSource </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Оболочка для вызова метода Source::open() </p>
+<p>Для каждого объекта исходного кода вызывает метод open(), тем самым читая текст каждого их исходников и сохраняя его в этом же объекте исходника. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00210">210</a></p>
+<div class="fragment"><div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;{</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keyword">this</span> -&gt; source_list = <span class="keyword">new</span> <a class="code" href="classSource.html">Source</a>*[<span class="keyword">this</span> -&gt; source_count];</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 0; counter &lt; <span class="keyword">this</span> -&gt; source_count; counter++)</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    {</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;        (<span class="keyword">this</span> -&gt; source_list)[counter] = <span class="keyword">new</span> <a class="code" href="classSource.html">Source</a>((<span class="keyword">this</span> -&gt; source_pathes)[counter]);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;        (<span class="keyword">this</span> -&gt; source_list)[counter] -&gt; open();</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;    }</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-6" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-6-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-6-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-6-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_a6927dbdf123c014426df45b5f2d9d034_icgraph.svg" width="258" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<a id="a9f68e8c12daa7c9f6480092035189d80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f68e8c12daa7c9f6480092035189d80">&#9670;&nbsp;</a></span>showSource()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Compiler::showSource </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Показ всех считанных исходных кодов </p>
+<p>Обходит все объекты класса <a class="el" href="classSource.html">Source</a> и показывает считанный исходный код. </p>
+
+<p class="definition">См. определение в файле <a class="el" href="compiler_8cpp_source.html">compiler.cpp</a> строка <a class="el" href="compiler_8cpp_source.html#l00226">226</a></p>
+<div class="fragment"><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;{       </div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    <span class="keywordflow">if</span> (<span class="keyword">this</span> -&gt; source_list and <span class="keyword">this</span> -&gt; verbose)</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    {</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> counter = 0; counter &lt; <span class="keyword">this</span> -&gt; source_count; counter++)</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        {</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;            (<span class="keyword">this</span> -&gt; source_list)[counter] -&gt; print();</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;            printf(<span class="stringliteral">&quot;\n-----------------------\n\n&quot;</span>);</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        }</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    }</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;}</div>
+</div><!-- fragment --><div id="dynsection-7" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-7-trigger" src="closed.png" alt="+"/> Граф вызова функции:</div>
+<div id="dynsection-7-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-7-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classCompiler_a9f68e8c12daa7c9f6480092035189d80_icgraph.svg" width="264" height="38"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
+</div>
+</div>
+<hr/>Объявления и описания членов классов находятся в файлах:<ul>
+<li>Headers/<a class="el" href="compiler_8hpp_source.html">compiler.hpp</a></li>
+<li>Source/<a class="el" href="compiler_8cpp_source.html">compiler.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div class="ttc" id="aclassCompiler_html_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457"><div class="ttname"><a href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457">Compiler::UNKNOWN_PARAMETER</a></div><div class="ttdeci">@ UNKNOWN_PARAMETER</div><div class="ttdoc">Неверный ключ компиляции</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00066">compiler.hpp:66</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e"><div class="ttname"><a href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e">Compiler::ERRORS_COUNT</a></div><div class="ttdeci">@ ERRORS_COUNT</div><div class="ttdoc">Количество ошибок</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00067">compiler.hpp:67</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a46ba28db0dc240d2c5f2c00e35220a41"><div class="ttname"><a href="classCompiler.html#a46ba28db0dc240d2c5f2c00e35220a41">Compiler::dumpAST</a></div><div class="ttdeci">void dumpAST()</div><div class="ttdoc">Дамп синтаксических деревьев в файлы</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8cpp_source.html#l00261">compiler.cpp:261</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d"><div class="ttname"><a href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d">Compiler::ERROR</a></div><div class="ttdeci">@ ERROR</div><div class="ttdoc">Неверный аргумент или их отсутствие</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00059">compiler.hpp:59</a></div></div>
+<div class="ttc" id="aclassSource_html"><div class="ttname"><a href="classSource.html">Source</a></div><div class="ttdef"><b>Definition:</b> <a href="source_8hpp_source.html#l00014">source.hpp:14</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc"><div class="ttname"><a href="classCompiler.html#a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc">Compiler::OK</a></div><div class="ttdeci">@ OK</div><div class="ttdoc">Ошибок при выполнении не было</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00065">compiler.hpp:65</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612"><div class="ttname"><a href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612">Compiler::COMPILATION</a></div><div class="ttdeci">@ COMPILATION</div><div class="ttdoc">Компилятору передан исходный код и он может его скомпилировать</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00057">compiler.hpp:57</a></div></div>
+<div class="ttc" id="aclassCompiler_html_aae0a96a2f210854dc2ae58dca56c3bfd"><div class="ttname"><a href="classCompiler.html#aae0a96a2f210854dc2ae58dca56c3bfd">Compiler::addPath</a></div><div class="ttdeci">void addPath(const char *source_path)</div><div class="ttdoc">Функция добавления нового файла в список исходников</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8cpp_source.html#l00110">compiler.cpp:110</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a6990c4cd92935d8eaa7c59926004440d"><div class="ttname"><a href="classCompiler.html#a6990c4cd92935d8eaa7c59926004440d">Compiler::makeAST</a></div><div class="ttdeci">void makeAST()</div><div class="ttdoc">Оболочка для вызова метода Source::makeAST()</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8cpp_source.html#l00245">compiler.cpp:245</a></div></div>
+<div class="ttc" id="aclassCompiler_html_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0"><div class="ttname"><a href="classCompiler.html#a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0">Compiler::HELP</a></div><div class="ttdeci">@ HELP</div><div class="ttdoc">Показ страницы помощи</div><div class="ttdef"><b>Definition:</b> <a href="compiler_8hpp_source.html#l00058">compiler.hpp:58</a></div></div>
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classCompiler.html">Compiler</a></li>
+    <li class="footer">Создано системой
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,533 @@
+\hypertarget{classCompiler}{}\doxysection{Класс Compiler}
+\label{classCompiler}\index{Compiler@{Compiler}}
+
+
+Класс компилятора  
+
+
+
+
+{\ttfamily \#include $<$compiler.\+hpp$>$}
+
+
+
+Граф связей класса Compiler\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=336pt]{classCompiler__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Открытые типы}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fe}{Modes}} \{ \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612}{C\+O\+M\+P\+I\+L\+A\+T\+I\+ON}}, 
+\mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}{H\+E\+LP}}, 
+\mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}{E\+R\+R\+OR}}
+ \}
+\begin{DoxyCompactList}\small\item\em Режимы работы компилятора \end{DoxyCompactList}\item 
+enum \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29}{Errors}} \{ \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}{OK}}, 
+\mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457}{U\+N\+K\+N\+O\+W\+N\+\_\+\+P\+A\+R\+A\+M\+E\+T\+ER}}, 
+\mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e}{E\+R\+R\+O\+R\+S\+\_\+\+C\+O\+U\+NT}}
+ \}
+\begin{DoxyCompactList}\small\item\em Ошибки \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Открытые члены}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classCompiler_ac7b42b46f0cfa326034767a724ba88f4}{Compiler}} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em Конструктор класса \mbox{\hyperlink{classCompiler}{Compiler}}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_ac06e6b6aa74c6da15efa3f0416df53b2}\label{classCompiler_ac06e6b6aa74c6da15efa3f0416df53b2}} 
+\mbox{\hyperlink{classCompiler_ac06e6b6aa74c6da15efa3f0416df53b2}{$\sim$\+Compiler}} ()
+\begin{DoxyCompactList}\small\item\em Деструктор класса \mbox{\hyperlink{classCompiler}{Compiler}}. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd}{add\+Path}} (const char $\ast$source\+\_\+path)
+\begin{DoxyCompactList}\small\item\em Функция добавления нового файла в список исходников \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_a26f35099c0f75a6ef4143d4a5869a1de}\label{classCompiler_a26f35099c0f75a6ef4143d4a5869a1de}} 
+void \mbox{\hyperlink{classCompiler_a26f35099c0f75a6ef4143d4a5869a1de}{show\+Settings}} ()
+\begin{DoxyCompactList}\small\item\em Показ настроек компилятора \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_a412d44764d0286257248c6d61d2fc05c}\label{classCompiler_a412d44764d0286257248c6d61d2fc05c}} 
+void \mbox{\hyperlink{classCompiler_a412d44764d0286257248c6d61d2fc05c}{show\+Help}} ()
+\begin{DoxyCompactList}\small\item\em Показ страницы помощи \end{DoxyCompactList}\item 
+short int \mbox{\hyperlink{classCompiler_ae397f04247f8297fbc1c847a747571d7}{mode}} ()
+\begin{DoxyCompactList}\small\item\em Проверка режима работы компилятора \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classCompiler_a6927dbdf123c014426df45b5f2d9d034}{read\+Source}} ()
+\begin{DoxyCompactList}\small\item\em Оболочка для вызова метода Source\+::open() \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classCompiler_a9f68e8c12daa7c9f6480092035189d80}{show\+Source}} ()
+\begin{DoxyCompactList}\small\item\em Показ всех считанных исходных кодов \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classCompiler_a6990c4cd92935d8eaa7c59926004440d}{make\+A\+ST}} ()
+\begin{DoxyCompactList}\small\item\em Оболочка для вызова метода Source\+::make\+A\+S\+T() \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classCompiler_a46ba28db0dc240d2c5f2c00e35220a41}{dump\+A\+ST}} ()
+\begin{DoxyCompactList}\small\item\em Дамп синтаксических деревьев в файлы \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_ad6f8735308e80c9b2fa260484de0667d}\label{classCompiler_ad6f8735308e80c9b2fa260484de0667d}} 
+void \mbox{\hyperlink{classCompiler_ad6f8735308e80c9b2fa260484de0667d}{create\+Binaries}} ()
+\begin{DoxyCompactList}\small\item\em Создание массива скомпилированных исходников \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_a4eb6d2076006863fc52116489c7b4ec8}\label{classCompiler_a4eb6d2076006863fc52116489c7b4ec8}} 
+void \mbox{\hyperlink{classCompiler_a4eb6d2076006863fc52116489c7b4ec8}{compile}} ()
+\begin{DoxyCompactList}\small\item\em Компиляция всех объектов \mbox{\hyperlink{classBinary}{Binary}} в байт код \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_ac3fb032e1934fdd437fff8b9fb74322b}\label{classCompiler_ac3fb032e1934fdd437fff8b9fb74322b}} 
+void \mbox{\hyperlink{classCompiler_ac3fb032e1934fdd437fff8b9fb74322b}{assemble}} ()
+\begin{DoxyCompactList}\small\item\em Линковка всех \mbox{\hyperlink{classBinary}{Binary}} объектов в один \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classCompiler_a97f5044124f8c68bf103aeb8eebddad8}\label{classCompiler_a97f5044124f8c68bf103aeb8eebddad8}} 
+void \mbox{\hyperlink{classCompiler_a97f5044124f8c68bf103aeb8eebddad8}{write}} ()
+\begin{DoxyCompactList}\small\item\em Экспорт полученного кода в файл \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Открытые атрибуты}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classCompiler_a0f31ab6d26032d9f2b3f7853653e9761}\label{classCompiler_a0f31ab6d26032d9f2b3f7853653e9761}} 
+char $\ast$$\ast$ {\bfseries source\+\_\+pathes} = nullptr
+\item 
+\mbox{\Hypertarget{classCompiler_a525094cf2b7f3671869bb52677d5a20d}\label{classCompiler_a525094cf2b7f3671869bb52677d5a20d}} 
+int {\bfseries source\+\_\+count} = 0
+\item 
+\mbox{\Hypertarget{classCompiler_a71570f1e9c84c223940217841232fef2}\label{classCompiler_a71570f1e9c84c223940217841232fef2}} 
+char $\ast$ {\bfseries output\+\_\+path} = nullptr
+\item 
+\mbox{\Hypertarget{classCompiler_a8b87e3adc33d4200739e60db80d85630}\label{classCompiler_a8b87e3adc33d4200739e60db80d85630}} 
+bool {\bfseries verbose} = false
+\item 
+\mbox{\Hypertarget{classCompiler_a10536b87820af1fca06068b722e757c5}\label{classCompiler_a10536b87820af1fca06068b722e757c5}} 
+bool {\bfseries only\+\_\+preprocess} = false
+\item 
+\mbox{\Hypertarget{classCompiler_af2bdffe28579ac1da5cb40f9e7eb0d48}\label{classCompiler_af2bdffe28579ac1da5cb40f9e7eb0d48}} 
+bool {\bfseries nasm\+\_\+listing} = false
+\item 
+\mbox{\Hypertarget{classCompiler_aa1cd991c3a4a2a4fdea4388ba4805766}\label{classCompiler_aa1cd991c3a4a2a4fdea4388ba4805766}} 
+bool {\bfseries virtual\+\_\+compilation} = false
+\item 
+\mbox{\Hypertarget{classCompiler_aeb5a26d227df98fbf25f734674bdd2ef}\label{classCompiler_aeb5a26d227df98fbf25f734674bdd2ef}} 
+bool {\bfseries obj\+\_\+generation} = false
+\item 
+\mbox{\Hypertarget{classCompiler_a7212cfe195132dfa8dc1ba28efcbd346}\label{classCompiler_a7212cfe195132dfa8dc1ba28efcbd346}} 
+bool {\bfseries show\+\_\+help} = false
+\item 
+\mbox{\Hypertarget{classCompiler_ac649b515ce2b549c9b2c2f611c36bb46}\label{classCompiler_ac649b515ce2b549c9b2c2f611c36bb46}} 
+short {\bfseries optimization\+\_\+level} = 2
+\item 
+\mbox{\Hypertarget{classCompiler_aa9be3f5f7202f68cf4adc6f25cf08401}\label{classCompiler_aa9be3f5f7202f68cf4adc6f25cf08401}} 
+bool {\bfseries correct\+\_\+usage} = true
+\item 
+\mbox{\Hypertarget{classCompiler_a748276b67d30e6094211e936473f22f5}\label{classCompiler_a748276b67d30e6094211e936473f22f5}} 
+\mbox{\hyperlink{classSource}{Source}} $\ast$$\ast$ {\bfseries source\+\_\+list} = nullptr
+\item 
+\mbox{\Hypertarget{classCompiler_ab0d60e311061e66d56dd0c8b822938a0}\label{classCompiler_ab0d60e311061e66d56dd0c8b822938a0}} 
+\mbox{\hyperlink{classBinary}{Binary}} $\ast$$\ast$ {\bfseries binary\+\_\+list} = nullptr
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Подробное описание}
+Класс компилятора 
+
+\begin{DoxyDate}{Дата}
+Июль 2020 года 
+\end{DoxyDate}
+\begin{DoxyRefDesc}{Ошибка}
+\item[\mbox{\hyperlink{bug__bug000001}{Ошибка}}]Иногда некорректно преобразует исходный код в абстрактное синтаксическое дерево. Пока не понятно, в каких случаях возникает ошибка и как ее исправить.\end{DoxyRefDesc}
+
+
+Основной класс компилятора, созданный для предоставления пользователю удобного api для компиляции/сборки программ. Также хранит в себе исходный и скомпилированный код программ и параметры компиляции. 
+
+См. определение в файле compiler.\+hpp строка 24
+
+
+
+\doxysubsection{Перечисления}
+\mbox{\Hypertarget{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29}\label{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29}} 
+\index{Compiler@{Compiler}!Errors@{Errors}}
+\index{Errors@{Errors}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{Errors}{Errors}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29}{Compiler\+::\+Errors}}}
+
+
+
+Ошибки 
+
+\begin{DoxyEnumFields}{Элементы перечислений}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{OK@{OK}!Compiler@{Compiler}}\index{Compiler@{Compiler}!OK@{OK}}}\mbox{\Hypertarget{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}\label{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}} 
+OK&Ошибок при выполнении не было \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{UNKNOWN\_PARAMETER@{UNKNOWN\_PARAMETER}!Compiler@{Compiler}}\index{Compiler@{Compiler}!UNKNOWN\_PARAMETER@{UNKNOWN\_PARAMETER}}}\mbox{\Hypertarget{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457}\label{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457}} 
+U\+N\+K\+N\+O\+W\+N\+\_\+\+P\+A\+R\+A\+M\+E\+T\+ER&Неверный ключ компиляции \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ERRORS\_COUNT@{ERRORS\_COUNT}!Compiler@{Compiler}}\index{Compiler@{Compiler}!ERRORS\_COUNT@{ERRORS\_COUNT}}}\mbox{\Hypertarget{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e}\label{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e}} 
+E\+R\+R\+O\+R\+S\+\_\+\+C\+O\+U\+NT&Количество ошибок \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+См. определение в файле compiler.\+hpp строка 63
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{64     \{}
+\DoxyCodeLine{65         \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ac6ef57041ad87e563018477518c8cbbc}{OK}},                   }
+\DoxyCodeLine{66         \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29ad127ee59181b3b08a17dbad7acac9457}{UNKNOWN\_PARAMETER}}, }
+\DoxyCodeLine{67         \mbox{\hyperlink{classCompiler_a4e1db16fbfa018b606e0aeb44ec36f29a868ab49c92cf22f8d8ae5f02b8ba9b0e}{ERRORS\_COUNT}}        }
+\DoxyCodeLine{68     \};}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fe}\label{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fe}} 
+\index{Compiler@{Compiler}!Modes@{Modes}}
+\index{Modes@{Modes}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{Modes}{Modes}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fe}{Compiler\+::\+Modes}}}
+
+
+
+Режимы работы компилятора 
+
+\begin{DoxyEnumFields}{Элементы перечислений}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{COMPILATION@{COMPILATION}!Compiler@{Compiler}}\index{Compiler@{Compiler}!COMPILATION@{COMPILATION}}}\mbox{\Hypertarget{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612}\label{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612}} 
+C\+O\+M\+P\+I\+L\+A\+T\+I\+ON&Компилятору передан исходный код и он может его скомпилировать \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{HELP@{HELP}!Compiler@{Compiler}}\index{Compiler@{Compiler}!HELP@{HELP}}}\mbox{\Hypertarget{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}\label{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}} 
+H\+E\+LP&Показ страницы помощи \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{ERROR@{ERROR}!Compiler@{Compiler}}\index{Compiler@{Compiler}!ERROR@{ERROR}}}\mbox{\Hypertarget{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}\label{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}} 
+E\+R\+R\+OR&Неверный аргумент или их отсутствие \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+См. определение в файле compiler.\+hpp строка 55
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{56     \{}
+\DoxyCodeLine{57         \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612}{COMPILATION}}, }
+\DoxyCodeLine{58         \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}{HELP}},           }
+\DoxyCodeLine{59         \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}{ERROR}}          }
+\DoxyCodeLine{60     \};}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Конструктор(ы)}
+\mbox{\Hypertarget{classCompiler_ac7b42b46f0cfa326034767a724ba88f4}\label{classCompiler_ac7b42b46f0cfa326034767a724ba88f4}} 
+\index{Compiler@{Compiler}!Compiler@{Compiler}}
+\index{Compiler@{Compiler}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{Compiler()}{Compiler()}}
+{\footnotesize\ttfamily Compiler\+::\+Compiler (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+Конструктор класса \mbox{\hyperlink{classCompiler}{Compiler}}. 
+
+
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\texttt{ in}}  & {\em argc} & Количество аргументов командной строки \\
+\hline
+\mbox{\texttt{ in}}  & {\em argv} & Парметры командной строки\\
+\hline
+\end{DoxyParams}
+Конструирует класс на основе переданных ключей запуска, выставляет параметры запуска и сохраняет имена исходников. 
+
+См. определение в файле compiler.\+cpp строка 16
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{17 \{}
+\DoxyCodeLine{18     \textcolor{keywordflow}{if} (argc <= 1)}
+\DoxyCodeLine{19         \textcolor{keyword}{this} -\/> correct\_usage = \textcolor{keyword}{false};}
+\DoxyCodeLine{20     }
+\DoxyCodeLine{21     \textcolor{keywordflow}{else}}
+\DoxyCodeLine{22     \{}
+\DoxyCodeLine{23         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 1; counter < argc; counter++)}
+\DoxyCodeLine{24         \{}
+\DoxyCodeLine{25             \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/v"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/-\/verbose"}, argv[counter]))}
+\DoxyCodeLine{26                 \textcolor{keyword}{this} -\/> verbose = \textcolor{keyword}{true};}
+\DoxyCodeLine{27             }
+\DoxyCodeLine{28             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/p"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/-\/only-\/preprocess"}, argv[counter]))}
+\DoxyCodeLine{29                 \textcolor{keyword}{this} -\/> only\_preprocess = \textcolor{keyword}{true};}
+\DoxyCodeLine{30             }
+\DoxyCodeLine{31             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/l"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/-\/nasm-\/listing"}, argv[counter]))}
+\DoxyCodeLine{32                 \textcolor{keyword}{this} -\/> nasm\_listing = \textcolor{keyword}{true};}
+\DoxyCodeLine{33                 }
+\DoxyCodeLine{34             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/-\/virtual"}, argv[counter]))}
+\DoxyCodeLine{35                 \textcolor{keyword}{this} -\/> virtual\_compilation = \textcolor{keyword}{true};}
+\DoxyCodeLine{36                 }
+\DoxyCodeLine{37             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/h"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/-\/help"}, argv[counter]))}
+\DoxyCodeLine{38                 \textcolor{keyword}{this} -\/> show\_help = \textcolor{keyword}{true};}
+\DoxyCodeLine{39                 }
+\DoxyCodeLine{40             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/-\/obj"}, argv[counter]))}
+\DoxyCodeLine{41                 \textcolor{keyword}{this} -\/> obj\_generation = \textcolor{keyword}{true};}
+\DoxyCodeLine{42             }
+\DoxyCodeLine{43             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/o"}, argv[counter]))}
+\DoxyCodeLine{44             \{}
+\DoxyCodeLine{45                 counter++;}
+\DoxyCodeLine{46                 \textcolor{keyword}{this} -\/> output\_path = \textcolor{keyword}{new} \textcolor{keywordtype}{char}[strlen(argv[counter]) + 1]\{0\};}
+\DoxyCodeLine{47                 strcpy(\textcolor{keyword}{this} -\/> output\_path, argv[counter]);}
+\DoxyCodeLine{48             \}}
+\DoxyCodeLine{49             }
+\DoxyCodeLine{50             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (!strcmp(\textcolor{stringliteral}{"-\/o0"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/o1"}, argv[counter]) or !strcmp(\textcolor{stringliteral}{"-\/o2"}, argv[counter]))}
+\DoxyCodeLine{51                 \textcolor{keyword}{this} -\/> optimization\_level = argv[counter][2] -\/ \textcolor{charliteral}{'0'};}
+\DoxyCodeLine{52             }
+\DoxyCodeLine{53             \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (argv[counter][0] != \textcolor{charliteral}{'-\/'})}
+\DoxyCodeLine{54                 \textcolor{keyword}{this} -\/> \mbox{\hyperlink{classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd}{addPath}}(argv[counter]);}
+\DoxyCodeLine{55                 }
+\DoxyCodeLine{56             \textcolor{keywordflow}{else}}
+\DoxyCodeLine{57             \{}
+\DoxyCodeLine{58                 printf(\textcolor{stringliteral}{"\(\backslash\)x1b[1;31mError:\(\backslash\)x1b[0m Unknown parameter \(\backslash\)x1b[3m\(\backslash\)'\%s\(\backslash\)'\(\backslash\)x1b[0m\(\backslash\)n"}, argv[counter]);}
+\DoxyCodeLine{59                 \textcolor{keyword}{this} -\/> correct\_usage = \textcolor{keyword}{false};}
+\DoxyCodeLine{60                 \textcolor{keywordflow}{break};}
+\DoxyCodeLine{61             \}}
+\DoxyCodeLine{62         \}}
+\DoxyCodeLine{63         }
+\DoxyCodeLine{64         \textcolor{keywordflow}{if} (\textcolor{keyword}{this} -\/> output\_path == \textcolor{keyword}{nullptr})}
+\DoxyCodeLine{65         \{}
+\DoxyCodeLine{66             \textcolor{keyword}{this} -\/> output\_path = \textcolor{keyword}{new} \textcolor{keywordtype}{char}[6];}
+\DoxyCodeLine{67             strcpy(\textcolor{keyword}{this} -\/> output\_path, \textcolor{stringliteral}{"a.out"});}
+\DoxyCodeLine{68         \}}
+\DoxyCodeLine{69     \}}
+\DoxyCodeLine{70 \}}
+
+\end{DoxyCode}
+Граф вызовов\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=315pt]{classCompiler_ac7b42b46f0cfa326034767a724ba88f4_cgraph}
+\end{center}
+\end{figure}
+
+
+\doxysubsection{Методы}
+\mbox{\Hypertarget{classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd}\label{classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd}} 
+\index{Compiler@{Compiler}!addPath@{addPath}}
+\index{addPath@{addPath}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{addPath()}{addPath()}}
+{\footnotesize\ttfamily void Compiler\+::add\+Path (\begin{DoxyParamCaption}\item[{const char $\ast$}]{source\+\_\+path }\end{DoxyParamCaption})}
+
+
+
+Функция добавления нового файла в список исходников 
+
+
+\begin{DoxyParams}[1]{Аргументы}
+\mbox{\texttt{ in}}  & {\em source\+\_\+path} & Имя исходника\\
+\hline
+\end{DoxyParams}
+Расширяет массив имен исходников на 1 элемент и копирует в этот элемент имя исходника. Так же увеличивает счетчик исходников на 1. 
+
+См. определение в файле compiler.\+cpp строка 110
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{111 \{}
+\DoxyCodeLine{112     \textcolor{keywordtype}{int} new\_source\_count = \textcolor{keyword}{this} -\/> source\_count + 1;}
+\DoxyCodeLine{113     \textcolor{keywordtype}{char}** new\_source\_pathes = \textcolor{keyword}{new} \textcolor{keywordtype}{char}*[new\_source\_count];}
+\DoxyCodeLine{114     }
+\DoxyCodeLine{115     \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 0; counter < \textcolor{keyword}{this} -\/> source\_count; counter++)}
+\DoxyCodeLine{116         new\_source\_pathes[counter] = (\textcolor{keyword}{this} -\/> source\_pathes)[counter];}
+\DoxyCodeLine{117     }
+\DoxyCodeLine{118     new\_source\_pathes[\textcolor{keyword}{this} -\/> source\_count] = \textcolor{keyword}{new} \textcolor{keywordtype}{char}[strlen(source\_path) + 1];}
+\DoxyCodeLine{119     strcpy(new\_source\_pathes[\textcolor{keyword}{this} -\/> source\_count], source\_path);}
+\DoxyCodeLine{120     }
+\DoxyCodeLine{121     \textcolor{keyword}{delete}[] \textcolor{keyword}{this} -\/> source\_pathes;}
+\DoxyCodeLine{122     \textcolor{keyword}{this} -\/> source\_pathes = new\_source\_pathes;}
+\DoxyCodeLine{123     \textcolor{keyword}{this} -\/> source\_count = new\_source\_count;}
+\DoxyCodeLine{124 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=315pt]{classCompiler_aae0a96a2f210854dc2ae58dca56c3bfd_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classCompiler_a46ba28db0dc240d2c5f2c00e35220a41}\label{classCompiler_a46ba28db0dc240d2c5f2c00e35220a41}} 
+\index{Compiler@{Compiler}!dumpAST@{dumpAST}}
+\index{dumpAST@{dumpAST}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{dumpAST()}{dumpAST()}}
+{\footnotesize\ttfamily void Compiler\+::dump\+A\+ST (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Дамп синтаксических деревьев в файлы 
+
+Для каждого исходника, для которого это возможно, сохраняет графический дамп дерева в файл. 
+
+См. определение в файле compiler.\+cpp строка 261
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{262 \{}
+\DoxyCodeLine{263     \textcolor{keywordflow}{if} (not \textcolor{keyword}{this} -\/> verbose)}
+\DoxyCodeLine{264         \textcolor{keywordflow}{return};}
+\DoxyCodeLine{265         }
+\DoxyCodeLine{266     \textcolor{keywordtype}{bool} dumped = \textcolor{keyword}{false};}
+\DoxyCodeLine{267     }
+\DoxyCodeLine{268     \textcolor{keywordflow}{if} (\textcolor{keyword}{this} -\/> source\_list)}
+\DoxyCodeLine{269     \{}
+\DoxyCodeLine{270         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 0; counter < \textcolor{keyword}{this} -\/> source\_count; counter++)}
+\DoxyCodeLine{271         \{}
+\DoxyCodeLine{272             \textcolor{keywordflow}{if} ((\textcolor{keyword}{this} -\/> source\_list)[counter] -\/> source\_type == Source::JAUL\_SOURCE)}
+\DoxyCodeLine{273             \{}
+\DoxyCodeLine{274                 (\textcolor{keyword}{this} -\/> source\_list)[counter] -\/> \mbox{\hyperlink{classCompiler_a46ba28db0dc240d2c5f2c00e35220a41}{dumpAST}}();}
+\DoxyCodeLine{275                 dumped = \textcolor{keyword}{true};}
+\DoxyCodeLine{276             \}}
+\DoxyCodeLine{277         \}}
+\DoxyCodeLine{278     \}}
+\DoxyCodeLine{279     }
+\DoxyCodeLine{280     \textcolor{keywordflow}{if} (not dumped)}
+\DoxyCodeLine{281         printf(\textcolor{stringliteral}{"No abstract syntax tree builded! Maybe you not listed .j file with code or trying to compile code to object library?\(\backslash\)n"});}
+\DoxyCodeLine{282 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=259pt]{classCompiler_a46ba28db0dc240d2c5f2c00e35220a41_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classCompiler_a6990c4cd92935d8eaa7c59926004440d}\label{classCompiler_a6990c4cd92935d8eaa7c59926004440d}} 
+\index{Compiler@{Compiler}!makeAST@{makeAST}}
+\index{makeAST@{makeAST}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{makeAST()}{makeAST()}}
+{\footnotesize\ttfamily void Compiler\+::make\+A\+ST (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Оболочка для вызова метода Source\+::make\+A\+S\+T() 
+
+\begin{DoxyRefDesc}{Необходимо сделать}
+\item[\mbox{\hyperlink{todo__todo000001}{Необходимо сделать}}]Добавить проверку, можно ли сгенерировать A\+ST для конкретного исходника\end{DoxyRefDesc}
+
+
+Для каждого объекта \mbox{\hyperlink{classSource}{Source}} создает абстрактное синтаксическое дерево. 
+
+См. определение в файле compiler.\+cpp строка 245
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{246 \{}
+\DoxyCodeLine{247     \textcolor{keywordflow}{if} (\textcolor{keyword}{this} -\/> source\_list)}
+\DoxyCodeLine{248     \{}
+\DoxyCodeLine{249         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 0; counter < \textcolor{keyword}{this} -\/> source\_count; counter++)}
+\DoxyCodeLine{250             (\textcolor{keyword}{this} -\/> source\_list)[counter] -\/> \mbox{\hyperlink{classCompiler_a6990c4cd92935d8eaa7c59926004440d}{makeAST}}();}
+\DoxyCodeLine{251     \}}
+\DoxyCodeLine{252 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=258pt]{classCompiler_a6990c4cd92935d8eaa7c59926004440d_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classCompiler_ae397f04247f8297fbc1c847a747571d7}\label{classCompiler_ae397f04247f8297fbc1c847a747571d7}} 
+\index{Compiler@{Compiler}!mode@{mode}}
+\index{mode@{mode}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{mode()}{mode()}}
+{\footnotesize\ttfamily short int Compiler\+::mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Проверка режима работы компилятора 
+
+Возвращает код ошибочного запуска если не передан ни один параметр, не передан ни один исходник или передан неверный параметр. Информация о корректности ключей сохраняется в поле correct\+\_\+usage в процессе конструирования объекта. 
+
+См. определение в файле compiler.\+cpp строка 190
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{191 \{}
+\DoxyCodeLine{192     \textcolor{keywordflow}{if} (show\_help)}
+\DoxyCodeLine{193         \textcolor{keywordflow}{return} \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84feaccf63b527fdf3b576fe8b5e428a171a0}{HELP}};}
+\DoxyCodeLine{194         }
+\DoxyCodeLine{195     \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (not correct\_usage or not source\_pathes)}
+\DoxyCodeLine{196         \textcolor{keywordflow}{return} \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea6d87c4441778cd634aefbb95c4f6e18d}{ERROR}};}
+\DoxyCodeLine{197         }
+\DoxyCodeLine{198     \textcolor{keywordflow}{else}}
+\DoxyCodeLine{199         \textcolor{keywordflow}{return} \mbox{\hyperlink{classCompiler_a6a270f1ece6ba6b1f72e0fa4527e84fea240fcb345307867ae0133c145f240612}{COMPILATION}};}
+\DoxyCodeLine{200 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=240pt]{classCompiler_ae397f04247f8297fbc1c847a747571d7_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classCompiler_a6927dbdf123c014426df45b5f2d9d034}\label{classCompiler_a6927dbdf123c014426df45b5f2d9d034}} 
+\index{Compiler@{Compiler}!readSource@{readSource}}
+\index{readSource@{readSource}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{readSource()}{readSource()}}
+{\footnotesize\ttfamily void Compiler\+::read\+Source (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Оболочка для вызова метода Source\+::open() 
+
+Для каждого объекта исходного кода вызывает метод open(), тем самым читая текст каждого их исходников и сохраняя его в этом же объекте исходника. 
+
+См. определение в файле compiler.\+cpp строка 210
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{211 \{}
+\DoxyCodeLine{212     \textcolor{keyword}{this} -\/> source\_list = \textcolor{keyword}{new} \mbox{\hyperlink{classSource}{Source}}*[\textcolor{keyword}{this} -\/> source\_count];}
+\DoxyCodeLine{213     \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 0; counter < \textcolor{keyword}{this} -\/> source\_count; counter++)}
+\DoxyCodeLine{214     \{}
+\DoxyCodeLine{215         (\textcolor{keyword}{this} -\/> source\_list)[counter] = \textcolor{keyword}{new} \mbox{\hyperlink{classSource}{Source}}((\textcolor{keyword}{this} -\/> source\_pathes)[counter]);}
+\DoxyCodeLine{216         (\textcolor{keyword}{this} -\/> source\_list)[counter] -\/> open();}
+\DoxyCodeLine{217     \}}
+\DoxyCodeLine{218 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=265pt]{classCompiler_a6927dbdf123c014426df45b5f2d9d034_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{classCompiler_a9f68e8c12daa7c9f6480092035189d80}\label{classCompiler_a9f68e8c12daa7c9f6480092035189d80}} 
+\index{Compiler@{Compiler}!showSource@{showSource}}
+\index{showSource@{showSource}!Compiler@{Compiler}}
+\doxysubsubsection{\texorpdfstring{showSource()}{showSource()}}
+{\footnotesize\ttfamily void Compiler\+::show\+Source (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Показ всех считанных исходных кодов 
+
+Обходит все объекты класса \mbox{\hyperlink{classSource}{Source}} и показывает считанный исходный код. 
+
+См. определение в файле compiler.\+cpp строка 226
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{227 \{       }
+\DoxyCodeLine{228     \textcolor{keywordflow}{if} (\textcolor{keyword}{this} -\/> source\_list and \textcolor{keyword}{this} -\/> verbose)}
+\DoxyCodeLine{229     \{}
+\DoxyCodeLine{230         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} counter = 0; counter < \textcolor{keyword}{this} -\/> source\_count; counter++)}
+\DoxyCodeLine{231         \{}
+\DoxyCodeLine{232             (\textcolor{keyword}{this} -\/> source\_list)[counter] -\/> print();}
+\DoxyCodeLine{233             printf(\textcolor{stringliteral}{"\(\backslash\)n-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\(\backslash\)n\(\backslash\)n"});}
+\DoxyCodeLine{234         \}}
+\DoxyCodeLine{235     \}}
+\DoxyCodeLine{236 \}}
+
+\end{DoxyCode}
+Граф вызова функции\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=270pt]{classCompiler_a9f68e8c12daa7c9f6480092035189d80_icgraph}
+\end{center}
+\end{figure}
+
+
+Объявления и описания членов классов находятся в файлах\+:\begin{DoxyCompactItemize}
+\item 
+Headers/\mbox{\hyperlink{compiler_8hpp}{compiler.\+hpp}}\item 
+Source/\mbox{\hyperlink{compiler_8cpp}{compiler.\+cpp}}\end{DoxyCompactItemize}

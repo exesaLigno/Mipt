@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.8.17"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>JCP - Jaul Compiler Pack: Класс AbstractSyntaxTree::Node</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">JCP - Jaul Compiler Pack
+   </div>
+   <div id="projectbrief">JAUL Compiler Pack</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- Создано системой Doxygen 1.8.17 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Поиск');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classAbstractSyntaxTree_1_1Node.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Открытые типы</a> &#124;
+<a href="#pub-methods">Открытые члены</a> &#124;
+<a href="#pub-attribs">Открытые атрибуты</a> &#124;
+<a href="#friends">Друзья</a> &#124;
+<a href="classAbstractSyntaxTree_1_1Node-members.html">Полный список членов класса</a>  </div>
+  <div class="headertitle">
+<div class="title">Класс AbstractSyntaxTree::Node</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Граф связей класса AbstractSyntaxTree::Node:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="classAbstractSyntaxTree_1_1Node__coll__graph.svg" width="211" height="55"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">см. легенду</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Открытые типы</h2></td></tr>
+<tr class="memitem:a8349d14717acf4d729215f0c62f6e215"><td class="memItemLeft" align="right" valign="top"><a id="a8349d14717acf4d729215f0c62f6e215"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>SYMTYPES</b> { <br />
+&#160;&#160;<b>LETTER</b> = 1, 
+<b>NUMBER</b>, 
+<b>SYMBOL</b>, 
+<b>SPECSYMBOL</b>, 
+<br />
+&#160;&#160;<b>COUNT_OF_SYMTYPES</b>
+<br />
+ }</td></tr>
+<tr class="separator:a8349d14717acf4d729215f0c62f6e215"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad635b964b08eaffa878084ecdfbfd3ce"><td class="memItemLeft" align="right" valign="top"><a id="ad635b964b08eaffa878084ecdfbfd3ce"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>VARTYPES</b> { <b>LOCAL</b> = 1, 
+<b>PARAMETER</b>
+ }</td></tr>
+<tr class="separator:ad635b964b08eaffa878084ecdfbfd3ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b759adf023e8b79480480e883baed79"><td class="memItemLeft" align="right" valign="top"><a id="a9b759adf023e8b79480480e883baed79"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>TYPES</b> { <br />
+&#160;&#160;<b>UNKNOWN</b>, 
+<b>ARITHM_OPERATOR</b>, 
+<b>CMP_OPERATOR</b>, 
+<b>CTRL_OPERATOR</b>, 
+<br />
+&#160;&#160;<b>VARIABLE</b>, 
+<b>FUNCCALL</b>, 
+<b>INT</b>, 
+<b>FLOAT</b>, 
+<br />
+&#160;&#160;<b>STRING</b>, 
+<b>CHAR</b>, 
+<b>LINE</b>, 
+<b>FUNC</b>, 
+<br />
+&#160;&#160;<b>ENTRY</b>, 
+<b>ITEM</b>, 
+<b>DEF</b>, 
+<b>_START</b>, 
+<br />
+&#160;&#160;<b>INCLUDE</b>, 
+<b>DEFINE</b>, 
+<b>COUNT_OF_TYPES</b>
+<br />
+ }</td></tr>
+<tr class="separator:a9b759adf023e8b79480480e883baed79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a356884fb56c26156e9d242e5da569c57"><td class="memItemLeft" align="right" valign="top"><a id="a356884fb56c26156e9d242e5da569c57"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>OPERATORS</b> { <br />
+&#160;&#160;<b>NOP</b>, 
+<b>PLUS</b>, 
+<b>MINUS</b>, 
+<b>MULTIPLY</b>, 
+<br />
+&#160;&#160;<b>DIVIDE</b>, 
+<b>POWER</b>, 
+<b>MODULO</b>, 
+<b>INT_DIVISION</b>, 
+<br />
+&#160;&#160;<b>EQUAL</b>, 
+<b>NOT_EQUAL</b>, 
+<b>MORE</b>, 
+<b>LESS</b>, 
+<br />
+&#160;&#160;<b>MORE_EQ</b>, 
+<b>LESS_EQ</b>, 
+<b>AND</b>, 
+<b>OR</b>, 
+<br />
+&#160;&#160;<b>IF</b>, 
+<b>ELSE</b>, 
+<b>WHILE</b>, 
+<b>FOR</b>, 
+<br />
+&#160;&#160;<b>RETURN</b>, 
+<b>ASSIGNMENT</b>, 
+<b>PLUS_ASSIGNMENT</b>, 
+<b>MINUS_ASSIGNMENT</b>, 
+<br />
+&#160;&#160;<b>MULTIPLY_ASSIGNMENT</b>, 
+<b>DIVIDE_ASSIGNMENT</b>, 
+<b>POWER_ASSIGNMENT</b>, 
+<b>COUNT_OF_OPERATORS</b>
+<br />
+ }</td></tr>
+<tr class="separator:a356884fb56c26156e9d242e5da569c57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Открытые члены</h2></td></tr>
+<tr class="memitem:a5f58b4d9d34dd33f60fff979258a6292"><td class="memItemLeft" align="right" valign="top"><a id="a5f58b4d9d34dd33f60fff979258a6292"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (int type)</td></tr>
+<tr class="separator:a5f58b4d9d34dd33f60fff979258a6292"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10b87fe03bb52d715a0bce977ed4956a"><td class="memItemLeft" align="right" valign="top"><a id="a10b87fe03bb52d715a0bce977ed4956a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (int type, char **text)</td></tr>
+<tr class="separator:a10b87fe03bb52d715a0bce977ed4956a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add9dcd865140db6fba3376576a160e96"><td class="memItemLeft" align="right" valign="top"><a id="add9dcd865140db6fba3376576a160e96"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (char **text)</td></tr>
+<tr class="separator:add9dcd865140db6fba3376576a160e96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae2419f06260a023c9e4a768749c6bac"><td class="memItemLeft" align="right" valign="top"><a id="aae2419f06260a023c9e4a768749c6bac"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Node</b> (const <a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> &amp;that)=delete</td></tr>
+<tr class="separator:aae2419f06260a023c9e4a768749c6bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a330818fce3078a4da3e9d19fae6b53ee"><td class="memItemLeft" align="right" valign="top"><a id="a330818fce3078a4da3e9d19fae6b53ee"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>leftConnect</b> (<a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> *left)</td></tr>
+<tr class="separator:a330818fce3078a4da3e9d19fae6b53ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a182a82015b3f20a0facc99562d0c0b03"><td class="memItemLeft" align="right" valign="top"><a id="a182a82015b3f20a0facc99562d0c0b03"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>leftConnect</b> (<a class="el" href="classAbstractSyntaxTree.html">AbstractSyntaxTree</a> *left)</td></tr>
+<tr class="separator:a182a82015b3f20a0facc99562d0c0b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a707de98b9c4b94ff50b1fc246623b167"><td class="memItemLeft" align="right" valign="top"><a id="a707de98b9c4b94ff50b1fc246623b167"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rightConnect</b> (<a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> *right)</td></tr>
+<tr class="separator:a707de98b9c4b94ff50b1fc246623b167"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd7a1a40e3688fff6efe3b9c98c48cfb"><td class="memItemLeft" align="right" valign="top"><a id="acd7a1a40e3688fff6efe3b9c98c48cfb"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rightConnect</b> (<a class="el" href="classAbstractSyntaxTree.html">AbstractSyntaxTree</a> *right)</td></tr>
+<tr class="separator:acd7a1a40e3688fff6efe3b9c98c48cfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a265d36e0602f713d76d60cf147e9d3"><td class="memItemLeft" align="right" valign="top"><a id="a8a265d36e0602f713d76d60cf147e9d3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>fixContainer</b> ()</td></tr>
+<tr class="separator:a8a265d36e0602f713d76d60cf147e9d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1c012aa810a77119ca8dc63e902f2da"><td class="memItemLeft" align="right" valign="top"><a id="af1c012aa810a77119ca8dc63e902f2da"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>dumper</b> (std::ofstream &amp;file, int mode)</td></tr>
+<tr class="separator:af1c012aa810a77119ca8dc63e902f2da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44f3ada060cb0ca01dab79992a6b84ab"><td class="memItemLeft" align="right" valign="top"><a id="a44f3ada060cb0ca01dab79992a6b84ab"></a>
+const char *&#160;</td><td class="memItemRight" valign="bottom"><b>colorize</b> ()</td></tr>
+<tr class="separator:a44f3ada060cb0ca01dab79992a6b84ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad68cee40069848f29a81e0b45a7fac41"><td class="memItemLeft" align="right" valign="top"><a id="ad68cee40069848f29a81e0b45a7fac41"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>write</b> (std::ofstream &amp;out)</td></tr>
+<tr class="separator:ad68cee40069848f29a81e0b45a7fac41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Открытые атрибуты</h2></td></tr>
+<tr class="memitem:a4dd16618c5ab0f5dd353e838b54e03ad"><td class="memItemLeft" align="right" valign="top"><a id="a4dd16618c5ab0f5dd353e838b54e03ad"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>type</b> = 0</td></tr>
+<tr class="separator:a4dd16618c5ab0f5dd353e838b54e03ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af3c42fe9d029bd8f9cc5d09ec25560c2"><td class="memItemLeft" align="right" valign="top"><a id="af3c42fe9d029bd8f9cc5d09ec25560c2"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>ivalue</b> = 0</td></tr>
+<tr class="separator:af3c42fe9d029bd8f9cc5d09ec25560c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3b7e75397f8c746d3399382e72d1843"><td class="memItemLeft" align="right" valign="top"><a id="ab3b7e75397f8c746d3399382e72d1843"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>fvalue</b> = 0</td></tr>
+<tr class="separator:ab3b7e75397f8c746d3399382e72d1843"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a432870e9e2d3927163f44f9ff2e35650"><td class="memItemLeft" align="right" valign="top"><a id="a432870e9e2d3927163f44f9ff2e35650"></a>
+char&#160;</td><td class="memItemRight" valign="bottom"><b>cvalue</b> = 0</td></tr>
+<tr class="separator:a432870e9e2d3927163f44f9ff2e35650"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac85e0aa4824ace2459734d73a900c91b"><td class="memItemLeft" align="right" valign="top"><a id="ac85e0aa4824ace2459734d73a900c91b"></a>
+char *&#160;</td><td class="memItemRight" valign="bottom"><b>svalue</b> = nullptr</td></tr>
+<tr class="separator:ac85e0aa4824ace2459734d73a900c91b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89408a0cf8daa3214a7b0c5b610e5853"><td class="memItemLeft" align="right" valign="top"><a id="a89408a0cf8daa3214a7b0c5b610e5853"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>LValue</b> = false</td></tr>
+<tr class="separator:a89408a0cf8daa3214a7b0c5b610e5853"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9409f90ebf73554dccea31f401a133fb"><td class="memItemLeft" align="right" valign="top"><a id="a9409f90ebf73554dccea31f401a133fb"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>vartype</b> = 0</td></tr>
+<tr class="separator:a9409f90ebf73554dccea31f401a133fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b46844c7cb9d3449d4f06c92ee9588f"><td class="memItemLeft" align="right" valign="top"><a id="a3b46844c7cb9d3449d4f06c92ee9588f"></a>
+<a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>parent</b> = nullptr</td></tr>
+<tr class="separator:a3b46844c7cb9d3449d4f06c92ee9588f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a035bd2037617abdcb2cb00f489856999"><td class="memItemLeft" align="right" valign="top"><a id="a035bd2037617abdcb2cb00f489856999"></a>
+<a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>left</b> = nullptr</td></tr>
+<tr class="separator:a035bd2037617abdcb2cb00f489856999"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13eb3a422aa9e88e13978590bd8b22bb"><td class="memItemLeft" align="right" valign="top"><a id="a13eb3a422aa9e88e13978590bd8b22bb"></a>
+<a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>right</b> = nullptr</td></tr>
+<tr class="separator:a13eb3a422aa9e88e13978590bd8b22bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Друзья</h2></td></tr>
+<tr class="memitem:a614fa02a57d912d34abf2e51ab472dad"><td class="memItemLeft" align="right" valign="top"><a id="a614fa02a57d912d34abf2e51ab472dad"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>AbstractSyntaxTree</b></td></tr>
+<tr class="separator:a614fa02a57d912d34abf2e51ab472dad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Подробное описание</h2>
+<div class="textblock">
+<p class="definition">См. определение в файле <a class="el" href="ast_8hpp_source.html">ast.hpp</a> строка <a class="el" href="ast_8hpp_source.html#l00028">28</a></p>
+</div><hr/>Объявления и описания членов классов находятся в файлах:<ul>
+<li>Headers/<a class="el" href="ast_8hpp_source.html">ast.hpp</a></li>
+<li>Source/<a class="el" href="ast_8cpp_source.html">ast.cpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="classAbstractSyntaxTree.html">AbstractSyntaxTree</a></li><li class="navelem"><a class="el" href="classAbstractSyntaxTree_1_1Node.html">Node</a></li>
+    <li class="footer">Создано системой
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
+  </ul>
+</div>
+</body>
+</html>
