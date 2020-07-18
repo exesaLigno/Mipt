@@ -1,3 +1,9 @@
+/*!
+ *	@file ast.cpp
+ *	@brief Исполняемый код класса AbstractSyntaxTree
+ */
+
+
 #include "../Headers/ast.hpp"
 
 

@@ -1,3 +1,9 @@
+/*!
+ *	@file ast.hpp
+ *	@brief Описание класса абстрактного синтаксического дерева
+ */
+
+
 #pragma once
 
 #include <fstream>
