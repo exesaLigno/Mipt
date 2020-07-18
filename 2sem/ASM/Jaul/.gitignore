@@ -10,4 +10,9 @@ test*.jaul
 
 *~
 
+.docs
 
+Examples/*.hex
+Examples/*.s
+Examples/*.jo
+Examples/*.jv
