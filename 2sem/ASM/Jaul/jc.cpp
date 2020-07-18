@@ -5,9 +5,9 @@
 #include "Headers/compiler.hpp"
 
 /*!
- *	@file
- *	@brief Main file of JAUL compiler
- *	@mainpage JCP - JAUL Compiler Pack
+ *	@file jc.cpp
+ *	@author Карцев Вадим
+ *	@brief Основной файл компилятора
  */
 
 
@@ -20,10 +20,10 @@
 
 
 /*!
- *	Main logic of compiler
- *	@param[in] argc Count of terminal arguments
- *	@param[in] argv Terminal arguments
- *	@return Status of compiler work
+ *	Основная логика компилятора
+ *	@param[in] argc Количество параметров командной строки
+ *	@param[in] argv Параметры командной строки
+ *	@return Статус работы компилятора
  */
 int main(int argc, char* argv[])
 {
@@ -54,6 +54,7 @@ int main(int argc, char* argv[])
 		compiler.dumpAST();
 		compiler.createBinaries();
 		compiler.compile();
+		compiler.write();
 	}
 
     return status;
