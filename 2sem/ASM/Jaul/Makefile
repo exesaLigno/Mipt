@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-c -std=c++2a -O3
 LDFLAGS=
 
-JC_SOURCES=jc.cpp Source/compiler.cpp Source/source.cpp Source/ast.cpp Source/binary.cpp
+JC_SOURCES=jc.cpp Source/compiler.cpp Source/source.cpp Source/ast.cpp Source/binary.cpp Source/elf.cpp
 JC_OBJECTS=$(JC_SOURCES:.cpp=.o)
 JC=jc
 
@@ -10,15 +10,15 @@ JVM_SOURCES=jvm.cpp
 JVM_OBJECTS=$(JVM_SOURCES:.cpp=.o)
 JVM=jvm
 
-ELFPARSER_SOURCES=Accessory/readBinary.cpp
+ELFPARSER_SOURCES=Accessory/ReadBinary/readBinary.cpp
 ELFPARSER_OBJECTS=$(ELFPARSER_SOURCES:.cpp=.o)
 ELFPARSER=relf
 
 
-all: $(JC) $(JVM) $(ELFPARSER) Documentation
+all: $(JC) $(JVM) $(ELFPARSER) documentation
 	
 	
-$(JC): $(JC_OBJECTS) 
+$(JC): $(JC_OBJECTS)
 	$(CC) $(LDFLAGS) $(JC_OBJECTS) -o $@
 	
 $(JVM): $(JVM_OBJECTS)
@@ -27,8 +27,8 @@ $(JVM): $(JVM_OBJECTS)
 $(ELFPARSER): $(ELFPARSER_OBJECTS)
 	$(CC) $(LDFLAGS) $(ELFPARSER_OBJECTS) -o $@
 
-.PHONY: Documentation
-Documentation:
+.PHONY: documentation
+documentation: Doxyfile
 	doxygen Doxyfile
 
 
@@ -58,6 +58,10 @@ clean:
 	
 
 .PHONY: nasm
-nasm:
-	nasm -f elf64 test.s -o test.o
-	ld -s -o a.out test.o
+nasm: $(ELFPARSER)
+	nasm -f elf64 nasm.s -o nasm.o
+	ld -s -o compiled_nasm nasm.o
+	rm nasm.o
+	./$(ELFPARSER) compiled_nasm compiled_nasm.txt
+	#rm compiled_nasm
+	
