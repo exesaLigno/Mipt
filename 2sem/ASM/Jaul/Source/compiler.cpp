@@ -1,5 +1,18 @@
 #include "../Headers/compiler.hpp"
 
+/*!
+ *	@file compiler.cpp
+ *	@brief Файл с исполняемым кодом класса Compiler
+ */
+ 
+/*!
+ *	@brief Конструктор класса Compiler
+ *	@param[in] argc Количество аргументов командной строки
+ *	@param[in] argv Парметры командной строки
+ *
+ *	Конструирует класс на основе переданных ключей запуска, выставляет параметры запуска и 
+ *	сохраняет имена исходников.
+ */
 Compiler::Compiler(int argc, char* argv[])
 {
 	if (argc <= 1)
@@ -26,6 +39,9 @@ Compiler::Compiler(int argc, char* argv[])
 				
 			else if (!strcmp("--obj", argv[counter]))
 				this -> obj_generation = true;
+				
+			else if (!strcmp("--hex-view", argv[counter]))
+				this -> hex_view = true;
 			
 			else if (!strcmp("-o", argv[counter]))
 			{
@@ -42,22 +58,65 @@ Compiler::Compiler(int argc, char* argv[])
 				
 			else
 			{
-				printf("\x1b[1;31mError:\x1b[0m Unknown parameter \x1b[3m\'%s\'\x1b[0m\n", argv[counter]);
+				printf("\x1b[1;31merror:\x1b[0m Unknown parameter \x1b[3m\'%s\'\x1b[0m\n", argv[counter]);
 				this -> correct_usage = false;
-				break;
+				return;
 			}
+		}
+		
+		if (not (this -> only_preprocess or this -> nasm_listing or this -> virtual_compilation or 
+			this -> obj_generation or this -> hex_view))
+		{
+			this -> executable = true;
+		}
+		
+		if (not (this -> only_preprocess xor this -> nasm_listing xor this -> virtual_compilation xor 
+			this -> obj_generation xor this -> hex_view xor  this -> executable))
+		{
+			printf("\x1b[1;31merror:\x1b[0m Keys \x1b[3m--only-preprocess\x1b[0m, \x1b[3m--nasm-listing\x1b[0m, \x1b[3m--virtual\x1b[0m, \x1b[3m--obj\x1b[0m, \x1b[3m--hex-view\x1b[0m can'not be combined!\n");
+			this -> correct_usage = false;
+			return;
 		}
 		
 		if (this -> output_path == nullptr)
 		{
-			this -> output_path = new char[6];
-			strcpy(this -> output_path, "a.out");
+			char* name = 0;
+			
+			if (this -> source_count == 1)
+				name = (this -> source_pathes)[0];
+				
+			else
+				name = "output";
+				
+			this -> output_path = new char[strlen(name) + 5]{0};
+			strcpy(this -> output_path, name);
+			
+			char* extension = strrchr(this -> output_path, '.');	// Excluding old extension
+			while (*extension != '\0')
+				*(extension++) = '\0';
+			
+			if (this -> only_preprocess)
+				strcat(this -> output_path, ".j");
+				
+			else if (this -> nasm_listing)
+				strcat(this -> output_path, ".s");
+				
+			else if (this -> virtual_compilation)
+				strcat(this -> output_path, ".jv");
+				
+			else if (this -> obj_generation)
+				strcat(this -> output_path, ".jo");
+				
+			else if (this -> hex_view)
+				strcat(this -> output_path, ".hex");
 		}
 	}
 }
 
 
-
+/*!
+ *	@brief Деструктор класса Compiler
+ */
 Compiler::~Compiler()
 {
 	if (this -> source_pathes != nullptr)
@@ -79,6 +138,16 @@ Compiler::~Compiler()
 		}
 		delete[] this -> source_list;
 	}
+	
+	if (this -> binary_list != nullptr)
+	{
+		for (int counter = 0; counter < this -> source_count; counter++)
+		{
+			if ((this -> binary_list)[counter])
+				delete (this -> binary_list)[counter];
+		}
+		delete[] this -> binary_list;
+	}
 
 	if (this -> output_path != nullptr)
 		delete[] this -> output_path;
@@ -86,6 +155,12 @@ Compiler::~Compiler()
 
 
 
+/*!
+ *	@brief Функция добавления нового файла в список исходников
+ *	@param[in] source_path Имя исходника
+ *
+ *	Расширяет массив имен исходников на 1 элемент и копирует в этот элемент имя исходника. Так же увеличивает счетчик исходников на 1.
+ */
 void Compiler::addPath(const char* source_path)
 {
 	int new_source_count = this -> source_count + 1;
@@ -102,6 +177,10 @@ void Compiler::addPath(const char* source_path)
 	this -> source_count = new_source_count;
 }
 
+
+/*!
+ *	@brief Показ настроек компилятора
+ */
 void Compiler::showSettings()
 {
 	if (not verbose)
@@ -132,12 +211,17 @@ void Compiler::showSettings()
 	
 	printf("%s", this -> virtual_compilation ? "Virtual compilation\n" : "");
 	
+	printf("%s", this -> hex_view ? "Hex view\n" : "");
+	
 	printf("Optimization level: %d\n", this -> optimization_level);
 	
 	printf("----------------------------------------\n\n");
 }
 
 
+/*!
+ *	@brief Показ страницы помощи
+ */
 void Compiler::showHelp()
 {
 	printf("Jaul Compiler (2020)\n");
@@ -148,12 +232,19 @@ void Compiler::showHelp()
 	printf("  -l --nasm-listing        Generate NASM listing\n");
 	printf("     --obj                 Generate jaul object file\n");
 	printf("     --virtual             Compile code to virtual executable\n");
+	printf("     --hex-view            Generate hex view of compiled code \x1b[2m(only for debugging)\x1b[0m\n");
 	printf("  -o \x1b[2m<file>\x1b[0m                Write compiled code to \x1b[2m<file>\x1b[0m. If not specified, using \x1b[2ma.out\x1b[0m\n");
 	printf("  -o#                      Optimization level, # = 0, 1 or 2\n");
 }
 
 
-bool Compiler::mode()
+/*!
+ *	@brief Проверка режима работы компилятора
+ *	
+ *	Возвращает код ошибочного запуска если не передан ни один параметр, не передан ни один исходник или передан неверный параметр.
+ *	Информация о корректности ключей сохраняется в поле correct_usage в процессе конструирования объекта.
+ */
+short int Compiler::mode()
 {
 	if (show_help)
 		return HELP;
@@ -167,6 +258,12 @@ bool Compiler::mode()
 
 
 
+/*!
+ *	@brief Оболочка для вызова метода Source::open()
+ *	
+ *	Для каждого объекта исходного кода вызывает метод open(), тем самым читая текст каждого их исходников и сохраняя его в
+ *	этом же объекте исходника.
+ */
 void Compiler::readSource()
 {
 	this -> source_list = new Source*[this -> source_count];
@@ -178,6 +275,11 @@ void Compiler::readSource()
 }
 
 
+/*!
+ *	@brief Показ всех считанных исходных кодов
+ *	
+ *	Обходит все объекты класса Source и показывает считанный исходный код.
+ */
 void Compiler::showSource()
 {		
 	if (this -> source_list and this -> verbose)
@@ -191,6 +293,12 @@ void Compiler::showSource()
 }
 
 
+/*!
+ *	@brief Оболочка для вызова метода Source::makeAST()
+ *	@todo Добавить проверку, можно ли сгенерировать AST для конкретного исходника
+ *	
+ *	Для каждого объекта Source создает абстрактное синтаксическое дерево.
+ */
 void Compiler::makeAST()
 {
 	if (this -> source_list)
@@ -202,6 +310,11 @@ void Compiler::makeAST()
 
 
 
+/*!
+ *	@brief Дамп синтаксических деревьев в файлы
+ *	
+ *	Для каждого исходника, для которого это возможно, сохраняет графический дамп дерева в файл.
+ */
 void Compiler::dumpAST()
 {
 	if (not this -> verbose)
@@ -226,6 +339,9 @@ void Compiler::dumpAST()
 }
 
 
+/*!
+ *	@brief Создание массива скомпилированных исходников
+ */
 void Compiler::createBinaries()
 {
 	this -> binary_list = new Binary*[this -> source_count];
@@ -235,6 +351,9 @@ void Compiler::createBinaries()
 }
 
 
+/*!
+ *	@brief Компиляция всех объектов Binary в байт код
+ */
 void Compiler::compile()
 {
 	for (int counter; counter < source_count; counter++)
@@ -244,15 +363,46 @@ void Compiler::compile()
 }
 
 
+/*!
+ *	@brief Линковка всех Binary объектов в один
+ */
 void Compiler::assemble()
 {
 	
 }
 
 
+/*!
+ *	@brief Экспорт полученного кода в файл
+ */
 void Compiler::write()
 {
-	
+	if (this -> only_preprocess)
+		printf("preproc is not implemented!\n");
+		
+	else if (this -> nasm_listing)
+		(this -> binary_list)[0] -> exportNasm(this -> output_path);
+		
+	else if (this -> virtual_compilation)
+		(this -> binary_list)[0] -> exportVirtualExecutable(this -> output_path);
+		
+	else if (this -> obj_generation)
+		(this -> binary_list)[0] -> exportObj(this -> output_path);
+		
+	else if (this -> hex_view)
+		(this -> binary_list)[0] -> exportHex(this -> output_path);
+		
+	else
+		(this -> binary_list)[0] -> exportExecutable(this -> output_path);
+		
+	printf("\x1b[1m%s%s%s%s%s%s\x1b[0m successfully exported to \x1b[1;32m<%s>\x1b[0m\n",
+			this -> only_preprocess ? "Preprocessed source" : "",
+			this -> nasm_listing ? "Nasm listing" : "",
+			this -> virtual_compilation ? "Virtual executable" : "",
+			this -> obj_generation ? "Object file" : "",
+			this -> hex_view ? "Hex view of executable" : "",
+			this -> executable ? "Executable" : "",
+			this -> output_path);
 }
 
 

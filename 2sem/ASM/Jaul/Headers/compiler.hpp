@@ -1,3 +1,8 @@
+/*!
+ *	@file compiler.hpp
+ *	@brief Заголовочный файл с описанием класса компилятора
+ */
+
 #pragma once
 
 #include <cstring>
@@ -8,11 +13,13 @@
 #include "binary.hpp"
 
 /*!
- *	@brief Compiler class, created for organizing compiler work
- *	@date July 2020
- *	@bug Rarely can not compile JAUL source to AbstractSyntaxTree
+ *	@brief Класс компилятора
+ *	@date Июль 2020 года
+ *	@bug Иногда некорректно преобразует исходный код в абстрактное синтаксическое дерево. 
+ *		 Пока не понятно, в каких случаях возникает ошибка и как ее исправить.
  *
- *	Main compiler class, control all compiler processes and stores all compilation information and source/compiled code
+ *	Основной класс компилятора, созданный для предоставления пользователю удобного api для компиляции/сборки программ. 
+ *	Также хранит в себе исходный и скомпилированный код программ и параметры компиляции.
  */
 class Compiler
 {
@@ -29,6 +36,8 @@ class Compiler
 	bool nasm_listing = false;
 	bool virtual_compilation = false;
 	bool obj_generation = false;
+	bool hex_view = false;
+	bool executable = false;
 	
 	bool show_help = false;
 	
@@ -38,26 +47,26 @@ class Compiler
 	
 	//------------------------------------//
 	
-	Source** source_list = nullptr;
-	Binary** binary_list = nullptr;
+	Source** source_list = nullptr;	///< Массив ссылок на объекты исходных кодов
+	Binary** binary_list = nullptr;	///< Массив ссылок на объекты скомпилированного кода
 		
 	
   public:
   
-	//! Compiler work modes
+	//! Режимы работы компилятора
   	enum Modes
   	{
-  		COMPILATION,	///< Compiler working in default mode
-  		HELP,			///< Just show help and exit
-  		ERROR			///< Compiler catch an error and exited urgently
+  		COMPILATION,	///< Компилятору передан исходный код и он может его скомпилировать
+  		HELP,			///< Показ страницы помощи
+  		ERROR			///< Неверный аргумент или их отсутствие
   	};
 	
-	//! Errors list
+	//! Ошибки
 	enum Errors
 	{
-		OK,					///< No error, all goes well
-		UNKNOWN_PARAMETER,	///< Unknown parameter in terminal call
-		ERRORS_COUNT
+		OK,					///< Ошибок при выполнении не было
+		UNKNOWN_PARAMETER,	///< Неверный ключ компиляции
+		ERRORS_COUNT		///< Количество ошибок
 	};
 	
 	Compiler(int argc, char* argv[]);
@@ -66,7 +75,7 @@ class Compiler
 	void addPath(const char* source_path);
 	void showSettings();
 	void showHelp();
-	bool mode();
+	short int mode();
 	
 	void readSource();
 	void showSource();

@@ -1,3 +1,9 @@
+/*!
+ *	@file binary.cpp
+ *	@brief Исполняемый код класса Binary и вложенных классов
+ */
+
+
 #include "../Headers/binary.hpp"
 
 Binary::Binary(Source* source)
@@ -6,7 +12,13 @@ Binary::Binary(Source* source)
 }
 
 Binary::~Binary()
-{}
+{
+	if (this -> start != nullptr)
+		delete this -> start;
+		
+	if (this -> labels != nullptr)
+		delete this -> labels;
+}
 
 
 
@@ -14,15 +26,24 @@ void Binary::compile(bool verbose)
 {
 	if (this -> source -> source_type == Source::JAUL_SOURCE)
 		this -> compileAst(verbose);
-		
+	
 	else if (this -> source -> source_type == Source::JASM_SOURCE)
 		this -> importNasm(verbose);
-		
+	
 	else if (this -> source -> source_type == Source::JAUL_OBJ)
 		this -> importObj(verbose);
-		
+	
 	else
 		printf("\x1b[1;31merror:\x1b[0m trying to compile non-compilable source \x1b[1m<%s>\x1b[0m\n", this -> source -> name);
+	
+	Token* current = this -> start;
+	
+	while (current)
+	{
+		current -> prepare();
+		current -> compile();
+		current = current -> next;
+	}
 }
 
 
@@ -272,6 +293,7 @@ void Binary::importObj(bool verbose)
 void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue)
 {
 	Token* new_token = new Token;
+	new_token -> container = this;
 	
 	if (not this -> start)
 	{
@@ -287,6 +309,9 @@ void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char
 	}
 	
 	new_token -> type = type;
+	if (type == Token::LOCAL_LABEL or type == Token::GLOBAL_LABEL or type == Token::FUNCTION_LABEL)
+		(this -> labels_count)++;
+		
 	new_token -> setText(text);
 	new_token -> ivalue = ivalue;
 	new_token -> fvalue = fvalue;
@@ -405,13 +430,99 @@ int Binary::exportNasm(const char* filename)
 	return 0;
 }
 
-int Binary::exportObj()
+
+
+int Binary::exportObj(const char* filename)
 {
+	//this -> translate();
+	
 	return 0;
 }
 
-int Binary::exportExecutable()
+
+
+int Binary::exportVirtualExecutable(const char* filename)
 {
+	//this -> virtualTranslate();
+	
+	return 0;
+}
+
+
+
+int Binary::exportExecutable(const char* filename)
+{
+	//this -> translate();
+	
+	return 0;
+}
+
+
+
+int Binary::exportHex(const char* filename)
+{
+	FILE* hex = fopen(filename, "w");
+
+	Token* current = this -> start;
+	
+	fprintf(hex, " position |           byte  code           |     nasm  code\n");
+	fprintf(hex, "          |                                |\n");
+	
+	while (current)
+	{
+		if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
+		{
+			fprintf(hex, "  %7llu |                                | \n", current -> first_byte_position);
+			fprintf(hex, "->%7llu | ", current -> first_byte_position);
+		}
+		else if (!strncmp(current -> text, "call ", 5) or !strncmp(current -> text, "jmp ", 4) or 
+				 !strncmp(current -> text, "jz ", 3))
+			fprintf(hex, "<-%7llu | ", current -> first_byte_position);
+		else
+			fprintf(hex, "  %7llu | ", current -> first_byte_position);
+	
+		if (current -> bytes)
+		{			
+			for (int counter = 0; counter < current -> bytes_count; counter++)
+				fprintf(hex, "%02x ", (unsigned char) (current -> bytes)[counter]);
+		}
+		
+		for (int counter = 0; counter < (10 - current -> bytes_count); counter++)
+			fprintf(hex, "   ");
+			
+		fprintf(hex, " | ");
+		
+		if (current -> text)
+		{
+			if (current -> type == Token::NASM_CODE)
+				fprintf(hex, "    ");
+				
+			if (strstr(current -> text, "%d") != nullptr)
+				fprintf(hex, current -> text, current -> ivalue);
+				
+			else if (strstr(current -> text, "%f") != nullptr)
+				fprintf(hex, current -> text, current -> fvalue);
+				
+			else if (strstr(current -> text, "%c") != nullptr)
+				fprintf(hex, current -> text, current -> cvalue);
+				
+			else if (strstr(current -> text, "%s") != nullptr)
+				fprintf(hex, current -> text, current -> svalue);
+			
+			else
+				fprintf(hex, current -> text);
+				
+			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
+				fprintf(hex, ":");
+		}
+		
+		fprintf(hex, "\n");
+		
+		current = current -> next;
+	}
+	
+	fclose(hex);
+	
 	return 0;
 }
 
@@ -426,6 +537,15 @@ Binary::Token::~Token()
 {
 	if (this -> text != nullptr)
 		delete[] this -> text;
+	
+	if (this -> bytes != nullptr)
+		delete[] this -> bytes;
+		
+	if (this -> svalue != nullptr)
+		delete[] this -> svalue;
+		
+	if (this -> next)
+		delete this -> next;
 }
 
 
@@ -436,10 +556,10 @@ void Binary::Token::setText(const char* text)
 	strcpy(this -> text, text);
 }
 
-void Binary::Token::setText(const char* bytes, long int bytes_count)
+void Binary::Token::setBytes(const char* bytes, long int bytes_count)
 {
-	this -> text = new char[bytes_count]{0};
-	strncpy(this -> text, bytes, bytes_count);
+	this -> bytes = new char[bytes_count]{0};
+	strncpy(this -> bytes, bytes, bytes_count);
 }
 
 void Binary::Token::setSValue(const char* svalue)
@@ -451,27 +571,46 @@ void Binary::Token::setSValue(const char* svalue)
 	}
 }
 
-int Binary::Token::toNasm()
+int Binary::Token::decompile()
+{
+	assert("Translating from binary to asm is not implemented yet\n");
+	return 0;
+}
+
+int Binary::Token::prepare()
 {
 	return 0;
 }
 
-int Binary::Token::toByte()
+int Binary::Token::compile()
 {
+	if (this -> type == LOCAL_LABEL or this -> type == GLOBAL_LABEL or this -> type == FUNCTION_LABEL or this -> type == BOTH or not this -> text);
+		
+	#define ASM(asm_code, byte_code_length, ...)						 \
+			else if (!strcmp(this -> text, asm_code))					  \
+			{															   \
+				unsigned char byte_code[] = __VA_ARGS__;					\
+				this -> bytes = new char[byte_code_length];					 \
+				this -> bytes_count = byte_code_length;						  \
+				strncpy(this -> bytes, (char*) byte_code, byte_code_length);   \
+				this -> type = BOTH;											\
+			}																	 \
+			
+	#include "../Syntax/asm_syntax.hpp"
+	
+	#undef ASM
+			
+	else
+		printf("\x1b[1;31merror:\x1b[0m can'not compile asm code: \x1b[1m%s\x1b[0m\n", this -> text);
+		
+	if (this -> prev)
+		this -> first_byte_position = this -> prev -> first_byte_position + this -> prev -> bytes_count;
+	
 	return 0;
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-Binary::Header::Header()
-{}
-
-Binary::Header::~Header()
-{}
-
-
-////////////////////////////////////////////////////////////////////////////////
 
 
