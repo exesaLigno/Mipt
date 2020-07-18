@@ -10,7 +10,7 @@ test*.jaul
 
 *~
 
-.docs
+Docs/
 
 Examples/*.hex
 Examples/*.s

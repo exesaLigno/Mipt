@@ -1,7 +1,0 @@
-<map id="Headers/binary.hpp" name="Headers/binary.hpp">
-<area shape="rect" id="node1" title="Описание класса бинарного кода" alt="" coords="109,5,245,32"/>
-<area shape="rect" id="node2" href="$compiler_8hpp.html" title="Заголовочный файл с описанием класса компилятора" alt="" coords="20,80,171,107"/>
-<area shape="rect" id="node5" href="$binary_8cpp.html" title="Исполняемый код класса Binary и вложенных классов" alt="" coords="195,80,321,107"/>
-<area shape="rect" id="node3" href="$jc_8cpp.html" title="Основной файл компилятора" alt="" coords="5,155,63,181"/>
-<area shape="rect" id="node4" href="$compiler_8cpp.html" title="Файл с исполняемым кодом класса Compiler." alt="" coords="87,155,229,181"/>
-</map>

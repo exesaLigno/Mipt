@@ -1,9 +1,0 @@
-<map id="Headers/source.hpp" name="Headers/source.hpp">
-<area shape="rect" id="node1" title="Описание класса исходного кода" alt="" coords="131,5,271,32"/>
-<area shape="rect" id="node2" href="$binary_8hpp.html" title="Описание класса бинарного кода" alt="" coords="133,80,269,107"/>
-<area shape="rect" id="node3" href="$compiler_8hpp.html" title="Заголовочный файл с описанием класса компилятора" alt="" coords="20,155,171,181"/>
-<area shape="rect" id="node7" href="$source_8cpp.html" title="Исполняемый код класса Source." alt="" coords="293,80,423,107"/>
-<area shape="rect" id="node6" href="$binary_8cpp.html" title="Исполняемый код класса Binary и вложенных классов" alt="" coords="195,155,321,181"/>
-<area shape="rect" id="node4" href="$jc_8cpp.html" title="Основной файл компилятора" alt="" coords="5,229,63,256"/>
-<area shape="rect" id="node5" href="$compiler_8cpp.html" title="Файл с исполняемым кодом класса Compiler." alt="" coords="87,229,229,256"/>
-</map>
