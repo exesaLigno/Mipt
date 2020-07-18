@@ -1,3 +1,9 @@
+/*!
+ *	@file source.cpp
+ *	@brief Исполняемый код класса Source
+ */
+
+
 #include "../Headers/source.hpp"
 
 

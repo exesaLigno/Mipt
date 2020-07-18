@@ -1,3 +1,9 @@
+/*!
+ *	@file source.hpp
+ *	@brief Описание класса исходного кода
+ */
+
+
 #pragma once
 
 #include <cstring>
@@ -30,10 +36,14 @@ class Source
 	
 	void makeAST();
 	
+	void rebuildTree();
+	void prepareAST();
+	void dumpAST();
+	
+  private:
 	int calculateIndent(char* text);
 	bool nextLine(char** _text);
 	
-  private:
 	ASN* parseBlock(int indent, char** _text);
 	ASN* parseLine(int indent, char** _text);
 	ASN* getInclude(char** _line);
@@ -53,9 +63,6 @@ class Source
 	void setVariables(ASN* node, const char* varname, int vartype, int varnumber);
 	
   public:
-	void rebuildTree();
-	void prepareAST();
-	void dumpAST();
 	
 	enum SourceTypes
 	{

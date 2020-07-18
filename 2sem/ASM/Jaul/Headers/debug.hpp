@@ -1,9 +1,10 @@
-#pragma once
-
-
 /*!
- *	\brief Debug library for easy SEGFAULT search
+ *	@file debug.hpp
+ *	@brief Библиотека для упрощения отладки программ и поиска SEGFAULT
  */
+
+
+#pragma once
 
 
 #ifndef release
