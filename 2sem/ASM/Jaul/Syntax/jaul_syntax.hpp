@@ -1,3 +1,8 @@
+/*!
+ *	@file jaul_syntax.hpp
+ *	@brief Инструкции для компиляции высокоуровневых операций в ассемблерный код
+ */
+
 #include "../Headers/ast.hpp"
 
 TOKEN("+", 	ASN::ARITHM_OPERATOR, ASN::PLUS, 	 	 "+", "pop rax\npop rbx\nadd rax, rbx\npush rax", "58 5b 48 01 d8 50")
