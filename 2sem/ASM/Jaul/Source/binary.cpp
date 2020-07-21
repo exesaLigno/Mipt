@@ -6,10 +6,8 @@
 
 #include "../Headers/binary.hpp"
 
-Binary::Binary(Source* source)
-{
-	this -> source = source;
-}
+Binary::Binary()
+{}
 
 Binary::~Binary()
 {
@@ -22,47 +20,18 @@ Binary::~Binary()
 
 
 
-void Binary::compile(bool verbose)
+void Binary::importAST(AST* ast)
 {
-	if (this -> source -> source_type == Source::JAUL_SOURCE)
-		this -> compileAst(verbose);
-	
-	else if (this -> source -> source_type == Source::JASM_SOURCE)
-		this -> importNasm(verbose);
-	
-	else if (this -> source -> source_type == Source::JAUL_OBJ)
-		this -> importObj(verbose);
-	
-	else
-		printf("\x1b[1;31merror:\x1b[0m trying to compile non-compilable source \x1b[1m<%s>\x1b[0m\n", this -> source -> name);
-	
-	Token* current = this -> start;
-	
-	while (current)
-	{
-		current -> prepare();
-		current -> compile();
-		current = current -> next;
-	}
-}
-
-
-
-void Binary::compileAst(bool verbose)
-{
-	ASN* current_def = (this -> source -> ast).head -> left;
+	ASN* current_def = ast -> head -> left;
 	
 	while (current_def)
 	{
-		compileDef(current_def -> right);
+		importDef(current_def -> right);
 		current_def = current_def -> left;
 	}
-	
-	if (verbose)
-		printf("\x1b[1m%s:\x1b[0m JAUL source compiled and imported to binary\n", this -> source -> name);
 }
 
-void Binary::compileDef(ASN* node)
+void Binary::importDef(ASN* node)
 {
 	this -> pushBack(Token::FUNCTION_LABEL, node -> svalue);
 	this -> pushBack("pop r13");
@@ -70,10 +39,10 @@ void Binary::compileDef(ASN* node)
 	this -> pushBack("sub rsp, %d", (node -> ivalue) * 8);
 	this -> pushBack("mov r14, rsp");
 	
-	compileBody(node -> left);
+	importBody(node -> left);
 	
 	this -> pushBack("add rsp, %d", (node -> ivalue) * 8);
-	this -> pushBack("push r13");
+	this -> pushBack("push r13"); 
 	
 	if (!strcmp(node -> svalue, "_start"))
 	{
@@ -86,7 +55,7 @@ void Binary::compileDef(ASN* node)
 		this -> pushBack("ret");
 }
 
-void Binary::compileBody(ASN* node)
+void Binary::importBody(ASN* node)
 {
 	int type = node -> type;
 	int optype = node -> ivalue;
@@ -98,7 +67,7 @@ void Binary::compileBody(ASN* node)
 		this -> pushBack("push r15");
 		
 		if (node -> right)
-			compileParameters(node -> right);
+			importParameters(node -> right);
 
 		this -> pushBack("call %s", node -> svalue);
 		
@@ -121,14 +90,14 @@ void Binary::compileBody(ASN* node)
 		this -> pushBack(Token::LOCAL_LABEL, ".cycle%d", node -> vartype);
 		
 		if (node -> right)
-			compileBody(node -> right);
+			importBody(node -> right);
 			
 		this -> pushBack("pop rax");
 		this -> pushBack("test rax, rax");
 		this -> pushBack("jz .exitcycle%d", node -> vartype);
 		
 		if (node -> left)
-			compileBody(node -> left);
+			importBody(node -> left);
 
 		this -> pushBack("jmp .cycle%d", node -> vartype);
 		
@@ -143,14 +112,14 @@ void Binary::compileBody(ASN* node)
 	else if (optype == ASN::IF and type == ASN::CTRL_OPERATOR)
 	{
 		if (node -> right)
-			compileBody(node -> right);
+			importBody(node -> right);
 
 		this -> pushBack("pop rax");
 		this -> pushBack("test rax, rax");
 		this -> pushBack("jz .endif%d", node -> vartype);
 		
 		if (node -> left)
-			compileBody(node -> left);
+			importBody(node -> left);
 
 		this -> pushBack("jmp .exitif%d", node -> vartype);
 		
@@ -161,7 +130,7 @@ void Binary::compileBody(ASN* node)
 		if (node -> parent -> left)
 		{
 			if (node -> parent -> left -> right -> type == ASN::CTRL_OPERATOR and node -> parent -> left -> right -> ivalue == ASN::ELSE)
-				compileBody(node -> parent -> left -> right -> left);
+				importBody(node -> parent -> left -> right -> left);
 		}
 
 		this -> pushBack(Token::LOCAL_LABEL, ".exitif%d", node -> vartype);
@@ -173,25 +142,25 @@ void Binary::compileBody(ASN* node)
 	else
 	{
 		if (node -> right)
-			compileBody(node -> right);
+			importBody(node -> right);
 		
 		if (node -> left)
-			compileBody(node -> left);
+			importBody(node -> left);
 		
-		compileNode(node);
+		importNode(node);
 	}
 }
 
-void Binary::compileParameters(ASN* node)
+void Binary::importParameters(ASN* node)
 {
 	if (node -> left)
-		compileParameters(node -> left);
+		importParameters(node -> left);
 		
 	if (node -> right)
-		compileBody(node -> right);
+		importBody(node -> right);
 }
 
-void Binary::compileNode(ASN* node)
+void Binary::importNode(ASN* node)
 {
 	if (node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR or node -> type == ASN::CTRL_OPERATOR)
 	{
@@ -272,20 +241,14 @@ void Binary::compileNode(ASN* node)
 
 
 
-void Binary::importNasm(bool verbose)
+void Binary::importNasm(const char* nasm_code)
 {
 	printf("\x1b[1;31mNASM import is not implemented yet!\x1b[0m\n");
-	
-	if (verbose)
-		printf("\x1b[1m%s:\x1b[0m JASM code imported to binary\n", this -> source -> name);
 }
 
-void Binary::importObj(bool verbose)
+void Binary::importObj(const char* object_code, long int object_code_length)
 {
 	printf("\x1b[1;31mObjects import is not implemented yet!\x1b[0m\n");
-	
-	if (verbose)
-		printf("\x1b[1m%s:\x1b[0m object imported to binary\n", this -> source -> name);
 }
 
 
@@ -307,7 +270,6 @@ void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char
 		new_token -> prev = this -> end;
 		this -> end = new_token;
 	}
-	
 	new_token -> type = type;
 	if (type == Token::LOCAL_LABEL or type == Token::GLOBAL_LABEL or type == Token::FUNCTION_LABEL)
 		(this -> labels_count)++;
@@ -382,6 +344,96 @@ void Binary::pushBack(int type, const char* text, int ivalue)
 
 
 
+void Binary::compile()
+{
+	Token* current = this -> start;
+	
+	while (current)
+	{
+		current -> prepare();
+		current -> compile();
+		
+		current = current -> next;
+	}
+}
+
+
+
+void Binary::storeLabels()
+{
+	this -> labels = new Token*[this -> labels_count];
+	int counter = 0;
+	
+	Token* current = this -> start;
+	
+	while (current)
+	{
+		if (current -> type == Token::FUNCTION_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::LOCAL_LABEL)
+			(this -> labels)[counter++] = current;
+		
+		current = current -> next;
+	}
+}
+
+
+
+void Binary::optimize()
+{
+	bool optimized = false;
+	
+	// Optimizations here
+	
+	if (optimized)
+		this -> optimize();
+	
+	return;
+}
+
+
+
+void Binary::setLabels()
+{
+	Token* current = this -> start;
+	
+	while (current)
+	{
+		if ((current -> type == Token::NASM_CODE or current -> type == Token::BOTH) and ((current -> text)[0] == 'j' or !strncmp(current -> text, "call", 4))) 
+		{
+			long int label_position = getLabelPosition(current -> svalue);
+			long int delta = label_position ? label_position - ((current -> first_byte_position) + (current -> bytes_count)) : 0;
+			
+			unsigned int parameter = delta;
+			for (int counter = (current -> bytes_count) - (current -> parameter_length); counter < current -> bytes_count; counter++)
+			{
+				int byte = parameter % 256;
+				(current -> bytes)[counter] = byte;
+				parameter = parameter / 256;
+			}
+		}
+		
+		current = current -> next;
+	}
+}
+
+
+
+long int Binary::getLabelPosition(const char* label_name)
+{
+	long int position = 0;
+	for (int counter = 0; counter < this -> labels_count; counter++)
+	{
+		if (!strcmp(label_name, (this -> labels)[counter] -> text))
+		{
+			position = (this -> labels)[counter] -> first_byte_position;
+			break;
+		}
+	}
+	
+	return position;
+}
+
+
+
 int Binary::exportNasm(const char* filename)
 {
 	FILE* export_file = fopen(filename, "a");
@@ -412,7 +464,7 @@ int Binary::exportNasm(const char* filename)
 				fprintf(export_file, current -> text, current -> svalue);
 			
 			else
-				fprintf(export_file, current -> text);
+				fprintf(export_file, "%s", current -> text);
 			
 				
 			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
@@ -510,7 +562,7 @@ int Binary::exportHex(const char* filename)
 				fprintf(hex, current -> text, current -> svalue);
 			
 			else
-				fprintf(hex, current -> text);
+				fprintf(hex, "%s", current -> text);
 				
 			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
 				fprintf(hex, ":");
@@ -579,6 +631,80 @@ int Binary::Token::decompile()
 
 int Binary::Token::prepare()
 {
+	if (this -> type == LOCAL_LABEL or this -> type == GLOBAL_LABEL or this -> type == FUNCTION_LABEL)
+	{
+		if (strstr(this -> text, "%d") != nullptr)
+		{
+			char* parsed = new char[strlen(this -> text) + 8]{0};
+			sprintf(parsed, this -> text, this -> ivalue);
+			delete[] this -> text;
+			this -> text = parsed;
+		}
+	}
+	
+	else if ((this -> text)[0] == 'j')
+	{
+		char* label_name = strchr(this -> text, ' ') + 1;
+		if (not !strncmp(label_name, "%s", 2))
+		{
+			char* new_label_name = new char[strlen(label_name) + 6]{0};
+			
+			if (strstr(label_name, "%d"))
+				sprintf(new_label_name, label_name, this -> ivalue);
+			
+			else
+				strcpy(new_label_name, label_name);
+			
+			this -> svalue = new_label_name;
+			
+			label_name[0] = '%';
+			label_name[1] = 's';
+			label_name[2] = '\0';
+		}
+	}
+	
+	else
+	{
+		int i = 0;
+		while ((strchr("0123456789", (this -> text)[i]) == nullptr or (i == 0 or (i > 0 and strchr(" +-*[({\t", (this -> text)[i - 1]) == nullptr))) and (this -> text)[i] != '\0')
+			i++;
+			
+		char* num_string = new char[10]{0};
+		int j = 0;
+		bool number_founded = false;
+		
+		int number_start = i;
+		
+		while (strchr("0123456789.", (this -> text)[i]) != nullptr and (this -> text)[i] != '\0')
+		{
+			number_founded = true;
+			num_string[j] = (this -> text)[i];
+			i++, j++;
+		}
+		
+		int number_end = i;
+		
+		if (strchr(" +-*])}\t\n\0", (this -> text)[i]) == nullptr)
+			number_founded = false;
+			
+		if (number_founded)
+		{
+			this -> ivalue = atoi(num_string);
+			(this -> text)[number_start] = '\0';
+			
+			char* new_text = new char[strlen(this -> text) + strlen((this -> text) + number_end) + strlen(num_string) + 1]{0};
+			
+			strcpy(new_text, this -> text);
+			strcat(new_text, "%d");
+			strcat(new_text, (this -> text) + number_end);
+			
+			delete[] this -> text;
+			this -> text = new_text;
+		}
+		
+		delete[] num_string;
+	}
+	
 	return 0;
 }
 
@@ -586,7 +712,7 @@ int Binary::Token::compile()
 {
 	if (this -> type == LOCAL_LABEL or this -> type == GLOBAL_LABEL or this -> type == FUNCTION_LABEL or this -> type == BOTH or not this -> text);
 		
-	#define ASM(asm_code, byte_code_length, ...)						 \
+	#define ASM(asm_code, data_length, byte_code_length, ...)			 \
 			else if (!strcmp(this -> text, asm_code))					  \
 			{															   \
 				unsigned char byte_code[] = __VA_ARGS__;					\
@@ -594,7 +720,8 @@ int Binary::Token::compile()
 				this -> bytes_count = byte_code_length;						  \
 				strncpy(this -> bytes, (char*) byte_code, byte_code_length);   \
 				this -> type = BOTH;											\
-			}																	 \
+				this -> parameter_length = data_length;							 \
+			}																	  \
 			
 	#include "../Syntax/asm_syntax.hpp"
 	
@@ -605,6 +732,15 @@ int Binary::Token::compile()
 		
 	if (this -> prev)
 		this -> first_byte_position = this -> prev -> first_byte_position + this -> prev -> bytes_count;
+	
+	
+	int parameter = this -> ivalue;
+	for (int counter = (this -> bytes_count) - (this -> parameter_length); counter < this -> bytes_count; counter++)
+	{
+		int byte = parameter % 256;
+		(this -> bytes)[counter] = byte;
+		parameter = parameter / 256;
+	}
 	
 	return 0;
 }

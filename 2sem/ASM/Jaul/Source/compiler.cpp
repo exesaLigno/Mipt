@@ -139,15 +139,8 @@ Compiler::~Compiler()
 		delete[] this -> source_list;
 	}
 	
-	if (this -> binary_list != nullptr)
-	{
-		for (int counter = 0; counter < this -> source_count; counter++)
-		{
-			if ((this -> binary_list)[counter])
-				delete (this -> binary_list)[counter];
-		}
-		delete[] this -> binary_list;
-	}
+	if (this -> binary)
+		delete (this -> binary);
 
 	if (this -> output_path != nullptr)
 		delete[] this -> output_path;
@@ -339,37 +332,66 @@ void Compiler::dumpAST()
 }
 
 
-/*!
- *	@brief Создание массива скомпилированных исходников
- */
-void Compiler::createBinaries()
-{
-	this -> binary_list = new Binary*[this -> source_count];
-	
-	for (int counter = 0; counter < this -> source_count; counter++)
-		(this -> binary_list)[counter] = new Binary((this -> source_list)[counter]);
-}
+// /*!
+//  *	@brief Создание массива скомпилированных исходников
+//  */
+// void Compiler::createBinaries()
+// {
+// 	this -> binary_list = new Binary*[this -> source_count];
+// 	
+// 	for (int counter = 0; counter < this -> source_count; counter++)
+// 		(this -> binary_list)[counter] = new Binary((this -> source_list)[counter]);
+// }
+// 
+// 
+// /*!
+//  *	@brief Линковка всех Binary объектов в один
+//  */
+// void Compiler::assemble()
+// {
+// 	for (int append_index = 1; append_index < this -> source_count; append_index++)
+// 		(this -> binary_list)[0] -> add((this -> binary_list)[append_index]);
+// }
+// 
+// 
+// /*!
+//  *	@brief Компиляция всех объектов Binary в байт код
+//  */
+// void Compiler::compile()
+// {
+// 	for (int counter; counter < source_count; counter++)
+// 	{
+// 		(this -> binary_list)[counter] -> makeTokens();
+// 	}
+// }
 
 
+
 /*!
- *	@brief Компиляция всех объектов Binary в байт код
+ * 
  */
 void Compiler::compile()
 {
-	for (int counter; counter < source_count; counter++)
-	{
-		(this -> binary_list)[counter] -> compile(this -> verbose);
-	}
-}
-
-
-/*!
- *	@brief Линковка всех Binary объектов в один
- */
-void Compiler::assemble()
-{
+	this -> binary = new Binary;
 	
+	for (int counter = 0; counter < source_count; counter++)
+	{
+		if ((this -> source_list)[counter] -> source_type == Source::JAUL_SOURCE)
+			this -> binary -> importAST((this -> source_list)[counter] -> ast);
+		
+		else if ((this -> source_list)[counter] -> source_type == Source::JASM_SOURCE)
+			this -> binary -> importNasm((this -> source_list)[counter] -> text);
+		
+		else if ((this -> source_list)[counter] -> source_type == Source::JASM_SOURCE)
+			this -> binary -> importObj((this -> source_list)[counter] -> text, (this -> source_list)[counter] -> text_length);
+	}
+	
+	this -> binary -> compile();
+	this -> binary -> storeLabels();
+	this -> binary -> optimize();
+	this -> binary -> setLabels();
 }
+
 
 
 /*!
@@ -381,19 +403,19 @@ void Compiler::write()
 		printf("preproc is not implemented!\n");
 		
 	else if (this -> nasm_listing)
-		(this -> binary_list)[0] -> exportNasm(this -> output_path);
+		this -> binary -> exportNasm(this -> output_path);
 		
 	else if (this -> virtual_compilation)
-		(this -> binary_list)[0] -> exportVirtualExecutable(this -> output_path);
+		this -> binary -> exportVirtualExecutable(this -> output_path);
 		
 	else if (this -> obj_generation)
-		(this -> binary_list)[0] -> exportObj(this -> output_path);
+		this -> binary -> exportObj(this -> output_path);
 		
 	else if (this -> hex_view)
-		(this -> binary_list)[0] -> exportHex(this -> output_path);
+		this -> binary -> exportHex(this -> output_path);
 		
 	else
-		(this -> binary_list)[0] -> exportExecutable(this -> output_path);
+		this -> binary -> exportExecutable(this -> output_path);
 		
 	printf("\x1b[1m%s%s%s%s%s%s\x1b[0m successfully exported to \x1b[1;32m<%s>\x1b[0m\n",
 			this -> only_preprocess ? "Preprocessed source" : "",

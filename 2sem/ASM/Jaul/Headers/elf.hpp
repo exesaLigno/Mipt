@@ -1,3 +1,5 @@
+#pragma once
+
 /*!
  *	@file elf.hpp
  *	@brief Описание класса ELF и его константы
@@ -17,7 +19,7 @@ class ELF
 	ProgramHeader* program_headers = nullptr;	///< Массив заголовков программ
 	SectionHeader* section_headers = nullptr;	///< Массив заголовков секций
 	
-	char* code_section = nullptr;				///< Скомпилированный исполняемый код (.code)
+	char* text_section = nullptr;				///< Скомпилированный исполняемый код (.text)
 	unsigned long int code_section_length = 0;	///< Длина исполняемого кода
 	
 	char* bss_section = nullptr;				///< Данные из секции .bss

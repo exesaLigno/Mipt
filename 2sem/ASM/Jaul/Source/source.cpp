@@ -19,6 +19,7 @@ Source::Source()
 	this -> text_length = 0;
 	this -> text_pointer = NULL;
 	this -> source_type = DEFINITION;
+	this -> ast = new AST;
 }
 
 Source::Source(const char* name)
@@ -32,15 +33,20 @@ Source::Source(const char* name)
 	this -> text_pointer = NULL;
 	
 	this -> source_type = this -> getType();
+	
+	this -> ast = new AST;
 }
 
 Source::~Source()
 {
-	if (this -> name != NULL)
+	if (this -> name != nullptr)
 		delete[] this -> name;
 		
-	if (this -> text != NULL)
+	if (this -> text != nullptr)
 		delete[] this -> text;
+	
+	if (this -> ast != nullptr)
+		delete this -> ast;
 }
 
 short int Source::open()
@@ -127,7 +133,7 @@ void Source::makeAST()
 	
 	int initial_indent = 0;
 	
-	ASN* entry = ast.createNode(ASN::ENTRY);
+	ASN* entry = ast -> createNode(ASN::ENTRY);
 	
 	ASN* result = parseBlock(initial_indent, &(this -> text_pointer));
 	
@@ -213,7 +219,7 @@ ASN* Source::parseBlock(int indent, char** _text)
 		
 		if (line_founded)
 		{
-			ASN* newline = ast.createNode(ASN::LINE);
+			ASN* newline = ast -> createNode(ASN::LINE);
 			newline -> ivalue = this -> current_line;
 			newline -> svalue = new char[strlen(this -> name) + 1];
 			strcpy(newline -> svalue, this -> name);
@@ -301,10 +307,10 @@ ASN* Source::getInclude(char** _line)
 	else
 	{
 		library.makeAST();
-		include -> leftConnect(library.ast.head -> left);
-		include -> rightConnect(library.ast.head -> right);
-		library.ast.head -> left = 0;
-		library.ast.head -> right = 0;
+		include -> leftConnect(library.ast -> head -> left);
+		include -> rightConnect(library.ast -> head -> right);
+		library.ast -> head -> left = 0;
+		library.ast -> head -> right = 0;
 	}
 	
 	return include;
@@ -315,7 +321,7 @@ ASN* Source::getDef(char** _line)
 {
 	(*_line) += 4;
 	
-	ASN* def = ast.createNode(ASN::FUNC, _line);
+	ASN* def = ast -> createNode(ASN::FUNC, _line);
 	
 	(*_line)++;
 	def -> rightConnect(getItemize(_line));
@@ -332,7 +338,7 @@ ASN* Source::getAssignment(char** _line)	// get assignment
 	skip_spaces(*_line);
 	if (**_line == '=' and *(*_line + 1) != '=')
 	{		
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -352,7 +358,7 @@ ASN* Source::getOperators(char** _line)
 
 	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "for", 4) or !strncmp(*_line, "return", 6))
 	{
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		
 		skip_spaces(*_line);
 		ASN* right_branch = getLogic(_line);
@@ -363,7 +369,7 @@ ASN* Source::getOperators(char** _line)
 	
 	else if (!strncmp(*_line, "else", 4))
 	{
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		
 		skip_spaces(*_line);
 		left_branch = operand;		
@@ -389,7 +395,7 @@ ASN* Source::getLogic(char** _line)
 	skip_spaces(*_line);
 	while (!strncmp(*_line, "||", 2) or !strncmp(*_line, "&&", 2))
 	{		
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -413,7 +419,7 @@ ASN* Source::getCmp(char** _line)
 		!strncmp(*_line, ">=", 2) or !strncmp(*_line, "<=", 2) or
 		!strncmp(*_line, ">", 1) or !strncmp(*_line, "<", 1))
 	{
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -438,11 +444,11 @@ ASN* Source::getAddSub(char** _line)
 	{
 		if (not left_branch)
 		{
-			left_branch = ast.createNode(ASN::INT);
+			left_branch = ast -> createNode(ASN::INT);
 			left_branch -> ivalue = 0;
 		}
 		
-		ASN* operand = ast.createNode(_line);;
+		ASN* operand = ast -> createNode(_line);;
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -464,7 +470,7 @@ ASN* Source::getMulDiv(char** _line)
 	skip_spaces(*_line);
 	while (**_line == '*' or **_line == '/' or **_line == '%')
 	{
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -486,7 +492,7 @@ ASN* Source::getPow(char** _line)
 	skip_spaces(*_line);
 	if (**_line == '^')
 	{
-		ASN* operand = ast.createNode(_line);
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
@@ -519,7 +525,7 @@ ASN* Source::getNumVarFunc(char** _line)	// get numbers, variables and functions
 	if (**_line == '-')
 		return 0;
 	
-	ASN* parsed = ast.createNode(_line);
+	ASN* parsed = ast -> createNode(_line);
 	
 	skip_spaces(*_line);
 	if (**_line == '(')
@@ -543,7 +549,7 @@ ASN* Source::getItemize(char** _line)
 	if (**_line == ')')
 		return 0;
 
-	ASN* item = ast.createNode(ASN::ITEM);
+	ASN* item = ast -> createNode(ASN::ITEM);
 	item -> rightConnect(getLogic(_line));
 	
 	skip_spaces(*_line);
@@ -564,7 +570,7 @@ void Source::rebuildTree()
 	
 	ASN* last_function = 0;
 
-	ASN* line = (this -> ast).head -> left;
+	ASN* line = this -> ast -> head -> left;
 	
 	while (line)
 	{
@@ -582,7 +588,7 @@ void Source::rebuildTree()
 				last_function -> leftConnect(def);
 				
 			else
-				(this -> ast).head -> rightConnect(def);
+				this -> ast -> head -> rightConnect(def);
 			
 			last_function = def;
 		}
@@ -604,7 +610,7 @@ void Source::rebuildTree()
 				
 			else
 			{
-				(this -> ast).head -> rightConnect(new_functions);
+				this -> ast -> head -> rightConnect(new_functions);
 				last_function = new_functions;
 			}
 			
@@ -634,30 +640,30 @@ void Source::rebuildTree()
 			line = line -> left;
 	}
 	
-	ASN* tmp = (this -> ast).head -> left;
-	(this -> ast).head -> left = (this -> ast).head -> right;
-	(this -> ast).head -> right = tmp;
+	ASN* tmp = this -> ast -> head -> left;
+	this -> ast -> head -> left = this -> ast -> head -> right;
+	this -> ast -> head -> right = tmp;
 	
-	if ((this -> ast).head -> right)
+	if (this -> ast -> head -> right)
 	{
-		ASN* _start = (this -> ast).head -> right;
-		(this -> ast).head -> right = 0;
+		ASN* _start = this -> ast -> head -> right;
+		this -> ast -> head -> right = 0;
 		
-		ASN* _start_function_node = (this -> ast).createNode(ASN::_START);
-		ASN* _start_def_node = (this -> ast).createNode(ASN::DEF);
+		ASN* _start_function_node = this -> ast -> createNode(ASN::_START);
+		ASN* _start_def_node = this -> ast -> createNode(ASN::DEF);
 		
-		_start_def_node -> leftConnect((this -> ast).head -> left);
+		_start_def_node -> leftConnect(this -> ast -> head -> left);
 		_start_def_node -> rightConnect(_start_function_node);
 		_start_function_node -> leftConnect(_start);
 		
-		(this -> ast).head -> leftConnect(_start_def_node);
+		this -> ast -> head -> leftConnect(_start_def_node);
 	}
 }
 
 
 void Source::prepareAST()
 {
-	ASN* def = (this -> ast).head -> left;
+	ASN* def = this -> ast -> head -> left;
 	
 	while (def)
 	{
@@ -690,7 +696,7 @@ void Source::prepareAST()
 	}
 	
 	int number = 0;
-	enumerateBranching((this -> ast).head, &number);
+	enumerateBranching(this -> ast -> head, &number);
 }
 
 
@@ -756,7 +762,7 @@ void Source::setVariables(ASN* node, const char* varname, int vartype, int varnu
 
 void Source::dumpAST()
 {
-	ast.dumper(this -> name, AST::DELETE_TXT);
+	ast -> dumper(this -> name, AST::DELETE_TXT);
 	printf("\x1b[1m%s:\x1b[0m Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n", this -> name, this -> name);
 }
 

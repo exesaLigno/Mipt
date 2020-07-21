@@ -1,6 +1,8 @@
 /*!
  *	@file binary.hpp
  *	@brief Описание класса бинарного кода
+ *	@todo Сначала импорт в токены, далее линковка (все объекты в первый), далее компиляция и простроение позиций, 
+ *	оптимизации и простановка адресов вызовов
  */
 
 
@@ -8,15 +10,13 @@
 
 #include <cstring>
 #include <cassert>
+#include <cstring>
 #include "ast.hpp"
-#include "source.hpp"
 
 class Binary
 {
   public:
   	class Token;
-	
-	Source* source = nullptr;
 	
 	Token* start = nullptr;
 	Token* end = nullptr;
@@ -24,21 +24,19 @@ class Binary
 	Token** labels = nullptr;
 	unsigned int labels_count = 0;
 	
-	Binary(Source* source);
+	Binary();
 	~Binary();
 	
-	void compile(bool verbose);
+	//------ Abstract syntax tree compilation ------//
+	void importAST(AST* ast);						///< Добавление информации в объект Binary на основе AbstractSyntaxTree
+	void importDef(ASN* node);			///< Вспомогательный метод для importAST (импорт функции)
+	void importBody(ASN* node);			///< Вспомогательный метод для importAST (импорт основных структур кода)
+	void importParameters(ASN* node);	///< Вспомогательный метод для importAST (импорт загрузки параметров функции)
+	void importNode(ASN* node);			///< Вспомогательный метод для importAST (импорт основных типов узлов)
+	//----------------------------------------------//
 	
-	//---- Abstract syntax tree compilation ----//
-	void compileAst(bool verbose);				//
-	void compileDef(ASN* node);					//
-	void compileBody(ASN* node);				//
-	void compileParameters(ASN* node);			//
-	void compileNode(ASN* node);				//
-	//------------------------------------------//
-	
-	void importNasm(bool verbose);		// push back and generate byte code
-	void importObj(bool verbose);		// manual - taking name of func, byte code of func and creating new token
+	void importNasm(const char* nasm_code);
+	void importObj(const char* object_code, long int object_code_length);
 	
 	void pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue);
 	
@@ -53,7 +51,11 @@ class Binary
 	void pushBack(int type, const char* text, int ivalue);		//
 	//----------------------------------------------------------//
 	
-	int translate();
+	void compile();			///< Подготовка токенов и их компиляция в байт-код
+	void storeLabels();		///< Сохранение всех меток в массив в объекте Binary
+	void optimize();		///< TODO Оптимизация байт-кода
+	void setLabels();	///< TODO Высчет позиций меток и их занесение в необходимые места
+	long int getLabelPosition(const char* label_name);
 	
 	int exportNasm(const char* filename);
 	int exportObj(const char* filename);
@@ -69,7 +71,7 @@ class Binary::Token
 	
   protected:
 	int type = EMPTY;
-	
+
 	char* text = nullptr;
 	int text_length = 0;
 	
@@ -80,6 +82,8 @@ class Binary::Token
 	float fvalue = 0;
 	char cvalue = 0;
 	char* svalue = nullptr;
+	
+	int parameter_length = 0;
 
 	unsigned long long int first_byte_position = 0;
 	
@@ -108,7 +112,7 @@ class Binary::Token
 	void setSValue(const char* svalue);
 	~Token();
 	
-	int decompile();	///< Декомпиляция из байт-кода в ассемблерный, если возможно
+	int decompile();	///< TODO Декомпиляция из байт-кода в ассемблерный, если возможно
 	int compile();		///< Компиляция из ассемблерного кода в байт-код
 	int prepare();		///< Подготовка ассемблерной команды, приведение ее к обобщенному виду
 };

@@ -52,7 +52,6 @@ int main(int argc, char* argv[])
 		
 		compiler.makeAST();
 		compiler.dumpAST();
-		compiler.createBinaries();
 		compiler.compile();
 		compiler.write();
 	}

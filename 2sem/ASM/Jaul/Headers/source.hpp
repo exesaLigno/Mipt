@@ -24,7 +24,7 @@ class Source
 	
   public:
 	short int source_type = 0;
-	AST ast;
+	AST* ast = nullptr;
 	
 	Source();
 	Source(const char* name);

@@ -48,8 +48,7 @@ class Compiler
 	//------------------------------------//
 	
 	Source** source_list = nullptr;	///< Массив ссылок на объекты исходных кодов
-	Binary** binary_list = nullptr;	///< Массив ссылок на объекты скомпилированного кода
-		
+	Binary* binary = nullptr;	///< Ссылка на объект скомпилированного кода
 	
   public:
   
@@ -83,9 +82,7 @@ class Compiler
 	void makeAST();
 	void dumpAST();
 	
-	void createBinaries();
 	void compile();
-	void assemble();
 	void write();
 };
 
