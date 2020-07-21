@@ -54,7 +54,7 @@ uninstall:
 	
 .PHONY: clean
 clean:
-	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER)
+	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER) *~ */*~
 	
 
 .PHONY: nasm
