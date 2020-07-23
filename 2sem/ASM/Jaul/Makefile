@@ -14,9 +14,16 @@ ELFPARSER_SOURCES=Accessory/ReadBinary/readBinary.cpp
 ELFPARSER_OBJECTS=$(ELFPARSER_SOURCES:.cpp=.o)
 ELFPARSER=relf
 
+OBJMAKER_SOURCES=Accessory/MakeObject/makeObject.cpp
+OBJMAKER_OBJECTS=$(OBJMAKER_SOURCES:.cpp=.o)
+OBJMAKER=makeobj
 
-all: $(JC) $(JVM) $(ELFPARSER) documentation
+
+all: $(JC) $(JVM) $(ELFPARSER) $(OBJMAKER) documentation
 	
+	
+$(OBJMAKER): $(OBJMAKER_OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJMAKER_OBJECTS) -o $@
 	
 $(JC): $(JC_OBJECTS)
 	$(CC) $(LDFLAGS) $(JC_OBJECTS) -o $@
