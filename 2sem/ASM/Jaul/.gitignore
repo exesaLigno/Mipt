@@ -4,6 +4,7 @@
 jc
 jvm
 relf
+makeobj
 
 test*.jaul
 *.out
@@ -16,3 +17,12 @@ Examples/*.hex
 Examples/*.s
 Examples/*.jo
 Examples/*.jv
+*/*.hex
+
+.kdev4
+Jaul.kdev4
+compiled_nasm
+compiled_nasm.txt
+test
+test.*
+nasm.s
