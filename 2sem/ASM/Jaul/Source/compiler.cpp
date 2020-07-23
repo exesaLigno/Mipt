@@ -288,16 +288,18 @@ void Compiler::showSource()
 
 /*!
  *	@brief Оболочка для вызова метода Source::makeAST()
- *	@todo Добавить проверку, можно ли сгенерировать AST для конкретного исходника
  *	
- *	Для каждого объекта Source создает абстрактное синтаксическое дерево.
+ *	Для каждого объекта Source, для которого это возможно, создает абстрактное синтаксическое дерево.
  */
 void Compiler::makeAST()
 {
 	if (this -> source_list)
 	{
 		for (int counter = 0; counter < this -> source_count; counter++)
-			(this -> source_list)[counter] -> makeAST();
+		{
+			if ((this -> source_list)[counter] -> source_type == Source::JAUL_SOURCE)
+				(this -> source_list)[counter] -> makeAST();
+		}
 	}
 }
 
@@ -332,43 +334,10 @@ void Compiler::dumpAST()
 }
 
 
-// /*!
-//  *	@brief Создание массива скомпилированных исходников
-//  */
-// void Compiler::createBinaries()
-// {
-// 	this -> binary_list = new Binary*[this -> source_count];
-// 	
-// 	for (int counter = 0; counter < this -> source_count; counter++)
-// 		(this -> binary_list)[counter] = new Binary((this -> source_list)[counter]);
-// }
-// 
-// 
-// /*!
-//  *	@brief Линковка всех Binary объектов в один
-//  */
-// void Compiler::assemble()
-// {
-// 	for (int append_index = 1; append_index < this -> source_count; append_index++)
-// 		(this -> binary_list)[0] -> add((this -> binary_list)[append_index]);
-// }
-// 
-// 
-// /*!
-//  *	@brief Компиляция всех объектов Binary в байт код
-//  */
-// void Compiler::compile()
-// {
-// 	for (int counter; counter < source_count; counter++)
-// 	{
-// 		(this -> binary_list)[counter] -> makeTokens();
-// 	}
-// }
-
-
 
 /*!
- * 
+ *	@brief Компиляция на базе всех объектов Source
+ *	
  */
 void Compiler::compile()
 {

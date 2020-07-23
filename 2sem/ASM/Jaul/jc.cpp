@@ -11,11 +11,6 @@
  */
 
 
-/*----------------------------------------------|
-| TODO 	In programm.cpp - symbol by symbol		|
-|		printing								|
-|----------------------------------------------*/
-
 #include "Headers/debug.hpp"
 
 

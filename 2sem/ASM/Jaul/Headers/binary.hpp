@@ -12,6 +12,7 @@
 #include <cassert>
 #include <cstring>
 #include "ast.hpp"
+#include "elf.hpp"
 
 class Binary
 {
@@ -20,6 +21,7 @@ class Binary
 	
 	Token* start = nullptr;
 	Token* end = nullptr;
+	long int size = 0;
 	
 	Token** labels = nullptr;
 	unsigned int labels_count = 0;
@@ -29,14 +31,14 @@ class Binary
 	
 	//------ Abstract syntax tree compilation ------//
 	void importAST(AST* ast);						///< Добавление информации в объект Binary на основе AbstractSyntaxTree
-	void importDef(ASN* node);			///< Вспомогательный метод для importAST (импорт функции)
-	void importBody(ASN* node);			///< Вспомогательный метод для importAST (импорт основных структур кода)
-	void importParameters(ASN* node);	///< Вспомогательный метод для importAST (импорт загрузки параметров функции)
-	void importNode(ASN* node);			///< Вспомогательный метод для importAST (импорт основных типов узлов)
+	void importDef(ASN* node);						///< Вспомогательный метод для importAST (импорт функции)
+	void importBody(ASN* node);						///< Вспомогательный метод для importAST (импорт основных структур кода)
+	void importParameters(ASN* node);				///< Вспомогательный метод для importAST (импорт загрузки параметров функции)
+	void importNode(ASN* node);						///< Вспомогательный метод для importAST (импорт основных типов узлов)
 	//----------------------------------------------//
 	
-	void importNasm(const char* nasm_code);
-	void importObj(const char* object_code, long int object_code_length);
+	void importNasm(const char* nasm_code);	///< TODO Импорт ассемблерного кода
+	void importObj(const char* object_code, long int object_code_length);	///< TODO Импорт объектного файла
 	
 	void pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue);
 	
@@ -54,9 +56,10 @@ class Binary
 	void compile();			///< Подготовка токенов и их компиляция в байт-код
 	void storeLabels();		///< Сохранение всех меток в массив в объекте Binary
 	void optimize();		///< TODO Оптимизация байт-кода
-	void setLabels();	///< TODO Высчет позиций меток и их занесение в необходимые места
-	long int getLabelPosition(const char* label_name);
+	void setLabels();		///< Высчет позиций меток и их занесение в необходимые места
+	long int getLabelPosition(const char* label_name);	///< Поиск адреса метки
 	
+	int exportString(char* destination);
 	int exportNasm(const char* filename);
 	int exportObj(const char* filename);
 	int exportExecutable(const char* filename);

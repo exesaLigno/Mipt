@@ -1,10 +1,12 @@
-#pragma once
-
 /*!
  *	@file elf.hpp
  *	@brief Описание класса ELF и его константы
  */
 
+#pragma once
+
+#include <cstring>
+#include <cstdio>
 
 typedef unsigned char byte;
 
@@ -14,22 +16,43 @@ class ELF
 	class FileHeader;
 	class ProgramHeader;
 	class SectionHeader;
-	
+
 	FileHeader* file_header = nullptr;			///< Заголовок ELF64 файла
+	
 	ProgramHeader* program_headers = nullptr;	///< Массив заголовков программ
+	int program_headers_count = 0;				///< Количество заголовков программ
+	
 	SectionHeader* section_headers = nullptr;	///< Массив заголовков секций
+	int section_headers_count = 0;				///< Количество заголовков секций
+	
+	
+	char* text = nullptr;
+	unsigned long int text_length = 0;
+
 	
 	char* text_section = nullptr;				///< Скомпилированный исполняемый код (.text)
-	unsigned long int code_section_length = 0;	///< Длина исполняемого кода
-	
+	unsigned long int text_section_length = 0;	///< Длина исполняемого кода .text
+
 	char* bss_section = nullptr;				///< Данные из секции .bss
 	unsigned long int bss_section_length = 0;	///< Длина секции .bss
-	
+
 	char* data_section = nullptr;				///< Данные из секции .data
 	unsigned long int data_section_length = 0;	///< Длина секции .data
+
+	void addText(char* text_section, unsigned long int text_section_length);
+	void addBss(char* bss_section, unsigned long int bss_section_length);
+	void addData(char* data_section, unsigned long int data_section_length);
 	
+	void assemble();
 	
-	ELF();
+	void addBin(const int bytes_count, const int number);
+	void addBin(const char* string);
+	void substituteNumber(long long int position, int bytes_count, int number);
+	void makeHeader();
+	
+	void write(const char* filename);
+
+	ELF(char* text, unsigned long int text_length);
 	~ELF();
 };
 
@@ -37,38 +60,38 @@ class ELF
 class ELF::FileHeader
 {
 	friend ELF;
-	
+
   public:
-	
+
 	//! Константы заголовка файла
 	enum Constants
 	{
 		ELFCLASSNONE = 0,						///< Некорректный класс
 		ELFCLASS32 = 1,							///< 32-битный объектный файл
 		ELFCLASS64 = 2,							///< 64-битный объектный файл
-		
+
 		ELFDATANONE = 0,						///< Некорректный тип
 		ELFDATA2LSB = 1,						///< Little Endian
 		ELFDATA2MSB = 2,						///< Big Endian
-		
+
 		EV_NONE = 0,							///< Устаревшая версия
 		EV_CURRENT = 1,							///< Текущая версия
-		
+
 		ELFOSABI_GNU = 3,						///< GNU/Linux формат
-		
+
 		ET_NONE = 0,							///< Неопределенный тип
 		ET_REL = 1,								///< Перемещаемый файл
 		ET_EXEC = 2,							///< Исполняемый файл
 		ET_DYN = 3,								///< Разделяемый объектный файл
 		ET_CORE = 4,							///< Core file
-		
+
 		EM_NONE = 0,							///< Неопределенный тип платформы
 		EM_386 = 3,								///< Intel 80386
 		EM_PPC = 20,							///< PowerPC
 		EM_PPC64 = 21,							///< 64-bit PowerPC
 		EM_X86_64 = 62							///< x86-64
 	};
-  	
+
 	byte EI_MAG[4] = {0x7f, 0x45, 0x4c, 0x46};	///< Магические числа заголовка ELF
 	byte EI_CLASS = ELFCLASS64;					///< Разрядность скомпилированной программы
 	byte EI_DATA = ELFDATA2LSB; 				///< Big или Little Endian
@@ -76,23 +99,23 @@ class ELF::FileHeader
 	byte EI_OSABI = ELFOSABI_GNU;				///< ABI расширение
 	byte EI_ABIVERSION = 0;						///< Версия ABI
 	byte EI_PAD[7] = {};						///< Bytes Padding (резервные байты на будущее)
-	
+
 	unsigned short int e_type = ET_EXEC;		///< Тип ELF файла
 	unsigned short int e_machine = EM_X86_64;	///< Архитектура платформы
 	unsigned int e_version = EV_CURRENT;		///< Номер версии формата ELF
-	
-	unsigned long int e_entry = 0;				///< Виртуальный адрес точки входа
-	unsigned long int e_phoff = 0;				///< Смещение таблицы заголовков программы от начала файла в байтах
+
+	unsigned long int e_entry = 0x401000;		///< Виртуальный адрес точки входа
+	unsigned long int e_phoff = 0x40;			///< Смещение таблицы заголовков программы от начала файла в байтах
 	unsigned long int e_shoff = 0;				///< Смещение таблицы заголовков секций от начала файла в байтах
-	
+
 	unsigned int e_flags = 0;					///< Флаги, зависящие от процессора
 	unsigned short int e_ehsize = 64;			///< Размер заголовка
 	unsigned short int e_phentsize = 56;		///< Размер одного заголовка программы
-	unsigned short int e_phnum = 0;				///< Количество заголовков программы
+	unsigned short int e_phnum = 0;				///< Количество заголовков программы (Всегда 2 вроде ???)
 	unsigned short int e_shentsize = 64;		///< Размер одного заголовка секции
-	unsigned short int e_shnum = 0;				///< Число заголовков секций
-	unsigned short int e_shstrndx = 0;			///< Индекс записи .shstrtab в таблице заголовков секций
-	
+	unsigned short int e_shnum = 0;				///< Число заголовков секций (Пустая, shstrtab, .text, .bss? .data?)
+	unsigned short int e_shstrndx = 0;			///< Индекс записи .shstrtab в таблице заголовков секций (Последняя)
+
 	FileHeader();
 	~FileHeader();
 };
@@ -115,23 +138,23 @@ class ELF::ProgramHeader
 		PT_SHLIB = 5,				///< Тип зарезервирован, но его смысл не определен
 		PT_PHDR = 6,				///< Местоположение и размер таблицы заголовков программы
 		PT_TLS = 7,					///< Шаблон Thread-Local Storage
-		
+
 		PF_X = 0x1,					///< Разрешение на исполнение
 		PF_W = 0x2,					///< Разрешение на запись
 		PF_R = 0x4,					///< Разрешение на чтение
 		PF_MASKOS = 0x0ff00000,		///< Маска значений, зависящих от операционной системы
 		PF_MASKPROC = 0xf0000000	///< Маска значение, зависящих от процессора
 	};
-  	
-	unsigned int p_type = PT_NULL;	///< Тип сегмента, который описывает данный заголовок
-	unsigned int p_flags = PF_X;	///< Флаги сегмента (для ELF64)
-	unsigned long int p_offset = 0;	///< Смещение сегмента от начала файла
-	unsigned long int p_vaddr = 0;	///< Виртуальный адрес сегмента в памяти
-	unsigned long int p_paddr = 0;	///< Физический адрес сегмента
-	unsigned long int p_filesz = 0;	///< Размер сегмента в файле
-	unsigned long int p_memsz = 0;	///< Размер сегмента в памяти
-	unsigned long int p_align = 0;	///< Выравнивание сегмента
-	
+
+	unsigned int p_type = PT_LOAD;		///< Тип сегмента, который описывает данный заголовок
+	unsigned int p_flags = PF_R;		///< Флаги сегмента (для ELF64)
+	unsigned long int p_offset = 0;		///< Смещение сегмента от начала файла
+	unsigned long int p_vaddr = 0;		///< Виртуальный адрес сегмента в памяти
+	unsigned long int p_paddr = 0;		///< Физический адрес сегмента
+	unsigned long int p_filesz = 0;		///< Размер сегмента в файле
+	unsigned long int p_memsz = 0;		///< Размер сегмента в памяти
+	unsigned long int p_align = 0x1000;	///< Выравнивание сегмента
+
 	ProgramHeader();
 	~ProgramHeader();
 };
@@ -142,7 +165,7 @@ class ELF::SectionHeader
 	friend ELF;
 
   public:
-	
+
 	//! Константы заголовка секции
 	enum Constants
 	{
@@ -163,7 +186,7 @@ class ELF::SectionHeader
 		SHT_PREINIT_ARRAY = 16,			///< Содержит массив указателей на функции, вызываемые до инициализации программы
 		SHT_GROUP = 17,					///< Секция с определением группы секций
 		SHT_SYMTAB_SHNDX = 18,			///< Секция связана с таблицей символов
-		
+
 		SHF_WRITE = 0x1,				///< Разрешение на запись
 		SHF_ALLOC = 0x2,				///< Занимает память во время выполнения
 		SHF_EXECINSTR = 0x4,			///< Содержит исполняемые машинные инструкции
@@ -178,18 +201,18 @@ class ELF::SectionHeader
 		SHF_MASKOS = 0x0ff00000,		///< Маска ОС
 		SHF_MASKPROC = 0xf0000000		///< Маска процессора
 	};
-  	
+
 	unsigned int sh_name = 0;			///< Смещение названия секции в .shstrtab
 	unsigned int sh_type = SHT_NULL;	///< Тип заголовка
 	unsigned long int sh_flags = 0;		///< Атрибуты секции
 	unsigned long int sh_addr = 0;		///< Адрес, в который необходимо загружать секцию
 	unsigned long int sh_offset = 0;	///< Смещение секции от начала файла в байтах
 	unsigned long int sh_size = 0;		///< Размер секции в файле
-	unsigned int sh_link = 0;			///< Индекс ассоциированной секции
-	unsigned int sh_info = 0;			///< Дополнительная информация о секции
-	unsigned long int sh_addralign = 0;	///< Необходимое выравнивание секции
-	unsigned long int sh_entsize = 0;	///< Размер в байтах каждой записи (Если они одинакого размера)
-	
+	unsigned int sh_link = 0;			///< Индекс ассоциированной секции (Всегда 0 в рамках компилятора)
+	unsigned int sh_info = 0;			///< Дополнительная информация о секции (Всегда 0 в рамках компилятора)
+	unsigned long int sh_addralign = 0;	///< Необходимое выравнивание секции (0x10 для .text, 0x1 для shstrtab)
+	unsigned long int sh_entsize = 0;	///< Размер в байтах каждой записи (Если они одинакого размера) (Всегда 0 в рамках компилятора)
+
 	SectionHeader();
 	~SectionHeader();
 };
