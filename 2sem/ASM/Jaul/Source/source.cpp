@@ -89,7 +89,7 @@ short int Source::open()
 
 short int Source::getType()
 {
-	const char* extension = strchr(name, '.');
+	const char* extension = strrchr(name, '.');
 	
 	if (!strcmp(extension, ".j"))
 		return JAUL_SOURCE;
@@ -97,7 +97,7 @@ short int Source::getType()
 	else if (!strcmp(extension, ".s"))
 		return JASM_SOURCE;
 		
-	else if (!strcmp(extension, ".so"))
+	else if (!strcmp(extension, ".jo"))
 		return JAUL_OBJ;
 		
 	else if (!strcmp(extension, ".jv"))
@@ -111,7 +111,7 @@ short int Source::getType()
 void Source::print()
 {
 	if (this -> name)
-		printf("\n\x1b[1;32m%s\x1b[0m\n\n", this -> name);
+		printf("\n\x1b[1;32m%s\x1b[0m (type = %d)\n\n", this -> name, this -> source_type);
 		
 	if (this -> text)
 		printf("%s\n", this -> text);

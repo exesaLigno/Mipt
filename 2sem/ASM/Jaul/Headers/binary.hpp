@@ -41,6 +41,7 @@ class Binary
 	void importObj(const char* object_code, long int object_code_length);	///< TODO Импорт объектного файла
 	
 	void pushBack(int type, const char* text, int ivalue, float fvalue, char cvalue, const char* svalue);
+	void pushBytes(const char* function, long int function_length);
 	
 	//----------- Just a covers for default pushBack -----------//
 	void pushBack(const char* nasm_code);						//

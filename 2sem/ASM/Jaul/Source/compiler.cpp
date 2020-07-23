@@ -110,6 +110,9 @@ Compiler::Compiler(int argc, char* argv[])
 			else if (this -> hex_view)
 				strcat(this -> output_path, ".hex");
 		}
+		
+		if (not this -> virtual_compilation)
+			this -> addPath(".std/stdio.jo");
 	}
 }
 
@@ -351,8 +354,11 @@ void Compiler::compile()
 		else if ((this -> source_list)[counter] -> source_type == Source::JASM_SOURCE)
 			this -> binary -> importNasm((this -> source_list)[counter] -> text);
 		
-		else if ((this -> source_list)[counter] -> source_type == Source::JASM_SOURCE)
+		else if ((this -> source_list)[counter] -> source_type == Source::JAUL_OBJ)
 			this -> binary -> importObj((this -> source_list)[counter] -> text, (this -> source_list)[counter] -> text_length);
+		
+		else
+			DEBUG
 	}
 	
 	this -> binary -> compile();
@@ -385,7 +391,7 @@ void Compiler::write()
 		
 	else
 		this -> binary -> exportExecutable(this -> output_path);
-		
+
 	printf("\x1b[1m%s%s%s%s%s%s\x1b[0m successfully exported to \x1b[1;32m<%s>\x1b[0m\n",
 			this -> only_preprocess ? "Preprocessed source" : "",
 			this -> nasm_listing ? "Nasm listing" : "",

@@ -247,8 +247,52 @@ void Binary::importNasm(const char* nasm_code)
 }
 
 void Binary::importObj(const char* object_code, long int object_code_length)
+{	
+	long int counter = 0;
+	
+	while (counter < object_code_length - 1)
+	{
+		int funcname_length = *((int*) (object_code + counter));
+		counter += sizeof(int);
+		
+		char* funcname = new char[funcname_length + 1]{0};
+		strncpy(funcname, object_code + counter, funcname_length);
+		counter += funcname_length;
+		
+		this -> pushBack(Token::FUNCTION_LABEL, funcname);
+		
+		int function_length = *((long int*) (object_code + counter));
+		counter += sizeof(long int);
+		
+		char* function = new char[function_length]{0};
+		memcpy(function, object_code + counter, function_length);
+		counter += function_length;
+		
+		this -> pushBytes(function, function_length);
+	}
+}
+
+
+void Binary::pushBytes(const char* function, long int function_length)
 {
-	printf("\x1b[1;31mObjects import is not implemented yet!\x1b[0m\n");
+	Token* new_token = new Token;
+	new_token -> container = this;
+	
+	if (not this -> start)
+	{
+		this -> start = new_token;
+		this -> end = new_token;
+	}
+	
+	else
+	{
+		this -> end -> next = new_token;
+		new_token -> prev = this -> end;
+		this -> end = new_token;
+	}
+	
+	new_token -> type = Token::BYTE_CODE;
+	new_token -> setBytes(function, function_length);
 }
 
 
@@ -270,6 +314,7 @@ void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char
 		new_token -> prev = this -> end;
 		this -> end = new_token;
 	}
+	
 	new_token -> type = type;
 	if (type == Token::LOCAL_LABEL or type == Token::GLOBAL_LABEL or type == Token::FUNCTION_LABEL)
 		(this -> labels_count)++;
@@ -549,26 +594,38 @@ int Binary::exportHex(const char* filename)
 
 	while (current)
 	{
-		if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
+		if (current -> text)
 		{
-			fprintf(hex, "  %7llu |                                | \n", current -> first_byte_position);
-			fprintf(hex, "->%7llu | ", current -> first_byte_position);
+			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
+			{
+				fprintf(hex, "  %7llu |                                | \n", current -> first_byte_position);
+				fprintf(hex, "->%7llu | ", current -> first_byte_position);
+			}
+			else if (!strncmp(current -> text, "call ", 5) or !strncmp(current -> text, "jmp ", 4) or
+					 !strncmp(current -> text, "jz ", 3))
+				fprintf(hex, "<-%7llu | ", current -> first_byte_position);
+			else
+				fprintf(hex, "  %7llu | ", current -> first_byte_position);
 		}
-		else if (!strncmp(current -> text, "call ", 5) or !strncmp(current -> text, "jmp ", 4) or
-				 !strncmp(current -> text, "jz ", 3))
-			fprintf(hex, "<-%7llu | ", current -> first_byte_position);
+		
 		else
 			fprintf(hex, "  %7llu | ", current -> first_byte_position);
-
+		
+		
+		
 		if (current -> bytes)
 		{
 			for (int counter = 0; counter < current -> bytes_count; counter++)
+			{
 				fprintf(hex, "%02x ", (unsigned char) (current -> bytes)[counter]);
+				if (counter % 10 == 9)
+					fprintf(hex, " |\n  %7llu | ", current -> first_byte_position + counter + 1);
+			}
 		}
 
-		for (int counter = 0; counter < (10 - current -> bytes_count); counter++)
+		for (int counter = 0; counter < (10 - (current -> bytes_count) % 10); counter++)
 			fprintf(hex, "   ");
-
+		
 		fprintf(hex, " | ");
 
 		if (current -> text)
@@ -594,7 +651,7 @@ int Binary::exportHex(const char* filename)
 			if (current -> type == Token::LOCAL_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::FUNCTION_LABEL)
 				fprintf(hex, ":");
 		}
-
+		
 		fprintf(hex, "\n");
 
 		current = current -> next;
@@ -638,7 +695,8 @@ void Binary::Token::setText(const char* text)
 void Binary::Token::setBytes(const char* bytes, long int bytes_count)
 {
 	this -> bytes = new char[bytes_count]{0};
-	strncpy(this -> bytes, bytes, bytes_count);
+	this -> bytes_count = bytes_count;
+	memcpy(this -> bytes, bytes, bytes_count);
 }
 
 void Binary::Token::setSValue(const char* svalue)
@@ -658,7 +716,10 @@ int Binary::Token::decompile()
 
 int Binary::Token::prepare()
 {
-	if (this -> type == LOCAL_LABEL or this -> type == GLOBAL_LABEL or this -> type == FUNCTION_LABEL)
+	if (this -> type == BOTH or this -> type == BYTE_CODE)
+		return 0;
+	
+	else if (this -> type == LOCAL_LABEL or this -> type == GLOBAL_LABEL or this -> type == FUNCTION_LABEL)
 	{
 		if (strstr(this -> text, "%d") != nullptr)
 		{
@@ -745,7 +806,7 @@ int Binary::Token::compile()
 				unsigned char byte_code[] = __VA_ARGS__;					\
 				this -> bytes = new char[byte_code_length];					 \
 				this -> bytes_count = byte_code_length;						  \
-				strncpy(this -> bytes, (char*) byte_code, byte_code_length);   \
+				memcpy(this -> bytes, (char*) byte_code, byte_code_length);    \
 				this -> type = BOTH;											\
 				this -> parameter_length = data_length;							 \
 			}																	  \
