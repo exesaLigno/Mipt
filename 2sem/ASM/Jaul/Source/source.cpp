@@ -138,8 +138,501 @@ void Source::makeAST()
 	ASN* result = parseBlock(initial_indent, &(this -> text_pointer));
 	
 	entry -> leftConnect(result);
-	this -> rebuildTree();
-	this -> prepareAST();
+}
+
+
+void Source::optimizeAST()
+{
+	foldConstants(this -> ast -> head);
+}
+
+
+void Source::foldConstants(ASN* node)
+{
+	if (node -> left)
+		foldConstants(node -> left);
+	
+	if (node -> right)
+		foldConstants(node -> right);
+	
+	if (node -> type == ASN::ARITHM_OPERATOR)
+		foldArithmeticConstants(node);
+	
+	else if (node -> type == ASN::CMP_OPERATOR)
+		foldCmpConstants(node);
+	
+	else if (node -> type == ASN::CTRL_OPERATOR)
+		foldCtrlConstants(node);
+}
+
+
+void Source::foldArithmeticConstants(ASN* node)
+{
+	switch (node -> ivalue)
+	{
+		case ASN::PLUS:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue + node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)
+				{
+					ASN* right = node -> right;
+					node -> right = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(right);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(right);
+					
+					delete node;
+				}
+
+				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
+				{
+					ASN* left = node -> left;
+					node -> left = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(left);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(left);
+					
+					delete node;
+				}
+			}
+		
+			break;
+		}
+		
+		case ASN::MINUS:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue - node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+// 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)	///< unary "-" with "neg" command working incorrect
+// 				{
+// 					node -> left = node -> right;
+// 					node -> right = nullptr;
+// 					
+// 					node -> ivalue = ASN::UNARY_MINUS;
+// 				}
+				
+				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
+				{
+					ASN* left = node -> left;
+					node -> left = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(left);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(left);
+					
+					delete node;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::MULTIPLY:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue * node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 1)
+				{
+					ASN* right = node -> right;
+					node -> right = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(right);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(right);
+					
+					delete node;
+				}
+
+				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 1)
+				{
+					ASN* left = node -> left;
+					node -> left = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(left);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(left);
+					
+					delete node;
+				}
+				
+				else if ((node -> right -> type == ASN::INT and node -> right -> ivalue == 0) or (node -> left -> type == ASN::INT and node -> left -> ivalue == 0))
+				{
+					delete node -> right;
+					node -> right = nullptr;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					node -> type = ASN::INT;
+					node -> ivalue = 0;
+				}
+			}
+			
+			break;
+		}
+	}
+}
+
+
+void Source::foldCmpConstants(ASN* node)
+{
+	switch (node -> ivalue)
+	{
+		case ASN::EQUAL:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue == node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::NOT_EQUAL:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue != node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::MORE:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue > node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::MORE_EQ:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue >= node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::LESS:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue < node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::LESS_EQ:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue <= node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::AND:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue and node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = 0;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = 0;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+						
+			break;
+		}
+		
+		case ASN::OR:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::INT and node -> right -> type == ASN::INT)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = node -> left -> ivalue or node -> right -> ivalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 1)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = 1;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+				
+				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 1)
+				{
+					node -> type = ASN::INT;
+					node -> ivalue = 1;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+				}
+			}
+						
+			break;
+		}
+	}
+}
+
+
+void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
+{
+	switch (node -> ivalue)
+	{
+		case ASN::IF:
+		{
+			if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
+			{
+				node -> parent -> parent -> leftConnect(node -> parent -> left);
+				ASN* next_line = node -> parent -> left;
+				
+				node -> parent -> left = nullptr;
+				delete node -> parent;
+				
+				if (next_line)
+				{				
+					if (next_line -> right -> type == ASN::CTRL_OPERATOR and next_line -> right -> ivalue == ASN::ELSE)
+					{
+						next_line -> parent -> leftConnect(next_line -> right -> left);
+						
+						ASN* line = next_line -> right -> left;
+						if (line)
+						{
+							while (line -> left)
+								line = line -> left;
+						}
+						
+						line -> leftConnect(next_line -> left);
+						
+						next_line -> left = nullptr;
+						next_line -> right -> left = nullptr;
+						
+						delete next_line;
+					}
+				}
+			}
+			
+			else if (node -> right -> type == ASN::INT and node -> right -> ivalue != 0)
+			{
+				node -> parent -> parent -> leftConnect(node -> left);
+				
+				ASN* line = node -> left;
+				
+				node -> left = nullptr;
+				
+				if (line)
+				{
+					while (line -> left)
+						line = line -> left;
+				}
+				
+				line -> leftConnect(node -> parent -> left);
+				
+				ASN* next_line = node -> parent -> left;
+				
+				node -> parent -> left = nullptr;
+				
+				delete node -> parent;
+				
+				if (next_line)
+				{
+					if (next_line -> right -> type == ASN::CTRL_OPERATOR and next_line -> right -> ivalue == ASN::ELSE)
+					{
+						next_line -> parent -> leftConnect(next_line -> left);
+						next_line -> left = nullptr;
+						
+						delete next_line;
+					}
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::WHILE:
+		{
+			if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
+			{
+				node -> parent -> parent -> leftConnect(node -> parent -> left);
+				node -> parent -> left = nullptr;
+				delete node -> parent;
+			}
+			
+			break;
+		}
+	}
+}
+
+
+
+
+void Source::prepareAST()
+{
+	this -> splitFunctions();
+	this -> enumerateMembers();
 }
 
 
@@ -563,7 +1056,7 @@ ASN* Source::getItemize(char** _line)
 }
 
 
-void Source::rebuildTree()
+void Source::splitFunctions()
 {
 	if (this -> source_type != JAUL_SOURCE)
 		return;
@@ -661,7 +1154,7 @@ void Source::rebuildTree()
 }
 
 
-void Source::prepareAST()
+void Source::enumerateMembers()
 {
 	ASN* def = this -> ast -> head -> left;
 	

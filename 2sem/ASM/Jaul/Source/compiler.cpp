@@ -301,7 +301,14 @@ void Compiler::makeAST()
 		for (int counter = 0; counter < this -> source_count; counter++)
 		{
 			if ((this -> source_list)[counter] -> source_type == Source::JAUL_SOURCE)
+			{
 				(this -> source_list)[counter] -> makeAST();
+				
+				if (this -> optimization_level > 0)
+					(this -> source_list)[counter] -> optimizeAST();
+				
+				(this -> source_list)[counter] -> prepareAST();
+			}
 		}
 	}
 }
@@ -356,14 +363,14 @@ void Compiler::compile()
 		
 		else if ((this -> source_list)[counter] -> source_type == Source::JAUL_OBJ)
 			this -> binary -> importObj((this -> source_list)[counter] -> text, (this -> source_list)[counter] -> text_length);
-		
-		else
-			DEBUG
 	}
 	
 	this -> binary -> compile();
 	this -> binary -> storeLabels();
-	this -> binary -> optimize();
+	
+	if (this -> optimization_level > 1)
+		this -> binary -> optimize();
+	
 	this -> binary -> setLabels();
 }
 

@@ -35,9 +35,9 @@ class Source
 	void print();
 	
 	void makeAST();
-	
-	void rebuildTree();
+	void optimizeAST();
 	void prepareAST();
+	
 	void dumpAST();
 	
   private:
@@ -58,9 +58,17 @@ class Source
 	ASN* getNumVarFunc(char** _line);
 	ASN* getItemize(char** _line);
 	
+	void splitFunctions();
+	void enumerateMembers();
+	
 	void enumerateBranching(ASN* node, int* number);
 	char* getUnnumeratedVariable(ASN* node);
 	void setVariables(ASN* node, const char* varname, int vartype, int varnumber);
+	
+	void foldConstants(ASN* node);
+	void foldArithmeticConstants(ASN* node);
+	void foldCmpConstants(ASN* node);
+	void foldCtrlConstants(ASN* node);
 	
   public:
 	
