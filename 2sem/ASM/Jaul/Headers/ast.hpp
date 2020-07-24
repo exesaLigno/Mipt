@@ -65,7 +65,7 @@ class AbstractSyntaxTree
 	  	{
 	  		NOP,
 	  		PLUS, MINUS, MULTIPLY, DIVIDE, POWER,				// ariphmetics operators
-	  		MODULO, INT_DIVISION,
+	  		MODULO, INT_DIVISION, UNARY_MINUS,
 	  		
 	  		EQUAL, NOT_EQUAL, MORE, LESS, MORE_EQ, LESS_EQ,		// comparison operators
 	  		AND, OR,
@@ -87,6 +87,8 @@ class AbstractSyntaxTree
 		Node(char** text);
 		Node(const Node& that) = delete;
 		~Node();
+		
+		void flush();
 		
 		void leftConnect(Node* left);
 		void leftConnect(AbstractSyntaxTree* left);

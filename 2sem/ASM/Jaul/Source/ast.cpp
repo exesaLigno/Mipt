@@ -44,16 +44,15 @@ AbstractSyntaxTree::Node::Node(char** text)
 	char* token = new char[token_len + 1]{0};
 	strncpy(token, token_start, token_len);
 	
-	if(0)
-		std::cout << "\x1b[1;31mbullshit\n\x1b[0m";
-
-	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
-			else if (!strcmp(token, string))										\
-			{																		\
-				this -> type = token_type;											\
-				this -> ivalue = token_number;										\
-				delete[] token;														\
-			}																		\
+	if(false);
+	
+	#define TOKEN(string, token_type, token_number, dump, nasm_code)		\
+			else if (!strcmp(token, string))								\
+			{																\
+				this -> type = token_type;									\
+				this -> ivalue = token_number;								\
+				delete[] token;												\
+			}																\
 			
 	#include "../Syntax/jaul_syntax.hpp"
 	
@@ -180,6 +179,25 @@ AbstractSyntaxTree::Node::~Node()
 	if (this -> container)
 		(this -> container -> nodes_count)--;
 }
+
+
+void AbstractSyntaxTree::Node::flush()
+{
+	this -> type = 0;
+	this -> ivalue = 0;
+	this -> fvalue = 0;
+	this -> cvalue = 0;
+	
+	if (this -> svalue)
+	{
+		delete this -> svalue;
+		this -> svalue = nullptr;
+	}
+	
+	this -> LValue = false;
+	this -> vartype = 0;
+}
+
 
 
 void AbstractSyntaxTree::Node::leftConnect(Node* left)
@@ -315,9 +333,9 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 	else if (this -> type == ITEM)
 		out << "item";
 
-	#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)					\
-			else if (this -> type == token_type and this -> ivalue == token_number)				\
-				out << "OPERATOR | " << dump;													\
+	#define TOKEN(string, token_type, token_number, dump, nasm_code)					\
+			else if (this -> type == token_type and this -> ivalue == token_number)		\
+				out << "OPERATOR | " << dump;											\
 			
 	#include "../Syntax/jaul_syntax.hpp"
 	
