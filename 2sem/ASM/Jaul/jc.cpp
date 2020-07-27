@@ -25,28 +25,18 @@ int main(int argc, char* argv[])
 	int status = Compiler::OK;
 	
 	Compiler compiler(argc, argv);
-
-	if (compiler.mode() == Compiler::ERROR)
-	{
-		compiler.showHelp();
-		status = Compiler::UNKNOWN_PARAMETER;
-	}
 	
-	else if (compiler.mode() == Compiler::HELP)
-	{
-		compiler.showHelp();
-		status = Compiler::OK;
-	}
+	compiler.showHelp();
+	compiler.showSettings();
 	
-	else
-	{
-		compiler.showSettings();
-		
+	if (compiler.status == Compiler::OK)
+	{		
 		compiler.readSource();
 		compiler.showSource();
 		
 		compiler.makeAST();
 		compiler.dumpAST();
+
 		compiler.compile();
 		compiler.write();
 	}

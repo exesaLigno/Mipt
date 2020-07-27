@@ -16,16 +16,19 @@ AbstractSyntaxTree::Node::Node(char** text)
 	this -> svalue = 0;
 	this -> vartype = 0;
 	this -> LValue = false;
-	
+		
 	int first_sym = 0;
 	if (isLetter(**text))
 		first_sym = LETTER;
 		
-	if (isNumber(**text))
+	else if (isNumber(**text))
 		first_sym = NUMBER;
 		
-	if (isOperand(**text))
+	else if (isOperand(**text))
 		first_sym = SPECSYMBOL;
+	
+	else
+		return;
 		
 	int token_len = 0;
 	char* token_start = *text;
@@ -307,10 +310,75 @@ const char* AbstractSyntaxTree::Node::colorize()
 }
 
 
+void AbstractSyntaxTree::Node::print()
+{
+	if (this -> type == UNKNOWN)
+	{
+		printf("unknown operator");
+		
+		if (this -> svalue)
+			printf(" (%s)", this -> svalue);
+	}
+
+	else if (this -> type == ENTRY)
+		printf("entry");
+	
+	else if (this -> type == LINE)
+		printf("<%s:%d>", this -> svalue, this -> ivalue);
+
+	else if (this -> type == INCLUDE)
+		printf("include of %s", this -> svalue);
+
+	else if (this -> type == FUNC)
+		printf("function %s", this -> svalue);
+	
+	else if (this -> type == ITEM)
+		printf("item");
+	
+	#define TOKEN(string, token_type, token_number, dump, nasm_code)			\
+	else if (this -> type == token_type and this -> ivalue == token_number)		\
+		printf("%s", dump);														\
+
+	#include "../Syntax/jaul_syntax.hpp"
+
+	#undef TOKEN
+
+	else if (this -> type == INT)
+		printf("%d", this -> ivalue);
+	
+	else if (this -> type == FLOAT)
+		printf("%g", this -> fvalue);
+	
+	else if (this -> type == CHAR)
+		printf("%c", this -> cvalue);
+	
+	else if (this -> type == STRING)
+		printf("%s", this -> svalue);
+	
+	else if (this -> type == VARIABLE)
+	{
+		if (this -> vartype == LOCAL)
+			printf("local variable %s", this -> svalue);
+		
+		else if (this -> vartype == PARAMETER)
+			printf("global variable %s", this -> svalue);
+	}
+	
+	else if (this -> type == FUNCCALL)
+		printf("call of function %s", this -> svalue);
+}
+
+
+
 void AbstractSyntaxTree::Node::write(std::ofstream& out)
 {
 	if (this -> type == UNKNOWN)
-		out << "unknown | " << this -> svalue;
+	{
+		out << "unknown";
+		
+		if (this -> svalue)
+			out << " | " << this -> svalue;
+	}
 		
 	else if (this -> type == ENTRY)
 		out << "entry";
@@ -528,6 +596,12 @@ AbstractSyntaxTree::~AbstractSyntaxTree()
 typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(char** text)
 {
 	Node* new_node = new Node(text);
+	if (new_node -> type == ASN::UNKNOWN)
+	{
+		delete new_node;
+		return nullptr;
+	}
+	
 	this -> nodes_count++;
 	new_node -> container = this;
 	if (not this -> head)
@@ -539,6 +613,14 @@ typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(char** text)
 typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type, char** text)
 {
 	Node* new_node = new Node(type, text);
+
+	if (new_node -> type == ASN::UNKNOWN)
+	{
+		
+		delete new_node;
+		return nullptr;
+	}
+	
 	this -> nodes_count++;
 	new_node -> container = this;
 	if (not this -> head)
@@ -550,6 +632,12 @@ typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type, char
 typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type)
 {
 	Node* new_node = new Node(type);
+	if (new_node -> type == ASN::UNKNOWN)
+	{
+		delete new_node;
+		return nullptr;
+	}
+	
 	this -> nodes_count++;
 	new_node -> container = this;
 	if (not this -> head)
@@ -563,12 +651,12 @@ typename AbstractSyntaxTree::Node* AbstractSyntaxTree::createNode(int type)
 
 bool isLetter(char symbol)
 {
-	return ((symbol >= 'A' and symbol <= 'Z') or (symbol >= 'a' and symbol <= 'z') or symbol == '.' or symbol == '_' or symbol == '\'' or symbol == '\"' or symbol == '-');
+	return ((symbol >= 'A' and symbol <= 'Z') or (symbol >= 'a' and symbol <= 'z') or symbol == '.' or symbol == '_' or symbol == '\'' or symbol == '\"');
 }
 
 bool isNumber(char symbol)
 {
-	return ((symbol >= '0' and symbol <= '9') or symbol == '-');
+	return ((symbol >= '0' and symbol <= '9'));
 }
 
 bool isOperand(char symbol)

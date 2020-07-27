@@ -125,7 +125,7 @@ void ELF::substituteNumber(long long int position, int bytes_count, int number)
 
 
 
-void ELF::addBin(const char* string)
+void ELF::addBin(const char* string)	///< @bug Valgrind error: lose 4696 bytes
 {
 	int counter = 0;
 	char symbol = 0;
@@ -146,16 +146,17 @@ void ELF::addBin(const char* string)
 		else
 		{
 			long long int new_length = this -> text_length + 1;
-			char* new_text = new char[new_length];
+			char* old_text = this -> text;
+			this -> text = new char[new_length];
 			
 			for (int i = 0; i < this -> text_length; i++)
-				new_text[i] = (this -> text)[i];
-			new_text[this -> text_length] = symbol;
+				(this -> text)[i] = (old_text)[i];
 			
-			if (this -> text)
-				delete[] this -> text;
+			(this -> text)[this -> text_length] = symbol;
 			
-			this -> text = new_text;
+			if (old_text != nullptr)
+				delete[] old_text;
+			
 			this -> text_length = new_length;
 		}
 				

@@ -14,10 +14,6 @@
 
 Source::Source()
 {
-	this -> name = NULL;
-	this -> text = NULL;
-	this -> text_length = 0;
-	this -> text_pointer = NULL;
 	this -> source_type = DEFINITION;
 	this -> ast = new AST;
 }
@@ -27,12 +23,10 @@ Source::Source(const char* name)
 	this -> name = new char[strlen(name) + 1]{0};
 	strcpy(this -> name, name);
 	
-	this -> text = NULL;
-	this -> text_length = 0;
-	
-	this -> text_pointer = NULL;
-	
 	this -> source_type = this -> getType();
+	
+	if (this -> source_type == ERRTYPE)
+		this -> status = UNSUPPORTED_FILE_EXTENSION;
 	
 	this -> ast = new AST;
 }
@@ -49,10 +43,13 @@ Source::~Source()
 		delete this -> ast;
 }
 
-short int Source::open()
+bool Source::open()
 {
 	if (this -> source_type == DEFINITION)
-		return OPENNING_PROHIBITED;
+	{
+		this -> status = OPENNING_PROHIBITED;
+		return false;
+	}
 		
 	FILE* source_file = fopen(this -> name, "r");	// Trying to open file
 	
@@ -68,8 +65,9 @@ short int Source::open()
 	
 	if (not source_file)
 	{
-		//printf("\x1b[1;31mError\x1b[0m: file \x1b[1m\"%s\"\x1b[0m not exist.\n", this -> name);
-		return FILE_NOT_EXIST;
+		printf("\x1b[1;31merror\x1b[0m: file \x1b[1m\'%s\'\x1b[0m not exist\n", this -> name);
+		this -> status = FILE_NOT_EXIST;
+		return false;
 	}
 	
 	fseek(source_file, 0, SEEK_END);
@@ -84,7 +82,7 @@ short int Source::open()
 	
 	fclose(source_file);
 	
-	return OK;
+	return true;
 }
 
 short int Source::getType()
@@ -128,6 +126,7 @@ void Source::print()
 \----------------------*/
 void Source::makeAST()	
 {
+	
 	if (this -> source_type != JAUL_SOURCE)
 		return;
 	
@@ -143,7 +142,15 @@ void Source::makeAST()
 
 void Source::optimizeAST()
 {
+	substituteStatic(this -> ast -> head);
 	foldConstants(this -> ast -> head);
+	inlineFunctions(this -> ast -> head);
+}
+
+
+void Source::substituteStatic(ASN* node)
+{
+	
 }
 
 
@@ -155,13 +162,13 @@ void Source::foldConstants(ASN* node)
 	if (node -> right)
 		foldConstants(node -> right);
 	
-	if (node -> type == ASN::ARITHM_OPERATOR)
+	if (node -> type == ASN::ARITHM_OPERATOR and node -> left and node -> right)
 		foldArithmeticConstants(node);
 	
-	else if (node -> type == ASN::CMP_OPERATOR)
+	else if (node -> type == ASN::CMP_OPERATOR and node -> left and node -> right)
 		foldCmpConstants(node);
 	
-	else if (node -> type == ASN::CTRL_OPERATOR)
+	else if (node -> type == ASN::CTRL_OPERATOR and node -> left and node -> right)
 		foldCtrlConstants(node);
 }
 
@@ -628,6 +635,13 @@ void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
 
 
 
+void Source::inlineFunctions(ASN* node)
+{
+	
+}
+
+
+
 
 void Source::prepareAST()
 {
@@ -697,13 +711,13 @@ ASN* Source::parseBlock(int indent, char** _text)
 {
 	ASN* head = 0;
 	ASN* previous = 0;
-
+	
 	while (**_text != '\0')
 	{
 		bool line_founded = nextLine(_text);
 		
 		int current_indent = calculateIndent(*_text);
-
+		
 		if (current_indent > indent)
 			printf("\x1b[1;31mIncorrect indent!\x1b[0m\n");
 
@@ -729,11 +743,12 @@ ASN* Source::parseBlock(int indent, char** _text)
 				head = newline;
 			}
 			
-			ASN* parsed = parseLine(indent, _text);
+			ASN* parsed = parseLine(indent, _text); // here segfault
+			
 			newline -> rightConnect(parsed);
 		}
 	}
-
+	
 	return head;
 }
 
@@ -754,23 +769,24 @@ ASN* Source::parseLine(int indent, char** _text)
 	
 	char* _line = line;
 	
-	ASN* node = 0;
+	ASN* node = getInclude(indent, &_line);	// here segfault
 	
-	if (!strncmp(line, "def ", 4))
-		node = getDef(&_line);
-		
-	else if (!strncmp(line, "define ", 7))
-		printf("defines not implemented yet!\n");
-		
-	else if (!strncmp(line, "include ", 8))
-		node = getInclude(&_line);
 	
-	else
-		node = getAssignment(&_line);
+// 	if (!strncmp(line, "def ", 4))
+// 		node = getDef(indent, &_line);
+// 		
+// 	else if (!strncmp(line, "define ", 7))
+// 		printf("defines not implemented yet!\n");
+// 		
+// 	else if (!strncmp(line, "include ", 8))
+// 		node = getInclude(indent, &_line);
+// 	
+// 	else
+// 		node = getAssignment(indent, &_line);
 
 	
 	(*_text) += length;
-		
+	
 	if ((node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::WHILE or node -> ivalue == ASN::IF or node -> ivalue == ASN::ELSE)) or node -> type == ASN::FUNC)
 	{
 		ASN* internal = parseBlock(indent + 1, _text);
@@ -779,54 +795,81 @@ ASN* Source::parseLine(int indent, char** _text)
 	
 	if (line)
 		delete[] line;
-
+	
+	
 	return node;
 }
 
 
-ASN* Source::getInclude(char** _line)
+ASN* Source::getInclude(int indent, char** _line)
 {
-	*_line += 8;
-	ASN* include = new ASN(ASN::INCLUDE, _line);
-	Source library(include -> svalue);
-	short int resp = library.open();
 	
-	if (resp != OK)
+	if (!strncmp(*_line, "include ", 8))
 	{
-		printf("%s:%d: \x1b[1;31merror:\x1b[0m including file \x1b[1m\"%s\"\x1b[0m not exist.\n", this -> name, this -> current_line, library.name);
+		
+		*_line += 8;
+		ASN* include = new ASN(ASN::INCLUDE, _line);
+		Source library(include -> svalue);
+		library.open();
+		
+		if (library.status != OK)
+		{
+			printf("%s:%d: \x1b[1;31merror:\x1b[0m including file \x1b[1m\"%s\"\x1b[0m not exist.\n", this -> name, this -> current_line, library.name);
+			return include;
+		}
+			
+		else
+		{
+			library.makeAST();
+			include -> leftConnect(library.ast -> head -> left);
+			include -> rightConnect(library.ast -> head -> right);
+			library.ast -> head -> left = 0;
+			library.ast -> head -> right = 0;
+		}
+		
 		return include;
 	}
-		
+	
 	else
 	{
-		library.makeAST();
-		include -> leftConnect(library.ast -> head -> left);
-		include -> rightConnect(library.ast -> head -> right);
-		library.ast -> head -> left = 0;
-		library.ast -> head -> right = 0;
+		
+		return getDef(indent, _line);
+		
 	}
 	
-	return include;
 }
 
 
-ASN* Source::getDef(char** _line)
+ASN* Source::getDef(int indent, char** _line)
 {
-	(*_line) += 4;
+	if (!strncmp(*_line, "def ", 4))
+	{
+		(*_line) += 4;
+		
+		ASN* def = ast -> createNode(ASN::FUNC, _line);
+		
+		(*_line)++;
+		
+		ASN* itemize = getItemize(indent, _line);
+		
+		def -> rightConnect(itemize);
+		
+		return def;
+	}
 	
-	ASN* def = ast -> createNode(ASN::FUNC, _line);
-	
-	(*_line)++;
-	def -> rightConnect(getItemize(_line));
-	
-	return def;
+	else
+	{
+		
+		return getAssignment(indent, _line);
+		
+	}
 }
 
 
-ASN* Source::getAssignment(char** _line)	// get assignment
-{
+ASN* Source::getAssignment(int indent, char** _line)	// get assignment
+{	
 	skip_spaces(*_line);
-	ASN* left_branch = getOperators(_line);
+	ASN* left_branch = getOperators(indent, _line);
 	
 	skip_spaces(*_line);
 	if (**_line == '=' and *(*_line + 1) != '=')
@@ -835,8 +878,8 @@ ASN* Source::getAssignment(char** _line)	// get assignment
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getOperators(_line);
-		
+		ASN* right_branch = getOperators(indent, _line);
+			
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
 	}
@@ -845,16 +888,17 @@ ASN* Source::getAssignment(char** _line)	// get assignment
 }
 
 
-ASN* Source::getOperators(char** _line)
-{
+ASN* Source::getOperators(int indent, char** _line)
+{	
 	ASN* left_branch = 0;
 
 	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "for", 4) or !strncmp(*_line, "return", 6))
 	{
+		
 		ASN* operand = ast -> createNode(_line);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getLogic(_line);
+		ASN* right_branch = getLogic(indent, _line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -862,6 +906,7 @@ ASN* Source::getOperators(char** _line)
 	
 	else if (!strncmp(*_line, "else", 4))
 	{
+		
 		ASN* operand = ast -> createNode(_line);
 		
 		skip_spaces(*_line);
@@ -870,20 +915,24 @@ ASN* Source::getOperators(char** _line)
 	
 	else
 	{
-		skip_spaces(*_line);
-		left_branch = getLogic(_line);
 		
 		skip_spaces(*_line);
+		left_branch = getLogic(indent, _line);
+		
+		skip_spaces(*_line);
+		
 	}
 	
 	return left_branch;
 }
 
 
-ASN* Source::getLogic(char** _line)
+ASN* Source::getLogic(int indent, char** _line)
 {
 	skip_spaces(*_line);
-	ASN* left_branch = getCmp(_line);
+	
+	ASN* left_branch = getCmp(indent, _line);
+	
 	
 	skip_spaces(*_line);
 	while (!strncmp(*_line, "||", 2) or !strncmp(*_line, "&&", 2))
@@ -892,8 +941,8 @@ ASN* Source::getLogic(char** _line)
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getCmp(_line);
-		
+		ASN* right_branch = getCmp(indent, _line);
+			
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
 	}
@@ -902,10 +951,11 @@ ASN* Source::getLogic(char** _line)
 }
 
 
-ASN* Source::getCmp(char** _line)
+ASN* Source::getCmp(int indent, char** _line)
 {
+	
 	skip_spaces(*_line);
-	ASN* left_branch = getAddSub(_line);
+	ASN* left_branch = getAddSub(indent, _line);
 	
 	skip_spaces(*_line);
 	while (!strncmp(*_line, "==", 2) or !strncmp(*_line, "!=", 2) or 
@@ -916,7 +966,7 @@ ASN* Source::getCmp(char** _line)
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getAddSub(_line);
+		ASN* right_branch = getAddSub(indent, _line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -926,10 +976,11 @@ ASN* Source::getCmp(char** _line)
 }
 
 
-ASN* Source::getAddSub(char** _line)
+ASN* Source::getAddSub(int indent, char** _line)
 {
+	
 	skip_spaces(*_line);
-	ASN* left_branch = getMulDiv(_line);
+	ASN* left_branch = getMulDiv(indent, _line);
 	
 	skip_spaces(*_line);
 	
@@ -941,11 +992,11 @@ ASN* Source::getAddSub(char** _line)
 			left_branch -> ivalue = 0;
 		}
 		
-		ASN* operand = ast -> createNode(_line);;
+		ASN* operand = ast -> createNode(_line);
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getMulDiv(_line);
+		ASN* right_branch = getMulDiv(indent, _line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -955,10 +1006,11 @@ ASN* Source::getAddSub(char** _line)
 }
 
 
-ASN* Source::getMulDiv(char** _line)
+ASN* Source::getMulDiv(int indent, char** _line)
 {
+	
 	skip_spaces(*_line);
-	ASN* left_branch = getPow(_line);
+	ASN* left_branch = getPow(indent, _line);
 	
 	skip_spaces(*_line);
 	while (**_line == '*' or **_line == '/' or **_line == '%')
@@ -967,7 +1019,7 @@ ASN* Source::getMulDiv(char** _line)
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getPow(_line);
+		ASN* right_branch = getPow(indent, _line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -977,10 +1029,11 @@ ASN* Source::getMulDiv(char** _line)
 }
 
 
-ASN* Source::getPow(char** _line)
+ASN* Source::getPow(int indent, char** _line)
 {
+	
 	skip_spaces(*_line);
-	ASN* left_branch = getNumVarFunc(_line);
+	ASN* left_branch = getNumVarFunc(indent, _line);
 	
 	skip_spaces(*_line);
 	if (**_line == '^')
@@ -989,7 +1042,7 @@ ASN* Source::getPow(char** _line)
 		operand -> leftConnect(left_branch);
 		
 		skip_spaces(*_line);
-		ASN* right_branch = getNumVarFunc(_line);
+		ASN* right_branch = getNumVarFunc(indent, _line);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;
@@ -999,20 +1052,30 @@ ASN* Source::getPow(char** _line)
 }
 
 	
-ASN* Source::getNumVarFunc(char** _line)	// get numbers, variables and functions
+ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables and functions
 {
+	
 	skip_spaces(*_line);
 	
 	if (**_line == '(')
 	{
 		(*_line)++;
-		ASN* block = getLogic(_line);
+		
+		ASN* block = getLogic(indent, _line);
+		
 		if (**_line != ')')
-			std::cout << "Error!\n";
+		{
+			char operand[20] = {};
+			for (int i = 0; strchr(" \n\t\0", (*_line)[i]) == nullptr; i++)
+				operand[i] = (*_line)[i];
+			printf("\x1b[1;31merror:\x1b[0m <%s:%d>: enclosing bracket expected, but \x1b[1m\'%s\'\x1b[0m met\n", this -> name, this -> current_line, operand);
+			this -> status = SYNTAX_ERROR;
+		}
+		
 		(*_line)++;
 		return block;
 	}
-		
+	
 	skip_spaces(*_line);
 	
 	if (**_line == '-')
@@ -1020,15 +1083,38 @@ ASN* Source::getNumVarFunc(char** _line)	// get numbers, variables and functions
 	
 	ASN* parsed = ast -> createNode(_line);
 	
+	if (parsed == nullptr)
+	{
+		printf("\x1b[1;31merror:\x1b[0m <%s:%d>: supposed operand, but endline met\n", this -> name, this -> current_line);
+		this -> status = SYNTAX_ERROR;
+	}
+	
+	else if (parsed -> type != ASN::FUNCCALL and parsed -> type != ASN::VARIABLE and parsed -> type != ASN::INT)
+	{
+		printf("\x1b[1;31merror:\x1b[0m <%s:%d>: supposed operand, but operator ", this -> name, this -> current_line);
+		parsed -> print();
+		printf(" met\n");
+		this -> status = SYNTAX_ERROR;
+	}
+	
 	skip_spaces(*_line);
 	if (**_line == '(')
 	{
 		(*_line)++;
-		ASN* itemize = getItemize(_line);
+		ASN* itemize = getItemize(indent, _line);
+		
 		if (itemize)
 			parsed -> rightConnect(itemize);
+		
 		if (**_line != ')')
-			std::cout << "Error!\n";
+		{
+			char operand[20] = {};
+			for (int i = 0; strchr(" \n\t\0", (*_line)[i]) == nullptr; i++)
+				operand[i] = (*_line)[i];
+			printf("\x1b[1;31merror:\x1b[0m <%s:%d>: enclosing bracket expected, but \x1b[1m\'%s\'\x1b[0m met\n", this -> name, this -> current_line, operand);
+			this -> status = SYNTAX_ERROR;
+		}
+		
 		(*_line)++;
 	}
 	
@@ -1036,20 +1122,26 @@ ASN* Source::getNumVarFunc(char** _line)	// get numbers, variables and functions
 }
 
 
-ASN* Source::getItemize(char** _line)
+ASN* Source::getItemize(int indent, char** _line)
 {
+	
 	skip_spaces(*_line);
 	if (**_line == ')')
 		return 0;
-
+	
 	ASN* item = ast -> createNode(ASN::ITEM);
-	item -> rightConnect(getLogic(_line));
+	
+	item -> rightConnect(getLogic(indent, _line));
 	
 	skip_spaces(*_line);
+	
 	if (**_line == ',')
 	{
+		
 		(*_line)++;
-		item -> leftConnect(getItemize(_line));
+		skip_spaces(*_line);
+		item -> leftConnect(getItemize(indent, _line));
+		
 	}
 	
 	return item;

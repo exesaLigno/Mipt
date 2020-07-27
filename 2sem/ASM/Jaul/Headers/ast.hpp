@@ -102,6 +102,7 @@ class AbstractSyntaxTree
 		
 		const char* colorize();
 		void write(std::ofstream& out);
+		void print();
 		
 	  private:
 		AbstractSyntaxTree* container = nullptr;

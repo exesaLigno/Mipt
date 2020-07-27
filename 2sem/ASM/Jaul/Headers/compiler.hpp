@@ -43,8 +43,7 @@ class Compiler
 	
 	short optimization_level = 2;
 	
-	bool correct_usage = true;
-	
+	short int status = OK;
 	//------------------------------------//
 	
 	Source** source_list = nullptr;	///< Массив ссылок на объекты исходных кодов
@@ -64,7 +63,11 @@ class Compiler
 	enum Errors
 	{
 		OK,					///< Ошибок при выполнении не было
-		UNKNOWN_PARAMETER,	///< Неверный ключ компиляции
+		ARGUMENT_ERROR,		///< Неверный ключ компиляции
+		INPUT_FILE_ERROR,	///< Указан некорректный входной тип данных
+		COMPILATION_ERROR,	///< Ошибка компиляции
+		LINKER_ERROR,		///< Ошибка сброки программы
+		EXPORT_ERROR,		///< Ошибка экспорта
 		ERRORS_COUNT		///< Количество ошибок
 	};
 	

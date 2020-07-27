@@ -16,7 +16,7 @@
 Compiler::Compiler(int argc, char* argv[])
 {
 	if (argc <= 1)
-		this -> correct_usage = false;
+		this -> status = ARGUMENT_ERROR;
 	
 	else
 	{
@@ -58,8 +58,8 @@ Compiler::Compiler(int argc, char* argv[])
 				
 			else
 			{
-				printf("\x1b[1;31merror:\x1b[0m Unknown parameter \x1b[3m\'%s\'\x1b[0m\n", argv[counter]);
-				this -> correct_usage = false;
+				printf("\x1b[1;31merror:\x1b[0m unknown parameter \x1b[3m\'%s\'\x1b[0m\n", argv[counter]);
+				this -> status = ARGUMENT_ERROR;
 				return;
 			}
 		}
@@ -74,7 +74,7 @@ Compiler::Compiler(int argc, char* argv[])
 			this -> obj_generation xor this -> hex_view xor  this -> executable))
 		{
 			printf("\x1b[1;31merror:\x1b[0m Keys \x1b[3m--only-preprocess\x1b[0m, \x1b[3m--nasm-listing\x1b[0m, \x1b[3m--virtual\x1b[0m, \x1b[3m--obj\x1b[0m, \x1b[3m--hex-view\x1b[0m can'not be combined!\n");
-			this -> correct_usage = false;
+			this -> status = ARGUMENT_ERROR;
 			return;
 		}
 		
@@ -113,6 +113,9 @@ Compiler::Compiler(int argc, char* argv[])
 		
 		if (not this -> virtual_compilation)
 			this -> addPath(".std/stdio.jo");
+		
+		if (this -> source_count == 0)
+			this -> status = INPUT_FILE_ERROR;
 	}
 }
 
@@ -179,7 +182,7 @@ void Compiler::addPath(const char* source_path)
  */
 void Compiler::showSettings()
 {
-	if (not verbose)
+	if (not this -> verbose)
 		return;
 	
 	printf("\n---------------\x1b[1;32m Compiler \x1b[0m---------------\n");
@@ -220,6 +223,9 @@ void Compiler::showSettings()
  */
 void Compiler::showHelp()
 {
+	if (not this -> show_help and this -> status == OK)
+		return;
+	
 	printf("Jaul Compiler (2020)\n");
 	printf("Usage: ./jc [options] file...\n");
 	printf("Options:\n");
@@ -245,7 +251,7 @@ short int Compiler::mode()
 	if (show_help)
 		return HELP;
 		
-	else if (not correct_usage or not source_pathes)
+	else if (status != OK or not source_pathes)
 		return ERROR;
 		
 	else

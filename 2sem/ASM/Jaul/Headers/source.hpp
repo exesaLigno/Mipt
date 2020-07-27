@@ -18,6 +18,7 @@ class Source
 	char* text = nullptr;
 	long long int text_length = 0;
 	int current_line = 1;
+	int status = OK;
 	
   private:
 	char* text_pointer = nullptr;
@@ -30,7 +31,7 @@ class Source
 	Source(const char* name);
 	~Source();
 	
-	short int open();
+	bool open();
 	short int getType();
 	void print();
 	
@@ -46,17 +47,17 @@ class Source
 	
 	ASN* parseBlock(int indent, char** _text);
 	ASN* parseLine(int indent, char** _text);
-	ASN* getInclude(char** _line);
-	ASN* getDef(char** _line);
-	ASN* getAssignment(char** _line);
-	ASN* getOperators(char** _line);
-	ASN* getLogic(char** _line);
-	ASN* getCmp(char** _line);
-	ASN* getAddSub(char** _line);
-	ASN* getMulDiv(char** _line);
-	ASN* getPow(char** _line);
-	ASN* getNumVarFunc(char** _line);
-	ASN* getItemize(char** _line);
+	ASN* getInclude(int indent, char** _line);
+	ASN* getDef(int indent, char** _line);
+	ASN* getAssignment(int indent, char** _line);
+	ASN* getOperators(int indent, char** _line);
+	ASN* getLogic(int indent, char** _line);
+	ASN* getCmp(int indent, char** _line);
+	ASN* getAddSub(int indent, char** _line);
+	ASN* getMulDiv(int indent, char** _line);
+	ASN* getPow(int indent, char** _line);
+	ASN* getNumVarFunc(int indent, char** _line);
+	ASN* getItemize(int indent, char** _line);
 	
 	void splitFunctions();
 	void enumerateMembers();
@@ -65,10 +66,14 @@ class Source
 	char* getUnnumeratedVariable(ASN* node);
 	void setVariables(ASN* node, const char* varname, int vartype, int varnumber);
 	
+	void substituteStatic(ASN* node);
+	
 	void foldConstants(ASN* node);
 	void foldArithmeticConstants(ASN* node);
 	void foldCmpConstants(ASN* node);
 	void foldCtrlConstants(ASN* node);
+	
+	void inlineFunctions(ASN* node);
 	
   public:
 	
@@ -84,11 +89,12 @@ class Source
 	
 	enum Errors
 	{
-		OK = 0,
-		OPENNING_PROHIBITED = -1,
-		FILE_NOT_EXIST = -2,
-		UNSUPPORTED_FILE_EXTENSION = -3,
-		NOT_SUBSTITUTABLE_TYPE = -4
+		OK,
+		OPENNING_PROHIBITED,
+		FILE_NOT_EXIST,
+		UNSUPPORTED_FILE_EXTENSION,
+		NOT_SUBSTITUTABLE_TYPE,
+		SYNTAX_ERROR
 	};
 };
 

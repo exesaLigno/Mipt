@@ -164,7 +164,7 @@ void Binary::importNode(ASN* node)
 {
 	if (node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR or node -> type == ASN::CTRL_OPERATOR)
 	{
-		#define TOKEN(string, token_type, token_number, dump, nasm_code, bin_code)		\
+		#define TOKEN(string, token_type, token_number, dump, nasm_code)		\
 				case token_number:														\
 				{																		\
 					this -> pushBack(nasm_code);										\
@@ -269,6 +269,9 @@ void Binary::importObj(const char* object_code, long int object_code_length)
 		counter += function_length;
 		
 		this -> pushBytes(function, function_length);
+		
+		delete[] funcname;
+		delete[] function;
 	}
 }
 
@@ -550,6 +553,17 @@ int Binary::exportNasm(const char* filename)
 
 int Binary::exportObj(const char* filename)
 {
+	FILE* obj_file = fopen(filename, "w");
+	
+	Token* current = this -> start;
+	
+	while (current)
+	{
+		current = current -> next;
+	}
+	
+	fclose(obj_file);
+	
 	return 0;
 }
 
@@ -575,6 +589,10 @@ int Binary::exportExecutable(const char* filename)
 	fwrite(elf.text, sizeof(char), elf.text_length, executable);
 	
 	fclose(executable);
+	
+	char* cmd = new char[strlen(filename) + strlen("chmod +x ") + 1];
+	sprintf(cmd, "chmod +x %s", filename);
+	system(cmd);
 	
 	return 0;
 }
