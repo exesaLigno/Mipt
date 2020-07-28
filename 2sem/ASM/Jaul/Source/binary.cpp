@@ -34,15 +34,12 @@ void Binary::importAST(AST* ast)
 void Binary::importDef(ASN* node)
 {
 	this -> pushBack(Token::FUNCTION_LABEL, node -> svalue);
-	this -> pushBack("pop r13");
-	this -> pushBack("mov r15, rsp");
 	this -> pushBack("sub rsp, %d", (node -> ivalue) * 8);
-	this -> pushBack("mov r14, rsp");
+	this -> pushBack("mov r15, rsp");
 
 	importBody(node -> left);
 
 	this -> pushBack("add rsp, %d", (node -> ivalue) * 8);
-	this -> pushBack("push r13");
 
 	if (!strcmp(node -> svalue, "_start"))
 	{
@@ -62,8 +59,6 @@ void Binary::importBody(ASN* node)
 
 	if (type == ASN::FUNCCALL)
 	{
-		this -> pushBack("push r13");
-		this -> pushBack("push r14");
 		this -> pushBack("push r15");
 
 		if (node -> right)
@@ -73,16 +68,18 @@ void Binary::importBody(ASN* node)
 
 		ASN* param = node -> right;
 
+		int params_count = 0;
 		while (param)
 		{
-			this -> pushBack("pop r15");
+			params_count++;
 			param = param -> left;
 		}
+		this -> pushBack("add rsp, %d", params_count * 8);
 
 		this -> pushBack("pop r15");
-		this -> pushBack("pop r14");
-		this -> pushBack("pop r13");
-		this -> pushBack("push rax");
+
+		if (node -> parent -> type != ASN::LINE)	// pushing retcode only if it necessary
+			this -> pushBack("push rax");
 	}
 
 	else if (optype == ASN::WHILE and type == ASN::CTRL_OPERATOR)
@@ -164,7 +161,7 @@ void Binary::importNode(ASN* node)
 {
 	if (node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR or node -> type == ASN::CTRL_OPERATOR)
 	{
-		#define TOKEN(string, token_type, token_number, dump, nasm_code)		\
+		#define TOKEN(string, token_type, token_number, dump, nasm_code)				\
 				case token_number:														\
 				{																		\
 					this -> pushBack(nasm_code);										\
@@ -189,31 +186,15 @@ void Binary::importNode(ASN* node)
 	{
 		if (node -> LValue)
 		{
-			if (node -> vartype == ASN::LOCAL)
-			{
-				this -> pushBack("mov rax, r14");
-				this -> pushBack("add rax, %d", (node -> ivalue) * 8);
-				this -> pushBack("push rax");
-			}
-			else if (node -> vartype == ASN::PARAMETER)
-			{
-				this -> pushBack("mov rax, r15");
-				this -> pushBack("add rax, %d", (node -> ivalue) * 8);
-				this -> pushBack("push rax");
-			}
+			this -> pushBack("mov rax, r15");
+			this -> pushBack("add rax, %d", (node -> ivalue) * 8);
+			this -> pushBack("push rax");
 		}
+		
 		else
 		{
-			if (node -> vartype == ASN::LOCAL)
-			{
-				this -> pushBack("mov rax, [r14 + %d]", (node -> ivalue) * 8);
-				this -> pushBack("push rax");
-			}
-			else if (node -> vartype == ASN::PARAMETER)
-			{
-				this -> pushBack("mov rax, [r15 + %d]", (node -> ivalue) * 8);
-				this -> pushBack("push rax");
-			}
+			this -> pushBack("mov rax, [r15 + %d]", (node -> ivalue) * 8);
+			this -> pushBack("push rax");
 		}
 	}
 
@@ -225,7 +206,7 @@ void Binary::importNode(ASN* node)
 
 	else if (node -> type == ASN::FLOAT)
 	{
-		this -> pushBack("mov rax, %f", node -> fvalue);
+		this -> pushBack("mov rax, __float32__(%f)", node -> fvalue);
 		this -> pushBack("push rax");
 	}
 
@@ -841,15 +822,14 @@ int Binary::Token::compile()
 
 	this -> container -> size += this -> bytes_count;
 
-
-	int parameter = this -> ivalue;
-	for (int counter = (this -> bytes_count) - (this -> parameter_length); counter < this -> bytes_count; counter++)
+	if (this -> text != nullptr)
 	{
-		int byte = parameter % 256;
-		(this -> bytes)[counter] = byte;
-		parameter = parameter / 256;
+		if (strstr(this -> text, "%d"))
+			memcpy((this -> bytes) + ((this -> bytes_count) - (this -> parameter_length)), &(this -> ivalue), this -> parameter_length);
+		
+		else if (strstr(this -> text, "%f"))
+			memcpy((this -> bytes) + ((this -> bytes_count) - (this -> parameter_length)), &(this -> fvalue), this -> parameter_length);
 	}
-
 	return 0;
 }
 

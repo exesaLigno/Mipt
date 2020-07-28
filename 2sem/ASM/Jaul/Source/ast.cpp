@@ -9,14 +9,6 @@
 
 AbstractSyntaxTree::Node::Node(char** text)
 {
-	this -> type = UNKNOWN;
-	this -> ivalue = 0;
-	this -> fvalue = 0;
-	this -> cvalue = 0;
-	this -> svalue = 0;
-	this -> vartype = 0;
-	this -> LValue = false;
-		
 	int first_sym = 0;
 	if (isLetter(**text))
 		first_sym = LETTER;
@@ -112,12 +104,7 @@ AbstractSyntaxTree::Node::Node(char** text)
 AbstractSyntaxTree::Node::Node(int type)
 {
 	this -> type = type;
-	this -> ivalue = 0;
-	this -> fvalue = 0;
-	this -> cvalue = 0;
-	this -> svalue = 0;
-	this -> vartype = 0;
-	this -> LValue = false;
+	
 	if (type == _START)
 	{
 		this -> type = FUNC;
@@ -130,12 +117,6 @@ AbstractSyntaxTree::Node::Node(int type)
 AbstractSyntaxTree::Node::Node(int type, char** text)
 {
 	this -> type = type;
-	this -> ivalue = 0;
-	this -> fvalue = 0;
-	this -> cvalue = 0;
-	this -> svalue = 0;
-	this -> vartype = 0;
-	this -> LValue = false;
 	
 	int first_sym = 0;
 	if (isLetter(**text))

@@ -769,21 +769,7 @@ ASN* Source::parseLine(int indent, char** _text)
 	
 	char* _line = line;
 	
-	ASN* node = getInclude(indent, &_line);	// here segfault
-	
-	
-// 	if (!strncmp(line, "def ", 4))
-// 		node = getDef(indent, &_line);
-// 		
-// 	else if (!strncmp(line, "define ", 7))
-// 		printf("defines not implemented yet!\n");
-// 		
-// 	else if (!strncmp(line, "include ", 8))
-// 		node = getInclude(indent, &_line);
-// 	
-// 	else
-// 		node = getAssignment(indent, &_line);
-
+	ASN* node = getInclude(indent, &_line);
 	
 	(*_text) += length;
 	
@@ -809,6 +795,28 @@ ASN* Source::getInclude(int indent, char** _line)
 		
 		*_line += 8;
 		ASN* include = new ASN(ASN::INCLUDE, _line);
+		
+		char* source_prefix_end = strrchr(this -> name, '/');
+		if (source_prefix_end != nullptr)
+		{
+			int source_prefix_length = source_prefix_end - this -> name + 1;
+			char* fixed_name = new char[source_prefix_length + strlen(include -> svalue) + 1]{0};
+			strncpy(fixed_name, this -> name, source_prefix_length);
+			strcat(fixed_name, include -> svalue);
+			
+			delete[] include -> svalue;
+			include -> svalue = fixed_name;
+		}
+		
+		if (strrchr(include -> svalue, '.') == nullptr)	// TODO add searching algorithm
+		{
+			char* jaul_library_name = new char[strlen(include -> svalue) + 3];
+			sprintf(jaul_library_name, "%s.j", include -> svalue);			
+			
+			delete[] include -> svalue;
+			include -> svalue = jaul_library_name;
+		}
+		
 		Source library(include -> svalue);
 		library.open();
 		
@@ -1089,7 +1097,7 @@ ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables a
 		this -> status = SYNTAX_ERROR;
 	}
 	
-	else if (parsed -> type != ASN::FUNCCALL and parsed -> type != ASN::VARIABLE and parsed -> type != ASN::INT)
+	else if (parsed -> type != ASN::FUNCCALL and parsed -> type != ASN::VARIABLE and parsed -> type != ASN::INT and parsed -> type != ASN::FLOAT)
 	{
 		printf("\x1b[1;31merror:\x1b[0m <%s:%d>: supposed operand, but operator ", this -> name, this -> current_line);
 		parsed -> print();
@@ -1219,6 +1227,8 @@ void Source::splitFunctions()
 				
 			deleting -> left = 0;
 			delete deleting;
+			
+			line = new_lines;
 		}
 		
 		else
@@ -1256,27 +1266,37 @@ void Source::enumerateMembers()
 		
 		ASN* parameter = function -> right;		
 		
-		int varcounter = -1;
 		while (parameter)
-		{			
-			varcounter++;
-			setVariables(function, parameter -> right -> svalue, ASN::PARAMETER, varcounter);
+		{
+			setType(function, parameter -> right -> svalue, ASN::PARAMETER);
 			parameter = parameter -> left;
 		}
 		
-		
-		varcounter = -1;
+		int varcounter = 0;
 		while (true)
 		{
-			char* unnumerated_variable = getUnnumeratedVariable(function);
+			char* unnumerated_variable = getUnnumeratedVariable(function, ASN::LOCAL);
 			if (not unnumerated_variable)
 				break;
-				
-			varcounter++;
 			
-			setVariables(function, unnumerated_variable, ASN::LOCAL, varcounter);
+			setVariables(function, unnumerated_variable, varcounter);
+			
+			varcounter++;
 		}
-		function -> ivalue = varcounter + 1;
+		
+		function -> ivalue = varcounter;
+		
+		varcounter++;
+		
+		parameter = function -> right;
+		
+		while (parameter)
+		{			
+			setVariables(function, parameter -> right -> svalue, varcounter);
+			parameter = parameter -> left;
+			varcounter++;
+		}
+		
 		def = def -> left;
 	}
 	
@@ -1303,27 +1323,9 @@ void Source::enumerateBranching(ASN* node, int* number)
 
 
 
-char* Source::getUnnumeratedVariable(ASN* node)
+void Source::setType(ASN* node, const char* varname, int vartype)
 {
-	char* unnumerated_variable = 0;
-	
-	if (node -> type == ASN::VARIABLE and node -> ivalue == 0 and node -> vartype == 0)
-		unnumerated_variable = node -> svalue;
-		
-	if (node -> right and not unnumerated_variable)
-		unnumerated_variable = getUnnumeratedVariable(node -> right);
-		
-	if (node -> left and not unnumerated_variable)
-		unnumerated_variable = getUnnumeratedVariable(node -> left);	
-		
-	return unnumerated_variable;
-}
-
-
-
-void Source::setVariables(ASN* node, const char* varname, int vartype, int varnumber)
-{
-	if (varname == 0)
+	if (varname == nullptr)
 		return;
 	
 	if (node -> type == ASN::VARIABLE and node -> svalue)
@@ -1331,15 +1333,59 @@ void Source::setVariables(ASN* node, const char* varname, int vartype, int varnu
 		if (!strcmp(node -> svalue, varname))
 		{
 			node -> vartype = vartype;
-			node -> ivalue = varnumber;
 		}
 	}
 	
 	if (node -> right)
-		setVariables(node -> right, varname, vartype, varnumber);
+		setType(node -> right, varname, vartype);
 	
 	if (node -> left)
-		setVariables(node -> left, varname, vartype, varnumber);
+		setType(node -> left, varname, vartype);
+	
+	return;
+}
+
+
+
+char* Source::getUnnumeratedVariable(ASN* node, int vartype)
+{
+	char* unnumerated_variable = nullptr;
+	
+	if (node -> type == ASN::VARIABLE and node -> ivalue == 0 and node -> vartype == vartype and (not node -> enumerated))
+	{
+		unnumerated_variable = node -> svalue;
+	}
+		
+	if (node -> right and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> right, vartype);
+		
+	if (node -> left and not unnumerated_variable)
+		unnumerated_variable = getUnnumeratedVariable(node -> left, vartype);	
+		
+	return unnumerated_variable;
+}
+
+
+
+void Source::setVariables(ASN* node, const char* varname, int varnumber)
+{
+	if (varname == nullptr)
+		return;
+	
+	if (node -> type == ASN::VARIABLE and node -> svalue)
+	{
+		if (!strcmp(node -> svalue, varname))
+		{
+			node -> ivalue = varnumber;
+			node -> enumerated = true;
+		}
+	}
+	
+	if (node -> right)
+		setVariables(node -> right, varname, varnumber);
+	
+	if (node -> left)
+		setVariables(node -> left, varname, varnumber);
 	
 	return;
 }

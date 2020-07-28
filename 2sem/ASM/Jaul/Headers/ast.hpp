@@ -31,13 +31,14 @@ class AbstractSyntaxTree
 		
 	  public:
 	  
-		int type = 0;
+		int type = UNKNOWN;
 	  	int ivalue = 0;
 	  	float fvalue = 0;
 	  	char cvalue = 0;
 	  	char* svalue = nullptr;
 	  	bool LValue = false;
-	  	int vartype = 0;
+	  	int vartype = LOCAL;
+		bool enumerated = false;
 	  	
 	  	enum SYMTYPES
 		{
