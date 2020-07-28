@@ -11,6 +11,12 @@ int main(int argc, char* argv[])
 	
 	for (int counter = 1; counter < argc - 1; counter++)
 	{
+		char* func_name = strrchr(argv[counter], '/');
+		if (func_name == nullptr)
+			func_name = argv[counter];
+		else
+			func_name += 1;
+		
 		char* command = new char[strlen("nasm -f elf64 .s -o .o") + 2 * strlen(argv[counter]) + 1];
 		sprintf(command, "nasm -f elf64 %s.s -o %s.o", argv[counter], argv[counter]);
 		system(command);
@@ -39,12 +45,12 @@ int main(int argc, char* argv[])
 		_progbits--;
 		
 		long int progbits_length = _progbits - progbits;
-		int name_length = strlen(argv[counter]);
+		int name_length = strlen(func_name);
 
 		//	fwrite(elf.text, sizeof(char), elf.text_length, executable);
 		
 		fwrite(&name_length, sizeof(int), 1, output);
-		fwrite(argv[counter], sizeof(char), name_length, output);
+		fwrite(func_name, sizeof(char), name_length, output);
 		fwrite(&progbits_length, sizeof(long int), 1, output);
 		fwrite(progbits, sizeof(char), progbits_length, output);
 		
