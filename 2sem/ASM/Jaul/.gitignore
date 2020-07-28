@@ -1,23 +1,23 @@
-*.png
-*.txt
-*.o
+**/*.png
+**/*.txt
+**/*.o
 jc
 jvm
 relf
 makeobj
 
-test*.jaul
+*test*.jaul
 *.out
 
 *~
 
 Docs/
 
-Examples/*.hex
 Examples/*.s
-Examples/*.jo
-Examples/*.jv
-*/*.hex
+**/*.jo
+!.std/**/*.jo
+**/*.jv
+**/*.hex
 
 .kdev4
 Jaul.kdev4

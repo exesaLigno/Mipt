@@ -61,7 +61,9 @@ uninstall:
 	
 .PHONY: clean
 clean:
-	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER) *~ */*~
+	rm -rf *.o */*.o $(JC) $(JVM) $(ELFPARSER) $(OBJMAKER) *~ *.hex */*~ */*.hex .std/*~ .std/*.hex */*/*.o */*/*~ *.png */*.png
+	rm -rf Examples/fibonacci Examples/fibonacci_rec Examples/power_of_two
+	rm -rf opt_test feature_test out compiled_nasm compiled_nasm.txt
 	
 
 .PHONY: nasm
