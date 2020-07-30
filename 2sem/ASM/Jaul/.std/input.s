@@ -1,49 +1,76 @@
-input:		pop r15
-			sub rsp, 16
-			mov r14, rsp	; r14 - buffer start
+input:		sub rsp, 16			;// creating local buffer for reading
+			mov r15, rsp
+			mov r14, rsp
 			
 			mov rax, 0x00
 			mov rdi, 0
-			mov rsi, r14
+			mov rsi, r15
 			mov rdx, 16
-			syscall
+			syscall				;// in RAX stores count of readed symbols
 			
-			mov rcx, rax
-			dec rcx
-
-			add r14, rcx
+			add r14, rax		;// current position
+			sub r14, 2
 			
-			mov rbx, 1
-			mov rdi, 10
+			mov rdi, 1			;// power of current symbol in RDX
 			
-			xor rsi, rsi
+			sub rsp, 8			;// creating two dword variables for mantissa and exhibitor
+			mov dword [rsp], 1
 			
-.cycle:		dec r14
-			dec rcx
 			
-			cmp byte [r14], '-'
-			je .negative
+	.cycle:	xor rax, rax
+			mov al, byte [r14]
+			
+			cmp al, '.'
+			je .point
+			
+			cmp al, ','
+			je .point
+			
+			cmp al, '-'
+			je .minus
+			
+			sub rax, '0'
+			
+			mul edi
+			imul edi, 10
+			add dword [rsp + 4], eax
+			dec r14
+			
+			cmp r14, r15
+			jge .cycle
+			jmp .plus
+			
+			
+	.point:	mov dword [rsp], edi
+			dec r14
+			jmp .cycle
+			
+			
+	.minus:	fild dword [rsp + 4]
+			fild dword [rsp]
+			
+			fdiv
+			fchs
+			
+			fstp dword [rsp + 4]
 			
 			xor rax, rax
-			mov al, byte [r14]
-			sub al, '0'
-			mul ebx
-			add rsi, rax
+			mov eax, dword [rsp + 4]
+			movd xmm0, dword [rsp + 4]
 			
-			mov rax, rbx
-			mul edi
-			mov rbx, rax
-			
-			cmp rcx, 0
-			jne .cycle
 			jmp .exit
+						
 			
-.negative:	neg rsi
+	.plus:	fild dword [rsp + 4]
+			fild dword [rsp]
 			
-.exit:		mov rax, rsi
-
-			add rsp, 16
+			fdiv
 			
-			push r15
+			fstp dword [rsp + 4]
+			
+			xor rax, rax
+			mov eax, dword [rsp + 4]			
+			
+	.exit:	add rsp, 24
 			
 			ret
