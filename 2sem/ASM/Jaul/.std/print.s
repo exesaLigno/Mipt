@@ -1,4 +1,4 @@
-print:		fld qword [rsp]
+print:		fld dword [rsp + 8]
 			
 			mov rax, 1000000
 			push rax

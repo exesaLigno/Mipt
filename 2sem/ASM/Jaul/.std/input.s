@@ -56,8 +56,7 @@ input:		sub rsp, 16			;// creating local buffer for reading
 			
 			xor rax, rax
 			mov eax, dword [rsp + 4]
-			movd xmm0, dword [rsp + 4]
-			
+						
 			jmp .exit
 						
 			

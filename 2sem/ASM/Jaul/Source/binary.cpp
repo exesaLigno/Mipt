@@ -43,7 +43,7 @@ void Binary::importDef(ASN* node)
 
 	if (!strcmp(node -> svalue, "_start"))
 	{
-		this -> pushBack("mov rdi, rax");
+		this -> pushBack("mov rdi, %d", 0);
 		this -> pushBack("mov rax, 60");
 		this -> pushBack("syscall");
 	}

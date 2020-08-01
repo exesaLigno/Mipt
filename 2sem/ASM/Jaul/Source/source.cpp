@@ -142,39 +142,51 @@ void Source::makeAST()
 
 void Source::optimizeAST()
 {
-	substituteStatic(this -> ast -> head);
-	foldConstants(this -> ast -> head);
-	inlineFunctions(this -> ast -> head);
-}
-
-
-void Source::substituteStatic(ASN* node)
-{
+	int change_count = 0;
+	change_count += inlineFunctions(this -> ast -> head);
+	change_count += foldConstants(this -> ast -> head);
+	change_count += substituteStatic(this -> ast -> head);
+	change_count += foldConstants(this -> ast -> head);
 	
+	if (change_count != 0)
+		this -> optimizeAST();
 }
 
 
-void Source::foldConstants(ASN* node)
+int Source::substituteStatic(ASN* node)
 {
+	int change_count = 0;
+	return change_count;
+}
+
+
+int Source::foldConstants(ASN* node)
+{
+	int change_count = 0;
+	
 	if (node -> left)
-		foldConstants(node -> left);
+		change_count += foldConstants(node -> left);
 	
 	if (node -> right)
-		foldConstants(node -> right);
+		change_count += foldConstants(node -> right);
 	
 	if (node -> type == ASN::ARITHM_OPERATOR and node -> left and node -> right)
-		foldArithmeticConstants(node);
+		change_count += foldArithmeticConstants(node);
 	
 	else if (node -> type == ASN::CMP_OPERATOR and node -> left and node -> right)
-		foldCmpConstants(node);
+		change_count += foldCmpConstants(node);
 	
 	else if (node -> type == ASN::CTRL_OPERATOR and node -> left and node -> right)
-		foldCtrlConstants(node);
+		change_count += foldCtrlConstants(node);
+	
+	return change_count;
 }
 
 
-void Source::foldArithmeticConstants(ASN* node)
+int Source::foldArithmeticConstants(ASN* node)
 {
+	int change_count = 0;
+	
 	switch (node -> ivalue)
 	{
 		case ASN::PLUS:
@@ -191,6 +203,8 @@ void Source::foldArithmeticConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)
@@ -205,6 +219,8 @@ void Source::foldArithmeticConstants(ASN* node)
 						node -> parent -> rightConnect(right);
 					
 					delete node;
+					
+					change_count++;
 				}
 
 				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
@@ -219,6 +235,8 @@ void Source::foldArithmeticConstants(ASN* node)
 						node -> parent -> rightConnect(left);
 					
 					delete node;
+					
+					change_count++;
 				}
 			}
 		
@@ -239,6 +257,8 @@ void Source::foldArithmeticConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 // 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)	///< unary "-" with "neg" command working incorrect
@@ -261,6 +281,8 @@ void Source::foldArithmeticConstants(ASN* node)
 						node -> parent -> rightConnect(left);
 					
 					delete node;
+					
+					change_count++;
 				}
 			}
 			
@@ -281,6 +303,8 @@ void Source::foldArithmeticConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 1)
@@ -295,6 +319,8 @@ void Source::foldArithmeticConstants(ASN* node)
 						node -> parent -> rightConnect(right);
 					
 					delete node;
+					
+					change_count++;
 				}
 
 				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 1)
@@ -309,6 +335,8 @@ void Source::foldArithmeticConstants(ASN* node)
 						node -> parent -> rightConnect(left);
 					
 					delete node;
+					
+					change_count++;
 				}
 				
 				else if ((node -> right -> type == ASN::INT and node -> right -> ivalue == 0) or (node -> left -> type == ASN::INT and node -> left -> ivalue == 0))
@@ -321,17 +349,23 @@ void Source::foldArithmeticConstants(ASN* node)
 					
 					node -> type = ASN::INT;
 					node -> ivalue = 0;
+					
+					change_count++;
 				}
 			}
 			
 			break;
 		}
 	}
+	
+	return change_count;
 }
 
 
-void Source::foldCmpConstants(ASN* node)
+int Source::foldCmpConstants(ASN* node)
 {
+	int change_count = 0;
+	
 	switch (node -> ivalue)
 	{
 		case ASN::EQUAL:
@@ -348,6 +382,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -368,6 +404,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -388,6 +426,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -408,6 +448,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -428,6 +470,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -448,6 +492,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 			
@@ -468,6 +514,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 0)
@@ -480,6 +528,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 0)
@@ -492,6 +542,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 						
@@ -512,6 +564,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> left -> type == ASN::INT and node -> left -> ivalue == 1)
@@ -524,6 +578,8 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 				
 				else if (node -> right -> type == ASN::INT and node -> right -> ivalue == 1)
@@ -536,17 +592,23 @@ void Source::foldCmpConstants(ASN* node)
 					
 					delete node -> right;
 					node -> right = nullptr;
+					
+					change_count++;
 				}
 			}
 						
 			break;
 		}
 	}
+	
+	return change_count;
 }
 
 
-void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
+int Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
 {
+	int change_count = 0;
+	
 	switch (node -> ivalue)
 	{
 		case ASN::IF:
@@ -580,6 +642,8 @@ void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
 						delete next_line;
 					}
 				}
+				
+				change_count++;
 			}
 			
 			else if (node -> right -> type == ASN::INT and node -> right -> ivalue != 0)
@@ -614,6 +678,8 @@ void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
 						delete next_line;
 					}
 				}
+				
+				change_count++;
 			}
 			
 			break;
@@ -626,18 +692,23 @@ void Source::foldCtrlConstants(ASN* node) ///< TODO Valgrind maybe
 				node -> parent -> parent -> leftConnect(node -> parent -> left);
 				node -> parent -> left = nullptr;
 				delete node -> parent;
+				
+				change_count++;
 			}
 			
 			break;
 		}
 	}
+	
+	return change_count;
 }
 
 
 
-void Source::inlineFunctions(ASN* node)
+int Source::inlineFunctions(ASN* node)
 {
-	
+	int change_count = 0;
+	return change_count;
 }
 
 

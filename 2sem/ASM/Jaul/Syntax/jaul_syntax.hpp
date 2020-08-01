@@ -5,14 +5,14 @@
 
 #include "../Headers/ast.hpp"
 
-TOKEN("+", 	ASN::ARITHM_OPERATOR, ASN::PLUS, 	 	 "+", "pop rax\npop rbx\nadd rax, rbx\npush rax")
-TOKEN("-", 	ASN::ARITHM_OPERATOR, ASN::MINUS, 	 	 "-", "pop rax\npop rbx\nsub rax, rbx\npush rax")
-TOKEN("-", ASN::ARITHM_OPERATOR, ASN::UNARY_MINUS,	 "- (unary)", "pop rax\nneg rax\npush rax")
-TOKEN("*", 	ASN::ARITHM_OPERATOR, ASN::MULTIPLY, 	 "*", "pop rax\npop rbx\nimul ebx\npush rax")
-//TOKEN("/", 	ASN::ARITHM_OPERATOR, ASN::DIVIDE, 	 	 "/", "pop rax\npop rbx\nidiv ebx\npush rax\nнассыл в штаны")
+TOKEN("+", 	ASN::ARITHM_OPERATOR, ASN::PLUS, 	 	 "+", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfadd\nfstp dword [rsp]")
+TOKEN("-", 	ASN::ARITHM_OPERATOR, ASN::MINUS, 	 	 "-", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfsub\nfstp dword [rsp]")
+TOKEN("-", ASN::ARITHM_OPERATOR, ASN::UNARY_MINUS,	 "- (unary)", "fld dword [rsp]\nfchs\nfstp dword [rsp]")
+TOKEN("*", 	ASN::ARITHM_OPERATOR, ASN::MULTIPLY, 	 "*", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfmul\nfstp dword [rsp]")
+TOKEN("/", 	ASN::ARITHM_OPERATOR, ASN::DIVIDE, 	 	 "/", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfdiv\nfstp dword [rsp]")
 //TOKEN("^", 	ASN::ARITHM_OPERATOR, ASN::POWER, 	 	 "^", "  N|I power")
-TOKEN("%", 	ASN::ARITHM_OPERATOR, ASN::MODULO, 	 	 "%", "pop rax\npop rbx\nidiv rbx\npush rdx")
-TOKEN("//", ASN::ARITHM_OPERATOR, ASN::INT_DIVISION, "//", "pop rax\npop rbx\nidiv rbx\npush rax")
+//TOKEN("%", 	ASN::ARITHM_OPERATOR, ASN::MODULO, 	 	 "%", "pop rax\npop rbx\nidiv rbx\npush rdx")
+//TOKEN("//", ASN::ARITHM_OPERATOR, ASN::INT_DIVISION, "//", "pop rax\npop rbx\nidiv rbx\npush rax")
 
 TOKEN("==", ASN::CMP_OPERATOR, ASN::EQUAL, 		"==", "pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsete cl\npush rcx")
 TOKEN("!=", ASN::CMP_OPERATOR, ASN::NOT_EQUAL, 	"!=", "pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetne cl\npush rcx")

@@ -67,14 +67,14 @@ class Source
 	char* getUnnumeratedVariable(ASN* node, int vartype);
 	void setVariables(ASN* node, const char* varname, int varnumber);
 	
-	void substituteStatic(ASN* node);
+	int substituteStatic(ASN* node);
 	
-	void foldConstants(ASN* node);
-	void foldArithmeticConstants(ASN* node);
-	void foldCmpConstants(ASN* node);
-	void foldCtrlConstants(ASN* node);
+	int foldConstants(ASN* node);
+	int foldArithmeticConstants(ASN* node);
+	int foldCmpConstants(ASN* node);
+	int foldCtrlConstants(ASN* node);
 	
-	void inlineFunctions(ASN* node);
+	int inlineFunctions(ASN* node);
 	
   public:
 	
