@@ -5,7 +5,7 @@ all:
 	
 .PHONY: clean
 clean:
-	rm -rf *.o program.out
+	rm -rf *.o program.out *~
 	
 .PHONY: run
 run:
