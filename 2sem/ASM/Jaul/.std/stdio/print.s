@@ -4,7 +4,7 @@ print:		fld dword [rsp + 8]
 			push rax
 			fild qword [rsp]
 			
-			fmul
+			fmulp
 			frndint
 			
 			fistp qword [rsp]

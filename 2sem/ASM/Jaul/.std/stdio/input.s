@@ -15,6 +15,7 @@ input:		sub rsp, 16			;// creating local buffer for reading
 			
 			sub rsp, 8			;// creating two dword variables for mantissa and exhibitor
 			mov dword [rsp], 1
+			mov dword [rsp + 4], 0
 			
 			
 	.cycle:	xor rax, rax
@@ -49,7 +50,7 @@ input:		sub rsp, 16			;// creating local buffer for reading
 	.minus:	fild dword [rsp + 4]
 			fild dword [rsp]
 			
-			fdiv
+			fdivp
 			fchs
 			
 			fstp dword [rsp + 4]
@@ -63,7 +64,7 @@ input:		sub rsp, 16			;// creating local buffer for reading
 	.plus:	fild dword [rsp + 4]
 			fild dword [rsp]
 			
-			fdiv
+			fdivp
 			
 			fstp dword [rsp + 4]
 			
