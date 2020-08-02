@@ -4,15 +4,19 @@
 #include <cstring>
 #include "Headers/compiler.hpp"
 
-#define validate 								\
-		if (compiler.status != Compiler::OK)	\
-			return compiler.status;				\
 
 /*!
  *	@file jc.cpp
  *	@author Карцев Вадим
  *	@brief Основной файл компилятора
  */
+
+/*!
+ *	@brief Валидация состояния компилятора
+ */
+#define validate 								\
+		if (compiler.status != Compiler::OK)	\
+			return compiler.status;				\
 
 
 #include "Headers/debug.hpp"

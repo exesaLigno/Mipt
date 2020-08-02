@@ -417,17 +417,7 @@ void Binary::storeLabels()
 
 
 
-void Binary::optimize()
-{
-	bool optimized = false;
-
-	// Optimizations here
-
-	if (optimized)
-		this -> optimize();
-
-	return;
-}
+#include "binary.optimizations.cpp"
 
 
 

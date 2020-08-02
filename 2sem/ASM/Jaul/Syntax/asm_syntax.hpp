@@ -175,5 +175,4 @@ ASM("fcomip", 0, 2, {0xdf, 0xf1})
 ASM("fdecstp", 0, 2, {0xd9, 0xf6})
 ASM("fincstp", 0, 2, {0xd9, 0xf7})
 ASM("ffree", 0, 2, {0xdd, 0xc1})
-
-//ASM("jz label			| 0f 84 .. .. .. ..
+ASM("fchs", 0, 2, {0xd9, 0xe0})
