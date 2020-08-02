@@ -1,4 +1,17 @@
-input:		sub rsp, 16			;// creating local buffer for reading
+input:		sub rsp, 2
+			mov byte [rsp], '?'
+			mov byte [rsp + 1], ' '			
+			
+			mov rax, 0x01
+			mov rdi, 1
+			mov rsi, rsp
+			mov rdx, 2
+			syscall
+			
+			add rsp, 2
+			
+			
+			sub rsp, 16			;// creating local buffer for reading
 			mov r15, rsp
 			mov r14, rsp
 			
@@ -74,3 +87,5 @@ input:		sub rsp, 16			;// creating local buffer for reading
 	.exit:	add rsp, 24
 			
 			ret
+			
+PREFIX:	db	"? "

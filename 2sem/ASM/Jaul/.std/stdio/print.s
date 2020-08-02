@@ -73,7 +73,10 @@ print:		fld dword [rsp + 8]
 			dec r15
 			inc r14
 			
-	.sys:	inc r15
+	.sys:	dec r15
+			add r14, 2
+			mov byte [r15], '>'
+			mov byte [r15 + 1], ' '
 			mov rax, 0x01
 			mov rdi, 1
 			mov rsi, r15
