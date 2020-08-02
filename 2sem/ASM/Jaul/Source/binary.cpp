@@ -398,8 +398,19 @@ void Binary::storeLabels()
 	while (current)
 	{
 		if (current -> type == Token::FUNCTION_LABEL or current -> type == Token::GLOBAL_LABEL or current -> type == Token::LOCAL_LABEL)
+		{
 			(this -> labels)[counter++] = current;
-
+		
+			for (int i = 0; i < counter - 1; i++)
+			{
+				if (!strcmp((this -> labels)[i] -> text, current -> text))
+				{
+					printf("\x1b[1;31merror:\x1b[0m function \"%s\" redefined\n", current -> text);
+					this -> status = FUNCTION_REDEFINED;
+				}
+			}
+		}
+		
 		current = current -> next;
 	}
 }
@@ -429,17 +440,19 @@ void Binary::setLabels()
 		if ((current -> type == Token::NASM_CODE or current -> type == Token::BOTH) and ((current -> text)[0] == 'j' or !strncmp(current -> text, "call", 4)))
 		{
 			long int label_position = getLabelPosition(current -> svalue);
-			long int delta = label_position ? label_position - ((current -> first_byte_position) + (current -> bytes_count)) : 0;
-
-			unsigned int parameter = delta;
-			for (int counter = (current -> bytes_count) - (current -> parameter_length); counter < current -> bytes_count; counter++)
+			if (label_position == -1)
 			{
-				int byte = parameter % 256;
-				(current -> bytes)[counter] = byte;
-				parameter = parameter / 256;
+				printf("\x1b[1;31merror:\x1b[0m function \"%s\" is not declared in this scope\n", current -> svalue);
+				this -> status = FUNCTION_NOT_EXIST;
+			}
+			
+			else
+			{
+				long int delta = label_position - ((current -> first_byte_position) + (current -> bytes_count));
+				memcpy((current -> bytes) + ((current -> bytes_count) - (current -> parameter_length)), &delta, current -> parameter_length);
 			}
 		}
-
+		
 		current = current -> next;
 	}
 }
@@ -448,7 +461,7 @@ void Binary::setLabels()
 
 long int Binary::getLabelPosition(const char* label_name)
 {
-	long int position = 0;
+	long int position = -1;
 	for (int counter = 0; counter < this -> labels_count; counter++)
 	{
 		if (!strcmp(label_name, (this -> labels)[counter] -> text))

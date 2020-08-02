@@ -87,13 +87,16 @@ Compiler::Compiler(int argc, char* argv[])
 				
 			else
 				name = "output";
-				
+			
 			this -> output_path = new char[strlen(name) + 5]{0};
 			strcpy(this -> output_path, name);
 			
 			char* extension = strrchr(this -> output_path, '.');	// Excluding old extension
-			while (*extension != '\0')
-				*(extension++) = '\0';
+			if (extension != nullptr)
+			{
+				while (*extension != '\0')
+					*(extension++) = '\0';
+			}
 			
 			if (this -> only_preprocess)
 				strcat(this -> output_path, ".j");
@@ -243,25 +246,6 @@ void Compiler::showHelp()
 }
 
 
-/*!
- *	@brief Проверка режима работы компилятора
- *	
- *	Возвращает код ошибочного запуска если не передан ни один параметр, не передан ни один исходник или передан неверный параметр.
- *	Информация о корректности ключей сохраняется в поле correct_usage в процессе конструирования объекта.
- */
-short int Compiler::mode()
-{
-	if (show_help)
-		return HELP;
-		
-	else if (status != OK or not source_pathes)
-		return ERROR;
-		
-	else
-		return COMPILATION;
-}
-
-
 
 /*!
  *	@brief Оболочка для вызова метода Source::open()
@@ -276,6 +260,8 @@ void Compiler::readSource()
 	{
 		(this -> source_list)[counter] = new Source((this -> source_pathes)[counter]);
 		(this -> source_list)[counter] -> open();
+		if ((this -> source_list)[counter] -> status != Source::OK)
+			this -> status = INPUT_FILE_ERROR;
 	}
 }
 
@@ -317,6 +303,9 @@ void Compiler::makeAST()
 					(this -> source_list)[counter] -> optimizeAST();
 				
 				(this -> source_list)[counter] -> prepareAST();
+				
+				if ((this -> source_list)[counter] -> status != Source::OK)
+					this -> status = COMPILATION_ERROR;
 			}
 		}
 	}

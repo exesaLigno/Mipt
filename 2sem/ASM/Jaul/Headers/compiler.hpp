@@ -50,14 +50,6 @@ class Compiler
 	Binary* binary = nullptr;	///< Ссылка на объект скомпилированного кода
 	
   public:
-  
-	//! Режимы работы компилятора
-  	enum Modes
-  	{
-  		COMPILATION,	///< Компилятору передан исходный код и он может его скомпилировать
-  		HELP,			///< Показ страницы помощи
-  		ERROR			///< Неверный аргумент или их отсутствие
-  	};
 	
 	//! Ошибки
 	enum Errors
@@ -77,7 +69,6 @@ class Compiler
 	void addPath(const char* source_path);
 	void showSettings();
 	void showHelp();
-	short int mode();
 	
 	void readSource();
 	void showSource();

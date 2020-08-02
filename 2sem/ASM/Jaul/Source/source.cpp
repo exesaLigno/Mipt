@@ -24,9 +24,12 @@ Source::Source(const char* name)
 	strcpy(this -> name, name);
 	
 	this -> source_type = this -> getType();
-	
+
 	if (this -> source_type == ERRTYPE)
+	{
+		printf("\x1b[1;31merror:\x1b[0m file \x1b[1m\'%s\'\x1b[0m has an unsupported extension\n", name);
 		this -> status = UNSUPPORTED_FILE_EXTENSION;
+	}
 	
 	this -> ast = new AST;
 }
@@ -89,7 +92,10 @@ short int Source::getType()
 {
 	const char* extension = strrchr(name, '.');
 	
-	if (!strcmp(extension, ".j"))
+	if (extension == nullptr)
+		return ERRTYPE;
+	
+	else if (!strcmp(extension, ".j"))
 		return JAUL_SOURCE;
 		
 	else if (!strcmp(extension, ".s"))

@@ -17,6 +17,15 @@
 class Binary
 {
   public:
+	
+	enum Errors
+	{
+		OK,
+		NO_ENTRY_POINT,
+		FUNCTION_NOT_EXIST,
+		FUNCTION_REDEFINED
+	};
+	
   	class Token;
 	
 	Token* start = nullptr;
@@ -25,6 +34,8 @@ class Binary
 	
 	Token** labels = nullptr;
 	unsigned int labels_count = 0;
+	
+	int status = OK;
 	
 	Binary();
 	~Binary();

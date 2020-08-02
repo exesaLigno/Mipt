@@ -4,6 +4,10 @@
 #include <cstring>
 #include "Headers/compiler.hpp"
 
+#define validate 								\
+		if (compiler.status != Compiler::OK)	\
+			return compiler.status;				\
+
 /*!
  *	@file jc.cpp
  *	@author Карцев Вадим
@@ -22,26 +26,31 @@
  */
 int main(int argc, char* argv[])
 {
-	int status = Compiler::OK;
-	
 	Compiler compiler(argc, argv);
 	
-	compiler.showHelp();
-	compiler.showSettings();
+	if (compiler.status == Compiler::ARGUMENT_ERROR or compiler.show_help == true)
+		compiler.showHelp();
 	
-	if (compiler.status == Compiler::OK)
-	{		
+	else
+	{
+		compiler.showSettings();
+		
 		compiler.readSource();
+		validate;		
 		compiler.showSource();
 		
 		compiler.makeAST();
+		validate;
+		
 		compiler.dumpAST();
-
+		
 		compiler.compile();
+		validate;
+		
 		compiler.write();
 	}
 
-    return status;
+    return compiler.status;
 }
 
 
