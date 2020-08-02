@@ -14,12 +14,12 @@ TOKEN("/", 	ASN::ARITHM_OPERATOR, ASN::DIVIDE, 	 	 "/", "fld dword [rsp]\nfld dw
 //TOKEN("%", 	ASN::ARITHM_OPERATOR, ASN::MODULO, 	 	 "%", "pop rax\npop rbx\nidiv rbx\npush rdx")
 //TOKEN("//", ASN::ARITHM_OPERATOR, ASN::INT_DIVISION, "//", "pop rax\npop rbx\nidiv rbx\npush rax")
 
-TOKEN("==", ASN::CMP_OPERATOR, ASN::EQUAL, 		"==", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsete cl\npush rcx")
-TOKEN("!=", ASN::CMP_OPERATOR, ASN::NOT_EQUAL, 	"!=", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetne cl\npush rcx")
-TOKEN(">=", ASN::CMP_OPERATOR, ASN::MORE_EQ, 	"More or equal", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetbe cl\npush rcx")
-TOKEN("<=", ASN::CMP_OPERATOR, ASN::LESS_EQ, 	"Less or equal", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetae cl\npush rcx")
-TOKEN(">", 	ASN::CMP_OPERATOR, ASN::MORE, 		"More", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetb cl\npush rcx")
-TOKEN("<", 	ASN::CMP_OPERATOR, ASN::LESS, 		"Less", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nseta cl\npush rcx")
+TOKEN("==", ASN::CMP_OPERATOR, ASN::EQUAL, 		"==", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsete cl\nffree\npush rcx")
+TOKEN("!=", ASN::CMP_OPERATOR, ASN::NOT_EQUAL, 	"!=", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetne cl\nffree\npush rcx")
+TOKEN(">=", ASN::CMP_OPERATOR, ASN::MORE_EQ, 	"More or equal", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetbe cl\nffree\npush rcx")
+TOKEN("<=", ASN::CMP_OPERATOR, ASN::LESS_EQ, 	"Less or equal", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetae cl\nffree\npush rcx")
+TOKEN(">", 	ASN::CMP_OPERATOR, ASN::MORE, 		"More", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetb cl\nffree\npush rcx")
+TOKEN("<", 	ASN::CMP_OPERATOR, ASN::LESS, 		"Less", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nseta cl\nffree\npush rcx")
 TOKEN("&&", ASN::CMP_OPERATOR, ASN::AND, 		"And", "pop rax\npop rbx\nand rax, rbx\npush rax")
 TOKEN("||", ASN::CMP_OPERATOR, ASN::OR, 		"Or", "pop rax\npop rbx\nor rax, rbx\npush rax")
 
