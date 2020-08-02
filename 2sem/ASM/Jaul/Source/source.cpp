@@ -1176,6 +1176,13 @@ ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables a
 		this -> status = SYNTAX_ERROR;
 	}
 	
+	else if (parsed -> type == ASN::INT)
+	{
+		parsed -> type = ASN::FLOAT;
+		parsed -> fvalue = parsed -> ivalue;
+		parsed -> ivalue = 0;
+	}
+	
 	skip_spaces(*_line);
 	if (**_line == '(')
 	{

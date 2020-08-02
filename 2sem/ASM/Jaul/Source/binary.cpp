@@ -193,7 +193,7 @@ void Binary::importNode(ASN* node)
 		
 		else
 		{
-			this -> pushBack("mov rax, [r15 + %d]", (node -> ivalue) * 8);
+			this -> pushBack("mov eax, dword [r15 + %d]", (node -> ivalue) * 8);
 			this -> pushBack("push rax");
 		}
 	}

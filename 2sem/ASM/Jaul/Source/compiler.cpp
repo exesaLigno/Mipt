@@ -112,7 +112,10 @@ Compiler::Compiler(int argc, char* argv[])
 		}
 		
 		if (not this -> virtual_compilation)
+		{
+			this -> addPath(".std/stdlib.jo");
 			this -> addPath(".std/stdio.jo");
+		}
 		
 		if (this -> source_count == 0)
 			this -> status = INPUT_FILE_ERROR;
