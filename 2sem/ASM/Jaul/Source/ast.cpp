@@ -66,19 +66,6 @@ AbstractSyntaxTree::Node::Node(char** text)
 		this -> fvalue = atof(token);
 		delete[] token;
 	}
-	
-	else if (isChar(token))
-	{
-		this -> type = CHAR;
-		this -> cvalue = token[1];
-		delete[] token;
-	}
-	
-	else if (isString(token))
-	{
-		this -> type = STRING;
-		delete[] token;
-	}
 
 	else
 	{
@@ -270,16 +257,10 @@ const char* AbstractSyntaxTree::Node::colorize()
 		
 	else if (this -> type == INT)
 		return "\"#D083FF\"";
-		
-	else if (this -> type == CHAR)
-		return "\"#B3FFEF\"";
-		
+
 	else if (this -> type == FLOAT)
 		return "\"#FF89A9\"";
-		
-	else if (this -> type == STRING)
-		return "\"#9FFF88\"";
-		
+
 	else if (this -> type == VARIABLE)
 		return "\"#64ADFF\"";
 		
@@ -329,12 +310,6 @@ void AbstractSyntaxTree::Node::print()
 	
 	else if (this -> type == FLOAT)
 		printf("%g", this -> fvalue);
-	
-	else if (this -> type == CHAR)
-		printf("%c", this -> cvalue);
-	
-	else if (this -> type == STRING)
-		printf("%s", this -> svalue);
 	
 	else if (this -> type == VARIABLE)
 	{
@@ -395,12 +370,6 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 		
 	else if (this -> type == FLOAT)
 		out << "float | " << this -> fvalue;
-		
-	else if (this -> type == CHAR)
-		out << "char | " << this -> cvalue;
-		
-	else if (this -> type == STRING)
-		out << "string | " << this -> svalue;
 		
 	else if (this -> type == VARIABLE)
 	{
@@ -679,43 +648,6 @@ bool isFloat(char* string)
 			result = false;
 		string++;
 	}
-	
-	return result;
-}
-
-bool isChar(char* string)
-{
-	bool result = true;
-	
-	if (*string != '\'')
-		result = false;
-	
-	while (*string != '\0')
-		string++;
-
-	string--;
-	
-	if (*string != '\'')
-		result = false;
-	
-	return result;
-}
-
-
-bool isString(char* string)
-{
-	bool result = true;
-	
-	if (*string != '\"')
-		result = false;
-	
-	while (*string != '\0')
-		string++;
-
-	string--;
-	
-	if (*string != '\"')
-		result = false;
 	
 	return result;
 }

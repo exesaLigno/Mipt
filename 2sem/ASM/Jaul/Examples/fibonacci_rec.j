@@ -1,5 +1,5 @@
 def getFib(number, x)
-	if number <= 1
+	if number <= 2
 		return 1
 	else
 		return getFib(number-1) + getFib(number-2)
@@ -8,5 +8,3 @@ def getFib(number, x)
 n = input()
 res = getFib(n)
 print(res)
-
-return 0

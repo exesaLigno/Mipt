@@ -56,7 +56,8 @@ class AbstractSyntaxTree
 	  	{
 	  		UNKNOWN,
 	  		ARITHM_OPERATOR, CMP_OPERATOR, CTRL_OPERATOR,		// OPERATORS
-	  		VARIABLE, FUNCCALL, INT, FLOAT, STRING, CHAR,		// OPERANDS
+			F_ARITHM_OPERATOR, F_CMP_OPERATOR,					// FLOAT OPERATORS
+			VARIABLE, FUNCCALL, F_VARIABLE, F_FUNCCALL, INT, FLOAT,		// OPERANDS
 	  		LINE, FUNC, ENTRY, ITEM, DEF,						// SPECIAL SYMBOLS
 	  		_START, INCLUDE, DEFINE,
 	  		COUNT_OF_TYPES
@@ -135,5 +136,3 @@ bool isEnd(char symbol);
 
 bool isInteger(char* string);
 bool isFloat(char* string);
-bool isChar(char* string);
-bool isString(char* string);

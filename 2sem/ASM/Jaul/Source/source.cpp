@@ -292,7 +292,7 @@ ASN* Source::parseLine(int indent, char** _text)
 	
 	(*_text) += length;
 	
-	if ((node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::WHILE or node -> ivalue == ASN::IF or node -> ivalue == ASN::ELSE)) or node -> type == ASN::FUNC)
+	if ((node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::WHILE or node -> ivalue == ASN::FOR or node -> ivalue == ASN::IF or node -> ivalue == ASN::ELSE)) or node -> type == ASN::FUNC)
 	{
 		ASN* internal = parseBlock(indent + 1, _text);
 		node -> leftConnect(internal);
@@ -419,13 +419,32 @@ ASN* Source::getOperators(int indent, char** _line)
 {	
 	ASN* left_branch = 0;
 
-	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "for", 4) or !strncmp(*_line, "return", 6))
+	if (!strncmp(*_line, "while", 5) or !strncmp(*_line, "if", 2) or !strncmp(*_line, "return", 6))
 	{
 		
 		ASN* operand = ast -> createNode(_line);
 		
 		skip_spaces(*_line);
 		ASN* right_branch = getLogic(indent, _line);
+		
+		operand -> rightConnect(right_branch);
+		left_branch = operand;
+	}
+	
+	else if (!strncmp(*_line, "repeat", 6))
+	{
+		ASN* operand = ast -> createNode(_line);
+		
+		skip_spaces(*_line);
+		ASN* right_branch = ast -> createNode(ASN::CTRL_OPERATOR);
+		right_branch -> ivalue = ASN::ASSIGNMENT;
+		ASN* right_branch_value = getNumVarFunc(indent, _line);
+		
+		skip_spaces(*_line);
+		ASN* right_branch_variable = getNumVarFunc(indent, _line);
+		
+		right_branch -> rightConnect(right_branch_value);
+		right_branch -> leftConnect(right_branch_variable);
 		
 		operand -> rightConnect(right_branch);
 		left_branch = operand;

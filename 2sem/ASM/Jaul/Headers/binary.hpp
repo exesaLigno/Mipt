@@ -69,7 +69,10 @@ class Binary
 	void storeLabels();		///< Сохранение всех меток в массив в объекте Binary
 	
 	void optimize();		///< TODO Оптимизация байт-кода
-	void deleteUnusedFunctions();
+	int deleteUnusedFunctions();
+	int foldPushPop();
+	int foldMovMov();
+	int deleteUselessOperations();
 	
 	void setLabels();		///< Высчет позиций меток и их занесение в необходимые места
 	long int getLabelPosition(const char* label_name);	///< Поиск адреса метки

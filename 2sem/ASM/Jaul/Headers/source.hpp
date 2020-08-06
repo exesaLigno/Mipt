@@ -68,7 +68,8 @@ class Source
 	void setVariables(ASN* node, const char* varname, int varnumber);
 	
 	int substituteStatic(ASN* node);
-	int setStatic(ASN* node, ASN* variable, float value);
+	int setStatic(ASN* node, ASN* variable, float value, bool* declaration_needed);
+	int processBranching(ASN* node, ASN* variable);
 	
 	int foldConstants(ASN* node);
 	int foldArithmeticConstants(ASN* node);

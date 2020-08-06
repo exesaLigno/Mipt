@@ -363,11 +363,12 @@ void Compiler::compile()
 			this -> binary -> importObj((this -> source_list)[counter] -> text, (this -> source_list)[counter] -> text_length);
 	}
 	
-	this -> binary -> compile();
 	this -> binary -> storeLabels();
 	
 	if (this -> optimization_level > 1)
 		this -> binary -> optimize();
+	
+	this -> binary -> compile();	
 	
 	this -> binary -> setLabels();
 }

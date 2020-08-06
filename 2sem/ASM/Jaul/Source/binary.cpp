@@ -135,6 +135,11 @@ void Binary::importBody(ASN* node)
 
 	else if (optype == ASN::ELSE and type == ASN::CTRL_OPERATOR)
 		this -> pushBack("nop");
+	
+	else if (optype == ASN::FOR and type == ASN::CTRL_OPERATOR)
+	{
+		
+	}
 
 	else
 	{
@@ -209,15 +214,6 @@ void Binary::importNode(ASN* node)
 		this -> pushBack("mov rax, __float32__(%f)", node -> fvalue);
 		this -> pushBack("push rax");
 	}
-
-	else if (node -> type == ASN::CHAR)
-	{
-		this -> pushBack("mov rax, \'%c\'", node -> cvalue);
-		this -> pushBack("push rax");
-	}
-
-	else if (node -> type == ASN::STRING)
-		this -> pushBack("String");
 }
 
 
@@ -308,6 +304,7 @@ void Binary::pushBack(int type, const char* text, int ivalue, float fvalue, char
 	new_token -> fvalue = fvalue;
 	new_token -> cvalue = cvalue;
 	new_token -> setSValue(svalue);
+	new_token -> prepare();
 }
 
 void Binary::pushBack(const char* nasm_code)
@@ -379,7 +376,6 @@ void Binary::compile()
 
 	while (current)
 	{
-		current -> prepare();
 		current -> compile();
 
 		current = current -> next;

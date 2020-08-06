@@ -25,7 +25,7 @@ TOKEN("||", ASN::CMP_OPERATOR, ASN::OR, 		"Or", "pop rax\npop rbx\nor rax, rbx\n
 
 TOKEN("if", 	ASN::CTRL_OPERATOR, ASN::IF, 					"if", "nop")
 TOKEN("else", 	ASN::CTRL_OPERATOR, ASN::ELSE, 					"else", "nop")
-TOKEN("for", 	ASN::CTRL_OPERATOR, ASN::FOR, 					"for", "nop")
+TOKEN("repeat", ASN::CTRL_OPERATOR, ASN::FOR, 					"repeat", "nop")
 TOKEN("while", 	ASN::CTRL_OPERATOR, ASN::WHILE, 				"while", "nop")
 TOKEN("return", ASN::CTRL_OPERATOR, ASN::RETURN, 				"return", "pop rax")
 TOKEN("=", 		ASN::CTRL_OPERATOR, ASN::ASSIGNMENT, 			"=", "pop rbx\npop rax\nmov dword [rbx], eax")

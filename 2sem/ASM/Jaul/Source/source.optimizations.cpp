@@ -10,11 +10,15 @@ int Source::substituteStatic(ASN* node)
 		{
 			if (node -> parent -> left)
 			{
-				this -> setStatic(node -> parent -> left, node -> left, node -> right -> fvalue);
+				bool declaration_needed = false;
+				this -> setStatic(node -> parent -> left, node -> left, node -> right -> fvalue, &declaration_needed);
 				//printf("deleting line %d in file %s: %s = %g\n", node -> parent -> ivalue, node -> parent -> svalue, node -> left -> svalue, node -> right -> fvalue);
-				node -> parent -> parent -> leftConnect(node -> parent -> left);
-				node -> parent -> left = nullptr;
-				delete node -> parent;
+				if (not declaration_needed)
+				{
+					node -> parent -> parent -> leftConnect(node -> parent -> left);
+					node -> parent -> left = nullptr;
+					delete node -> parent;
+				}
 			}
 		}
 	}
@@ -29,14 +33,24 @@ int Source::substituteStatic(ASN* node)
 }
 
 
-int Source::setStatic(ASN* node, ASN* variable, float value)
+int Source::setStatic(ASN* node, ASN* variable, float value, bool* declaration_needed)
 {	
 	if (node -> type == ASN::VARIABLE and node -> LValue == true and !strcmp(node -> svalue, variable -> svalue))
 		return -1;
 	
+	if (node -> type == ASN::CTRL_OPERATOR and node -> ivalue == ASN::WHILE)
+	{
+		int status = processBranching(node, variable);
+		if (status == -1)
+		{
+			*declaration_needed = true;
+			return -1;
+		}
+	}
+	
 	if (node -> right)
 	{
-		int status = this -> setStatic(node -> right, variable, value);
+		int status = this -> setStatic(node -> right, variable, value, declaration_needed);
 		if (status == -1)
 			return -1;
 	}
@@ -49,7 +63,30 @@ int Source::setStatic(ASN* node, ASN* variable, float value)
 	
 	if (node -> left)
 	{
-		int status = this -> setStatic(node -> left, variable, value);
+		int status = this -> setStatic(node -> left, variable, value, declaration_needed);
+		if (status == -1)
+			return -1;
+	}
+	
+	return 0;
+}
+
+
+int Source::processBranching(ASN* node, ASN* variable)
+{
+	if (node -> left)
+	{
+		int status = processBranching(node -> left, variable);
+		if (status == -1)
+			return -1;
+	}
+	
+	if (node -> type == ASN::VARIABLE and node -> LValue == true and !strcmp(node -> svalue, variable -> svalue))
+		return -1;
+	
+	if (node -> right)
+	{
+		int status = processBranching(node -> right, variable);
 		if (status == -1)
 			return -1;
 	}
