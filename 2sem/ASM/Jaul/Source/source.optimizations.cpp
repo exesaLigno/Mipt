@@ -11,7 +11,9 @@ int Source::substituteStatic(ASN* node)
 			if (node -> parent -> left)
 			{
 				bool declaration_needed = false;
-				this -> setStatic(node -> parent -> left, node -> left, node -> right -> fvalue, &declaration_needed);
+				bool substituted = false;
+				this -> setStatic(node -> parent -> left, node -> left, node -> right -> fvalue, &declaration_needed, &substituted);
+				
 				//printf("deleting line %d in file %s: %s = %g\n", node -> parent -> ivalue, node -> parent -> svalue, node -> left -> svalue, node -> right -> fvalue);
 				if (not declaration_needed)
 				{
@@ -19,6 +21,9 @@ int Source::substituteStatic(ASN* node)
 					node -> parent -> left = nullptr;
 					delete node -> parent;
 				}
+				
+				if (substituted)
+					change_count++;
 			}
 		}
 	}
@@ -33,7 +38,7 @@ int Source::substituteStatic(ASN* node)
 }
 
 
-int Source::setStatic(ASN* node, ASN* variable, float value, bool* declaration_needed)
+int Source::setStatic(ASN* node, ASN* variable, float value, bool* declaration_needed, bool* substituted)
 {	
 	if (node -> type == ASN::VARIABLE and node -> LValue == true and !strcmp(node -> svalue, variable -> svalue))
 		return -1;
@@ -50,7 +55,7 @@ int Source::setStatic(ASN* node, ASN* variable, float value, bool* declaration_n
 	
 	if (node -> right)
 	{
-		int status = this -> setStatic(node -> right, variable, value, declaration_needed);
+		int status = this -> setStatic(node -> right, variable, value, declaration_needed, substituted);
 		if (status == -1)
 			return -1;
 	}
@@ -59,11 +64,12 @@ int Source::setStatic(ASN* node, ASN* variable, float value, bool* declaration_n
 	{
 		node -> type = ASN::FLOAT;
 		node -> fvalue = value;
+		*substituted = true;
 	}
 	
 	if (node -> left)
 	{
-		int status = this -> setStatic(node -> left, variable, value, declaration_needed);
+		int status = this -> setStatic(node -> left, variable, value, declaration_needed, substituted);
 		if (status == -1)
 			return -1;
 	}
@@ -275,6 +281,58 @@ int Source::foldArithmeticConstants(ASN* node)
 				}
 				
 				else if ((node -> right -> type == ASN::FLOAT and node -> right -> fvalue == 0) or (node -> left -> type == ASN::FLOAT and node -> left -> fvalue == 0))
+				{
+					delete node -> right;
+					node -> right = nullptr;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					node -> type = ASN::FLOAT;
+					node -> fvalue = 0;
+					
+					change_count++;
+				}
+			}
+			
+			break;
+		}
+		
+		case ASN::DIVIDE:
+		{
+			if (node -> left and node -> right)
+			{
+				if (node -> left -> type == ASN::FLOAT and node -> right -> type == ASN::FLOAT)
+				{
+					node -> type = ASN::FLOAT;
+					node -> fvalue = node -> left -> fvalue / node -> right -> fvalue;
+					
+					delete node -> left;
+					node -> left = nullptr;
+					
+					delete node -> right;
+					node -> right = nullptr;
+					
+					change_count++;
+				}
+				
+				else if (node -> right -> type == ASN::FLOAT and node -> right -> fvalue == 1)
+				{
+					ASN* left = node -> left;
+					node -> left = nullptr;
+					
+					if (node -> parent -> left == node)
+						node -> parent -> leftConnect(left);
+					
+					else if (node -> parent -> right == node)
+						node -> parent -> rightConnect(left);
+					
+					delete node;
+					
+					change_count++;
+				}
+				
+				else if (node -> left -> type == ASN::FLOAT and node -> left -> fvalue == 0)
 				{
 					delete node -> right;
 					node -> right = nullptr;
