@@ -43,6 +43,9 @@ Compiler::Compiler(int argc, char* argv[])
 			else if (!strcmp("--hex-view", argv[counter]))
 				this -> hex_view = true;
 			
+			else if (!strcmp("--feature", argv[counter]))
+				this -> feature = true;
+			
 			else if (!strcmp("-o", argv[counter]))
 			{
 				counter++;
@@ -114,14 +117,14 @@ Compiler::Compiler(int argc, char* argv[])
 				strcat(this -> output_path, ".hex");
 		}
 		
+		if (this -> source_count == 0)
+			this -> status = INPUT_FILE_ERROR;
+		
 		if (not this -> virtual_compilation)
 		{
 			this -> addPath(".std/stdlib.jo");
 			this -> addPath(".std/stdio.jo");
 		}
-		
-		if (this -> source_count == 0)
-			this -> status = INPUT_FILE_ERROR;
 	}
 }
 
@@ -218,6 +221,8 @@ void Compiler::showSettings()
 	
 	printf("%s", this -> hex_view ? "Hex view\n" : "");
 	
+	printf("%s", this -> feature ? "\x1b[1;31mFeature testing\x1b[0m\n" : "");
+	
 	printf("Optimization level: %d\n", this -> optimization_level);
 	
 	printf("----------------------------------------\n\n");
@@ -243,6 +248,7 @@ void Compiler::showHelp()
 	printf("     --hex-view            Generate hex view of compiled code \x1b[2m(only for debugging)\x1b[0m\n");
 	printf("  -o \x1b[2m<file>\x1b[0m                Write compiled code to \x1b[2m<file>\x1b[0m. If not specified, using \x1b[2ma.out\x1b[0m\n");
 	printf("  -o#                      Optimization level, # = 0, 1 or 2\n");
+	printf("     --feature             Enable all experimental functions");
 }
 
 

@@ -534,7 +534,8 @@ ASN* Source::getAddSub(int indent, char** _line)
 	{
 		if (not left_branch)
 		{
-			left_branch = ast -> createNode(ASN::FLOAT);
+			left_branch = ast -> createNode(ASN::CONSTANT);
+			left_branch -> data_type = ASN::FLOAT;
 			left_branch -> fvalue = 0;
 		}
 		
@@ -635,7 +636,7 @@ ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables a
 		this -> status = SYNTAX_ERROR;
 	}
 	
-	else if (parsed -> type != ASN::FUNCCALL and parsed -> type != ASN::VARIABLE and parsed -> type != ASN::INT and parsed -> type != ASN::FLOAT)
+	else if (parsed -> type != ASN::FUNCCALL and parsed -> type != ASN::VARIABLE and parsed -> type != ASN::CONSTANT)
 	{
 		printf("\x1b[1;31merror:\x1b[0m <%s:%d>: supposed operand, but operator ", this -> name, this -> current_line);
 		parsed -> print();
@@ -643,9 +644,9 @@ ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables a
 		this -> status = SYNTAX_ERROR;
 	}
 	
-	else if (parsed -> type == ASN::INT)
+	else if (parsed -> type == ASN::CONSTANT and parsed -> data_type == ASN::INT)
 	{
-		parsed -> type = ASN::FLOAT;
+		parsed -> data_type = ASN::FLOAT;
 		parsed -> fvalue = parsed -> ivalue;
 		parsed -> ivalue = 0;
 	}
@@ -824,7 +825,7 @@ void Source::enumerateMembers()
 			if (not unnumerated_variable)
 				break;
 			
-			setVariables(function, unnumerated_variable, varcounter);
+			enumerateVariables(function, unnumerated_variable, varcounter);
 			
 			varcounter++;
 		}
@@ -837,7 +838,7 @@ void Source::enumerateMembers()
 		
 		while (parameter)
 		{			
-			setVariables(function, parameter -> right -> svalue, varcounter);
+			enumerateVariables(function, parameter -> right -> svalue, varcounter);
 			parameter = parameter -> left;
 			varcounter++;
 		}
@@ -912,7 +913,7 @@ char* Source::getUnnumeratedVariable(ASN* node, int vartype)
 
 
 
-void Source::setVariables(ASN* node, const char* varname, int varnumber)
+void Source::enumerateVariables(ASN* node, const char* varname, int varnumber)
 {
 	if (varname == nullptr)
 		return;
@@ -927,10 +928,10 @@ void Source::setVariables(ASN* node, const char* varname, int varnumber)
 	}
 	
 	if (node -> right)
-		setVariables(node -> right, varname, varnumber);
+		enumerateVariables(node -> right, varname, varnumber);
 	
 	if (node -> left)
-		setVariables(node -> left, varname, varnumber);
+		enumerateVariables(node -> left, varname, varnumber);
 	
 	return;
 }

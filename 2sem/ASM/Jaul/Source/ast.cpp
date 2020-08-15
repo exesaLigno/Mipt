@@ -55,14 +55,16 @@ AbstractSyntaxTree::Node::Node(char** text)
 	
 	else if (isInteger(token))
 	{
-		this -> type = INT;
+		this -> type = CONSTANT;
+		this -> data_type = INT;
 		this -> ivalue = atoi(token);
 		delete[] token;
 	}
 	
 	else if (isFloat(token))
 	{
-		this -> type = FLOAT;
+		this -> type = CONSTANT;
+		this -> data_type = FLOAT;
 		this -> fvalue = atof(token);
 		delete[] token;
 	}
@@ -255,10 +257,10 @@ const char* AbstractSyntaxTree::Node::colorize()
 	else if (this -> type == CTRL_OPERATOR)
 		return "orange";
 		
-	else if (this -> type == INT)
+	else if (this -> type == CONSTANT and this -> data_type == INT)
 		return "\"#D083FF\"";
 
-	else if (this -> type == FLOAT)
+	else if (this -> type == CONSTANT and this -> data_type == FLOAT)
 		return "\"#FF89A9\"";
 
 	else if (this -> type == VARIABLE)

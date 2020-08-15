@@ -39,6 +39,8 @@ class AbstractSyntaxTree
 	  	bool LValue = false;
 	  	int vartype = LOCAL;
 		bool enumerated = false;
+		int data_type = FLOAT;
+		int processor_unit = KEEP;
 	  	
 	  	enum SYMTYPES
 		{
@@ -46,38 +48,37 @@ class AbstractSyntaxTree
 			COUNT_OF_SYMTYPES
 		};
 	  	
-	  	enum VARTYPES
-		{
-			LOCAL = 1,
-			PARAMETER
-		};
-	  	
-	  	enum TYPES
+	  	enum CONSTANTS
 	  	{
 	  		UNKNOWN,
+			
 	  		ARITHM_OPERATOR, CMP_OPERATOR, CTRL_OPERATOR,		// OPERATORS
-			F_ARITHM_OPERATOR, F_CMP_OPERATOR,					// FLOAT OPERATORS
-			VARIABLE, FUNCCALL, F_VARIABLE, F_FUNCCALL, INT, FLOAT,		// OPERANDS
+			
+				NOP,
+				PLUS, MINUS, MULTIPLY, DIVIDE, POWER,				// ariphmetics operators
+				MODULO, INT_DIVISION, UNARY_MINUS,
+				
+				EQUAL, NOT_EQUAL, MORE, LESS, MORE_EQ, LESS_EQ,		// comparison operators
+				AND, OR,
+				
+				IF, ELSE, WHILE, FOR, RETURN, ASSIGNMENT,			// control operators
+				PLUS_ASSIGNMENT, MINUS_ASSIGNMENT,
+				MULTIPLY_ASSIGNMENT, DIVIDE_ASSIGNMENT,
+				POWER_ASSIGNMENT,
+			
+			VARIABLE, FUNCCALL, CONSTANT,						// OPERANDS
+			
+				LOCAL,
+				PARAMETER,
+			
 	  		LINE, FUNC, ENTRY, ITEM, DEF,						// SPECIAL SYMBOLS
+			
 	  		_START, INCLUDE, DEFINE,
+			
+			INT, FLOAT,											// DATA TYPES
+			KEEP, TO_CPU, TO_FPU,								// TRANSFER_PARAMETERS
+			
 	  		COUNT_OF_TYPES
-	  	};
-	  	
-	  	enum OPERATORS
-	  	{
-	  		NOP,
-	  		PLUS, MINUS, MULTIPLY, DIVIDE, POWER,				// ariphmetics operators
-	  		MODULO, INT_DIVISION, UNARY_MINUS,
-	  		
-	  		EQUAL, NOT_EQUAL, MORE, LESS, MORE_EQ, LESS_EQ,		// comparison operators
-	  		AND, OR,
-	  		
-	  		IF, ELSE, WHILE, FOR, RETURN, ASSIGNMENT,			// control operators
-	  		PLUS_ASSIGNMENT, MINUS_ASSIGNMENT,
-	  		MULTIPLY_ASSIGNMENT, DIVIDE_ASSIGNMENT,
-	  		POWER_ASSIGNMENT,
-	  		
-	  		COUNT_OF_OPERATORS
 	  	};
 		
 		Node* parent = nullptr;

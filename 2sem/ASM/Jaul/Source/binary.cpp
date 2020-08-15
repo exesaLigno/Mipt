@@ -203,13 +203,13 @@ void Binary::importNode(ASN* node)
 		}
 	}
 
-	else if (node -> type == ASN::INT)
+	else if (node -> type == ASN::CONSTANT and node -> data_type == ASN::INT)
 	{
 		this -> pushBack("mov rax, %d", node -> ivalue);
 		this -> pushBack("push rax");
 	}
 
-	else if (node -> type == ASN::FLOAT)
+		else if (node -> type == ASN::CONSTANT and node -> data_type == ASN::FLOAT)
 	{
 		this -> pushBack("mov rax, __float32__(%f)", node -> fvalue);
 		this -> pushBack("push rax");

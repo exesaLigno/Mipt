@@ -41,6 +41,8 @@ class Compiler
 	
 	bool show_help = false;
 	
+	bool feature = false;
+	
 	short optimization_level = 2;
 	
 	short int status = OK;

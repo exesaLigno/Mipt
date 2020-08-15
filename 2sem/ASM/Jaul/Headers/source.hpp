@@ -65,7 +65,7 @@ class Source
 	void enumerateBranching(ASN* node, int* number);
 	void setType(ASN* node, const char* varname, int vartype);
 	char* getUnnumeratedVariable(ASN* node, int vartype);
-	void setVariables(ASN* node, const char* varname, int varnumber);
+	void enumerateVariables(ASN* node, const char* varname, int varnumber);
 	
 	int substituteStatic(ASN* node);
 	int setStatic(ASN* node, ASN* variable, float value, bool* declaration_needed, bool* substituted);
