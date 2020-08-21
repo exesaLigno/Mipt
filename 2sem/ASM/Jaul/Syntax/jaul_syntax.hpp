@@ -11,8 +11,8 @@ TOKEN("-", ASN::ARITHM_OPERATOR, ASN::UNARY_MINUS,	 "- (unary)", "fld dword [rsp
 TOKEN("*", 	ASN::ARITHM_OPERATOR, ASN::MULTIPLY, 	 "*", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfmul\nfstp dword [rsp]")
 TOKEN("/", 	ASN::ARITHM_OPERATOR, ASN::DIVIDE, 	 	 "/", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 8\nfdiv\nfstp dword [rsp]")
 //TOKEN("^", 	ASN::ARITHM_OPERATOR, ASN::POWER, 	 	 "^", "  N|I power")
-//TOKEN("%", 	ASN::ARITHM_OPERATOR, ASN::MODULO, 	 	 "%", "pop rax\npop rbx\nidiv rbx\npush rdx")
-//TOKEN("//", ASN::ARITHM_OPERATOR, ASN::INT_DIVISION, "//", "pop rax\npop rbx\nidiv rbx\npush rax")
+TOKEN("%", 	ASN::ARITHM_OPERATOR, ASN::MODULO, 	 	 "%", "pop rax\npop rbx\nidiv rbx\npush rdx")
+TOKEN("//", ASN::ARITHM_OPERATOR, ASN::INT_DIVISION, "//", "pop rax\npop rbx\nidiv rbx\npush rax")
 
 TOKEN("==", ASN::CMP_OPERATOR, ASN::EQUAL, 		"==", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsete cl\nffree\npush rcx")
 TOKEN("!=", ASN::CMP_OPERATOR, ASN::NOT_EQUAL, 	"!=", "fld dword [rsp]\nfld dword [rsp + 8]\nadd rsp, 16\nxor rcx, rcx\nfucomip\nsetne cl\nffree\npush rcx")

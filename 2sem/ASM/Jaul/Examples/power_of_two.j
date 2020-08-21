@@ -7,7 +7,7 @@ def power_of_two(n)
 	return res
 
 
-power = input()
+power = int(input())
 
 result = power_of_two(power)
 	

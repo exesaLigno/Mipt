@@ -45,6 +45,10 @@ class Compiler
 	
 	short optimization_level = 2;
 	
+	
+	bool include_stdio = true;
+	bool include_stdlib = true;
+	
 	short int status = OK;
 	//------------------------------------//
 	

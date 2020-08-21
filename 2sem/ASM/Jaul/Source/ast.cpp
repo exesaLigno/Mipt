@@ -148,6 +148,9 @@ AbstractSyntaxTree::Node::~Node()
 		
 	if (this -> svalue)
 		delete[] this -> svalue;
+	
+	if (this -> line_content)
+		delete[] this -> line_content;
 		
 	if (this -> container)
 		(this -> container -> nodes_count)--;
@@ -239,20 +242,17 @@ void AbstractSyntaxTree::Node::fixContainer()
 
 const char* AbstractSyntaxTree::Node::colorize()
 {
-	if (this -> type == ENTRY or this -> type == INCLUDE)
+	if (this -> type == ENTRY or this -> type == INCLUDE or this -> type == FUNC)
 		return "green";
 		
 	else if (this -> type == LINE or this -> type == ITEM or this -> type == DEF)
 		return "lightgray";
-		
-	else if (this -> type == FUNC)
-		return "green";
 	
 	else if (this -> type == ARITHM_OPERATOR)
 		return "pink";
 		
 	else if (this -> type == CMP_OPERATOR)
-		return "\"#f8aeff\"";
+		return "\"#F8AEFF\"";
 		
 	else if (this -> type == CTRL_OPERATOR)
 		return "orange";
@@ -270,7 +270,7 @@ const char* AbstractSyntaxTree::Node::colorize()
 		return "\"#0B8AFF\"";
 		
 	else
-		return "lightblue";
+		return "white";
 }
 
 
@@ -367,11 +367,11 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 	
 	#undef TOKEN
 
-	else if (this -> type == INT)
-		out << "int | " << this -> ivalue;
+	else if (this -> type == CONSTANT and this -> data_type == INT)
+		out << this -> ivalue;
 		
-	else if (this -> type == FLOAT)
-		out << "float | " << this -> fvalue;
+	else if (this -> type == CONSTANT and this -> data_type == FLOAT)
+		out << this -> fvalue;
 		
 	else if (this -> type == VARIABLE)
 	{
@@ -396,6 +396,20 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 		if (this -> svalue)
 			out << " | " << this -> svalue;
 	}
+	
+	else
+	{
+		out << "err type: " << this -> type;
+		
+		if (this -> svalue)
+			out << " | " << this -> svalue;
+	}
+	
+	if (this -> data_type == INT)
+		out << " | integer ";
+	
+	else if (this -> data_type == FLOAT)
+		out << " | float ";
 }
 
 
@@ -414,12 +428,16 @@ int AbstractSyntaxTree::dumper(const char* filename, int mode)
     file << (long int) element << " [shape = record, style = filled, fillcolor = " << element -> colorize() << ", color = black, label = \" {";
     
     if ((mode / DETAILED) % 10 == 1)
+	{
     	file << "<adr> Address: " << element << " | Data: ";
+	}
     
 	element -> write(file);
     
     if ((mode / DETAILED) % 10 == 1)
+	{
     	file << " |{<left> " << element -> left << " | <right> " << element -> right << "}";
+	}
     	
     file << "}\"]\n";
     

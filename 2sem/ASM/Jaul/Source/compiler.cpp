@@ -32,7 +32,11 @@ Compiler::Compiler(int argc, char* argv[])
 				this -> nasm_listing = true;
 				
 			else if (!strcmp("--virtual", argv[counter]))
+			{
 				this -> virtual_compilation = true;
+				this -> include_stdio = false;
+				this -> include_stdlib = false;
+			}
 				
 			else if (!strcmp("-h", argv[counter]) or !strcmp("--help", argv[counter]))
 				this -> show_help = true;
@@ -46,6 +50,18 @@ Compiler::Compiler(int argc, char* argv[])
 			else if (!strcmp("--feature", argv[counter]))
 				this -> feature = true;
 			
+			else if (!strcmp("--disable-stdio", argv[counter]))
+				this -> include_stdio = false;
+			
+			else if (!strcmp("--disable-stdlib", argv[counter]))
+				this -> include_stdlib = false;
+			
+			else if (!strcmp("--disable-std", argv[counter]))
+			{
+				this -> include_stdio = false;
+				this -> include_stdlib = false;
+			}
+			
 			else if (!strcmp("-o", argv[counter]))
 			{
 				counter++;
@@ -53,7 +69,7 @@ Compiler::Compiler(int argc, char* argv[])
 				strcpy(this -> output_path, argv[counter]);
 			}
 			
-			else if (!strcmp("-o0", argv[counter]) or !strcmp("-o1", argv[counter]) or !strcmp("-o2", argv[counter]))
+			else if (!strcmp("-o0", argv[counter]) or !strcmp("-o1", argv[counter]) or !strcmp("-o2", argv[counter]) or !strcmp("-o3", argv[counter]))
 				this -> optimization_level = argv[counter][2] - '0';
 			
 			else if (argv[counter][0] != '-')
@@ -83,13 +99,15 @@ Compiler::Compiler(int argc, char* argv[])
 		
 		if (this -> output_path == nullptr)
 		{
-			char* name = 0;
+			char* name = nullptr;
+			char* default_name = new char[7]{};
+			strcpy(default_name, "output");
 			
 			if (this -> source_count == 1)
 				name = (this -> source_pathes)[0];
 				
 			else
-				name = "output";
+				name = default_name;
 			
 			this -> output_path = new char[strlen(name) + 5]{0};
 			strcpy(this -> output_path, name);
@@ -115,16 +133,19 @@ Compiler::Compiler(int argc, char* argv[])
 				
 			else if (this -> hex_view)
 				strcat(this -> output_path, ".hex");
+			
+			delete[] default_name;
 		}
 		
 		if (this -> source_count == 0)
 			this -> status = INPUT_FILE_ERROR;
 		
-		if (not this -> virtual_compilation)
-		{
-			this -> addPath(".std/stdlib.jo");
+		
+		if (this -> include_stdio)
 			this -> addPath(".std/stdio.jo");
-		}
+		
+		if (this -> include_stdlib)
+			this -> addPath(".std/stdlib.jo");
 	}
 }
 
@@ -239,16 +260,20 @@ void Compiler::showHelp()
 	
 	printf("Jaul Compiler (2020)\n");
 	printf("Usage: ./jc [options] file...\n");
-	printf("Options:\n");
-	printf("  -v --verbose             Detailed compilation process output\n");
-	printf("  -p --only-preprocess     Only preprocess code and save it\n");
+	printf("Options:\n\n");
+	printf("  -v --verbose             Detailed compilation process output\n\n");
+	printf("  \x1b[9m-p --only-preprocess     Only preprocess code and save it\x1b[0m\n");
 	printf("  -l --nasm-listing        Generate NASM listing\n");
 	printf("     --obj                 Generate jaul object file\n");
 	printf("     --virtual             Compile code to virtual executable\n");
-	printf("     --hex-view            Generate hex view of compiled code \x1b[2m(only for debugging)\x1b[0m\n");
-	printf("  -o \x1b[2m<file>\x1b[0m                Write compiled code to \x1b[2m<file>\x1b[0m. If not specified, using \x1b[2ma.out\x1b[0m\n");
+	printf("     --hex-view            Generate hex view of compiled code \x1b[2m(only for debugging)\x1b[0m\n\n");
+	printf("  -o \x1b[2m<file>\x1b[0m                Write compiled code to \x1b[2m<file>\x1b[0m. If not specified, using \x1b[2moutput\x1b[0m\n\n");
 	printf("  -o#                      Optimization level, # = 0, 1 or 2\n");
-	printf("     --feature             Enable all experimental functions");
+	printf("                              0 - No optimizations at all\n");
+	printf("                              1 - Only on-tree optimizations\n");
+	printf("                              2 - Assembler and byte-code optimizations\n");
+	printf("                              3 - Pseudo-dynamic tipization, int data\n\n");
+	printf("     --feature             Enable all experimental functions\n");
 }
 
 
@@ -282,10 +307,9 @@ void Compiler::showSource()
 	if (this -> source_list and this -> verbose)
 	{
 		for (int counter = 0; counter < this -> source_count; counter++)
-		{
 			(this -> source_list)[counter] -> print();
-			printf("\n-----------------------\n\n");
-		}
+		
+		printf("\n\n");
 	}
 }
 
@@ -309,6 +333,15 @@ void Compiler::makeAST()
 					(this -> source_list)[counter] -> optimizeAST();
 				
 				(this -> source_list)[counter] -> prepareAST();
+				
+				if (this -> optimization_level > 2)
+				{
+					(this -> source_list)[counter] -> setTypes();
+					//(this -> source_list)[counter] -> optimizeAST(); // FIXME After type setting optimizing corrupting all arithmetical operations
+				}
+				
+				else
+					(this -> source_list)[counter] -> setFloats();
 				
 				if ((this -> source_list)[counter] -> status != Source::OK)
 					this -> status = COMPILATION_ERROR;

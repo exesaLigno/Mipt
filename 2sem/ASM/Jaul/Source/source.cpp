@@ -115,12 +115,31 @@ short int Source::getType()
 void Source::print()
 {
 	if (this -> name)
-		printf("\n\x1b[1;32m%s\x1b[0m (type = %d)\n\n", this -> name, this -> source_type);
+	{
+		char* filename = strrchr(this -> name, '/') != nullptr ? strrchr(this -> name, '/') + 1 : this -> name;
 		
-	if (this -> text)
-		printf("%s\n", this -> text);
-	else 
-		printf("\x1b[2mEmpty\x1b[0m\n");
+		printf("\x1b[1;32m%s\x1b[0m ", filename);
+		
+		if (this -> name != filename)
+		{
+			printf ("\x1b[2mfrom ");
+			char* path = this -> name;
+			while (path != filename)
+				putchar(*(path++));
+		}
+		
+		printf("\x1b[0m %s\n", 
+			   this -> source_type == JAUL_SOURCE ? "\x1b[34m(JAUL source code)\x1b[0m" : 
+			   this -> source_type == JASM_SOURCE ? "\x1b[34m(assembler source code)\x1b[0m" : 
+			   this -> source_type == JAUL_OBJ ? "\x1b[33m(JAUL object file)\x1b[0m" : 
+			   this -> source_type == VIRTUAL_EXECUTABLE ? "\x1b[33m(JAUL virtual executable)\x1b[0m" : 
+			   this -> source_type == DEFINITION ? "\x1b[35mdefinition\x1b[0m" : "\x1b[31m(incorrect file type)\x1b[0m");
+	}
+		
+	if (this -> text and (this -> source_type == JAUL_SOURCE or this -> source_type == JASM_SOURCE))
+	{
+		printf("-----------------\n%s-----------------\n\n", this -> text);
+	}
 }
 
 
@@ -153,6 +172,8 @@ void Source::optimizeAST()
 	change_count += foldConstants(this -> ast -> head);
 	change_count += substituteStatic(this -> ast -> head);
 	change_count += foldConstants(this -> ast -> head);
+	change_count += deleteUnused(this -> ast -> head);
+	change_count += optimizeBuiltInFunctions(this -> ast -> head);
 	
 	if (change_count != 0)
 		this -> optimizeAST();
@@ -250,6 +271,15 @@ ASN* Source::parseBlock(int indent, char** _text)
 			newline -> svalue = new char[strlen(this -> name) + 1];
 			strcpy(newline -> svalue, this -> name);
 			
+			char* newline_start = *_text;
+			while (*newline_start == '\t')
+				newline_start++;
+			
+			char* newline_end = strchr(newline_start, '\n') != nullptr ? strchr(newline_start, '\n') : strchr(newline_start, '\0');
+			
+			newline -> line_content = new char[newline_end - newline_start + 1]{};
+			strncpy(newline -> line_content, newline_start, newline_end - newline_start + 1);
+			
 			if (previous)
 			{
 				previous -> leftConnect(newline);
@@ -262,7 +292,7 @@ ASN* Source::parseBlock(int indent, char** _text)
 				head = newline;
 			}
 			
-			ASN* parsed = parseLine(indent, _text); // here segfault
+			ASN* parsed = parseLine(indent, _text);
 			
 			newline -> rightConnect(parsed);
 		}
@@ -378,6 +408,14 @@ ASN* Source::getDef(int indent, char** _line)
 		(*_line)++;
 		
 		ASN* itemize = getItemize(indent, _line);
+		
+		ASN* item = itemize;
+		
+		while (item)
+		{
+			item -> right -> LValue = true;
+			item = item -> left;
+		}
 		
 		def -> rightConnect(itemize);
 		
@@ -644,7 +682,7 @@ ASN* Source::getNumVarFunc(int indent, char** _line)	// get numbers, variables a
 		this -> status = SYNTAX_ERROR;
 	}
 	
-	else if (parsed -> type == ASN::CONSTANT and parsed -> data_type == ASN::INT)
+	else if (parsed -> type == ASN::CONSTANT and parsed -> data_type == ASN::INT)	///< All numbers switching to floats to simplifize constant folding and show old performance
 	{
 		parsed -> data_type = ASN::FLOAT;
 		parsed -> fvalue = parsed -> ivalue;
@@ -700,6 +738,8 @@ ASN* Source::getItemize(int indent, char** _line)
 	
 	return item;
 }
+
+
 
 
 void Source::splitFunctions()
@@ -814,7 +854,7 @@ void Source::enumerateMembers()
 		
 		while (parameter)
 		{
-			setType(function, parameter -> right -> svalue, ASN::PARAMETER);
+			setSide(function, parameter -> right -> svalue, ASN::PARAMETER);
 			parameter = parameter -> left;
 		}
 		
@@ -852,6 +892,355 @@ void Source::enumerateMembers()
 
 
 
+void Source::setFloats()
+{
+	this -> setFloats(this -> ast -> head);
+}
+
+
+void Source::setFloats(ASN* node)
+{
+	if (node -> left)
+		this -> setFloats(node -> left);
+	
+	if (node -> right)
+		this -> setFloats(node -> right);
+	
+	if (node -> type == ASN::VARIABLE or node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR or
+		node -> type == ASN::FUNC or node -> type == ASN::FUNCCALL or
+		(node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::RETURN or node -> ivalue == ASN::ASSIGNMENT)))
+		node -> data_type = ASN::FLOAT;
+	
+	if (node -> type == ASN::FUNCCALL and (!strcmp(node -> svalue, "i_input") or !strcmp(node -> svalue, "i_print")))
+	{
+		char* old_name = node -> svalue;
+		node -> svalue = new char[6]{};
+		strcpy(node -> svalue, old_name + 2);
+		delete[] old_name;
+	}
+	
+	else if (node -> type == ASN::FUNCCALL and (!strcmp(node -> svalue, "int") or !strcmp(node -> svalue, "float")))
+	{
+		ASN* parameter = node -> right -> right;
+		node -> right -> right = nullptr;
+		
+		if (node -> parent -> left == node)
+			node -> parent -> leftConnect(parameter);
+		
+		else
+			node -> parent -> rightConnect(parameter);
+		
+		delete node;
+	}
+}
+
+
+
+void Source::setTypes()
+{
+ 	this -> initParameters(this -> ast -> head);
+	
+	this -> setTypes(this -> ast -> head);
+	
+ 	int modified_count = this -> verifyDeclarationCoincidence();
+	
+	if (this -> status == SYNTAX_ERROR)
+		return;
+		
+	if (modified_count > 0)
+	{
+		this -> flushTypes(this -> ast -> head);
+		this -> setTypes();
+	}
+}
+
+
+
+int Source::setTypes(ASN* node)
+{
+	int left_type = ASN::NO_TYPE;
+	int right_type = ASN::NO_TYPE;
+	
+	if (node -> type == ASN::FUNC and node -> data_type != ASN::NO_TYPE)
+		return node -> data_type;
+	
+	if (node -> right)
+		right_type = this -> setTypes(node -> right);
+	
+	if (node -> left)
+		left_type = this -> setTypes(node -> left);
+	
+	if (node -> type == ASN::CONSTANT and node -> data_type == ASN::FLOAT)
+	{
+		int rounded = round(node -> fvalue);
+		float delta = node -> fvalue - rounded;
+		if (delta <= approximation and delta >= -approximation)
+		{
+			node -> fvalue = 0;
+			node -> data_type = ASN::INT;
+			node -> ivalue = rounded;
+		}
+	}
+	
+	else if (node -> type == ASN::FUNCCALL)
+	{
+		if (!strcmp(node -> svalue, "input") or !strcmp(node -> svalue, "float")
+			or !strcmp(node -> svalue, "sin") or !strcmp(node -> svalue, "cos")
+			or !strcmp(node -> svalue, "ctg") or !strcmp(node -> svalue, "tg")
+			or !strcmp(node -> svalue, "sqr") or !strcmp(node -> svalue, "sqrt")
+			or !strcmp(node -> svalue, "abs"))
+			node -> data_type = ASN::FLOAT;
+		
+		else if (!strcmp(node -> svalue, "i_input") or !strcmp(node -> svalue, "int"))
+			node -> data_type = ASN::INT;
+		
+		else if (!strcmp(node -> svalue, "i_print") or !strcmp(node -> svalue, "print"))
+		{
+			delete[] node -> svalue;
+			node -> svalue = new char[strlen("err_print") + 1]{};
+			
+			if (node -> right -> right -> data_type == ASN::INT)
+				strcpy(node -> svalue, "i_print");
+			
+			else if (node -> right -> right -> data_type == ASN::FLOAT)
+				strcpy(node -> svalue, "print");
+			
+			else
+				strcpy(node -> svalue, "err_print");
+		}
+		
+		else
+			node -> data_type = this -> getFunctionType(node);
+	}
+	
+	else if (node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR)
+	{
+		if (((left_type == ASN::INT and right_type == ASN::INT)
+			or node -> ivalue == ASN::INT_DIVISION) and node -> ivalue != ASN::DIVIDE)
+			node -> data_type = ASN::INT;
+		
+		else if (left_type == ASN::FLOAT or right_type == ASN::FLOAT
+			or node -> ivalue == ASN::DIVIDE)
+			node -> data_type = ASN::FLOAT;
+	}
+	
+	else if (node -> type == ASN::CTRL_OPERATOR and node -> ivalue == ASN::RETURN)
+	{
+		node -> data_type = node -> right -> data_type;
+		this -> getFunction(node) -> data_type = node -> data_type;
+	}
+	
+	if (node -> type == ASN::CTRL_OPERATOR and node -> ivalue == ASN::ASSIGNMENT)
+	{
+		if (node -> data_type == ASN::NO_TYPE)
+			node -> data_type = node -> right -> data_type;
+				
+		if (node -> left -> data_type != ASN::NO_TYPE and node -> left -> data_type != node -> data_type)
+		{
+			ASN* line = getLine(node);
+			printf("\x1b[1;31merror:\x1b[0m <%s:%d>: casting from \x1b[1m%s\x1b[0m to \x1b[1m%s\x1b[0m in branching is prohibited by the language standart\n", this -> name, line -> ivalue,
+				   node -> data_type == ASN::INT ? "int" : node -> data_type == ASN::FLOAT ? "float" : "n/t",
+				   node -> left -> data_type == ASN::INT ? "int" : node -> left -> data_type == ASN::FLOAT ? "float" : "n/t");
+			printf("        -> %s\n", line -> line_content);
+			
+			//this -> status = SYNTAX_ERROR;
+		}
+		
+		else
+			node -> left -> data_type = node -> data_type;
+		
+		if (node -> data_type != ASN::NO_TYPE)
+			setVariablesTypes(node -> parent -> left, node -> left, DEFAULT);
+	}
+	
+	if (node -> type == ASN::VARIABLE and node -> vartype == ASN::PARAMETER and node -> LValue == true and node -> parent -> type == ASN::ITEM)
+	{
+		ASN* function = node;
+		while (function -> type != ASN::FUNC)
+			function = function -> parent;
+		
+		setVariablesTypes(function -> left, node, DEFAULT);
+	}
+	
+	return node -> data_type;
+}
+
+
+int Source::setVariablesTypes(ASN* node, ASN* variable, int mode)
+{	
+	if (node == nullptr)
+		return 0;
+
+	if (node -> type == ASN::VARIABLE and node -> LValue == true and !strcmp(node -> svalue, variable -> svalue) and mode == DEFAULT)
+		return -1;
+	
+	if (node -> right)
+	{
+		int status = this -> setVariablesTypes(node -> right, variable, mode);
+		
+		if (status == -1)
+			return -1;
+	}
+	
+	if (node -> type == ASN::VARIABLE and (node -> LValue == false or mode == FORCE) and !strcmp(node -> svalue, variable -> svalue))
+	{
+		node -> data_type = variable -> data_type;
+	}
+	
+	if (node -> left)
+	{
+		int status = 0;
+		if (node -> type == ASN::CTRL_OPERATOR and 
+			(node -> ivalue == ASN::IF or node -> ivalue == ASN::ELSE or node -> ivalue == ASN::WHILE or node -> ivalue == ASN::FOR))
+			this -> setVariablesTypes(node -> left, variable, FORCE);
+		
+		else
+			status = this -> setVariablesTypes(node -> left, variable, mode);
+		
+		if (status == -1)
+			return -1;
+	}
+	
+	return 0;
+}
+
+
+
+void Source::initParameters(ASN* node)
+{
+	if (node -> left)
+		this -> initParameters(node -> left);
+	
+	if (node -> right)
+		this -> initParameters(node -> right);
+	
+	if (node -> type == ASN::VARIABLE and node -> vartype == ASN::PARAMETER and node -> LValue == true and node -> data_type == ASN::NO_TYPE and node -> parent -> type == ASN::ITEM)
+		node -> data_type = ASN::INT;
+}
+
+
+
+int Source::verifyDeclarationCoincidence()
+{
+	int redeclarations_count = 0;
+	
+	ASN* current_def = this -> ast -> head -> left;
+	
+	while (current_def)
+	{
+		redeclarations_count += this -> verifyDeclarationCoincidence(this -> ast -> head, current_def -> right);
+		current_def = current_def -> left;
+	}
+	
+	return redeclarations_count;
+}
+
+
+int Source::verifyDeclarationCoincidence(ASN* node, ASN* declaration)
+{
+	int redeclarations_count = 0;
+	
+	if (node -> left)
+		redeclarations_count += this -> verifyDeclarationCoincidence(node -> left, declaration);
+	
+	if (node -> right)
+		redeclarations_count += this -> verifyDeclarationCoincidence(node -> right, declaration);
+	
+	if (node -> type == ASN::FUNCCALL and !strcmp(node -> svalue, declaration -> svalue))
+	{
+		ASN* decl_parameter = declaration -> right;
+		int decl_parameter_count = 0;
+		
+		ASN* call_parameter = node -> right;
+		int call_parameter_count = 0;
+		
+		while (decl_parameter and call_parameter)
+		{
+			if (call_parameter -> right -> data_type == ASN::FLOAT and decl_parameter -> right -> data_type == ASN::INT)
+			{
+				decl_parameter -> right -> data_type = ASN::FLOAT;
+				redeclarations_count++;
+			}
+			
+			decl_parameter = decl_parameter -> left;
+			call_parameter = call_parameter -> left;
+			decl_parameter_count++;
+			call_parameter_count++;
+		}
+		
+		while (decl_parameter)
+		{
+			decl_parameter = decl_parameter -> left;
+			decl_parameter_count++;
+		}
+		
+		while (call_parameter)
+		{
+			call_parameter = call_parameter -> left;
+			call_parameter_count++;
+		}
+		
+		if (call_parameter_count != decl_parameter_count)
+		{
+			printf("\x1b[1;31merror:\x1b[0m <%s:%d>: function \x1b[1m%s\x1b[0m assumes %d parameters, but %d given\n", getLine(node) -> svalue, 
+					getLine(node) -> ivalue, declaration -> svalue, decl_parameter_count, call_parameter_count);
+			printf("\t-> %s\n", getLine(node) -> line_content);
+		
+			this -> status = SYNTAX_ERROR;
+		}
+		
+	}
+	
+	return redeclarations_count;
+}
+
+
+
+void Source::flushTypes(ASN* node)
+{
+	if (node -> left)
+		this -> flushTypes(node -> left);
+	
+	if (node -> right)
+		this -> flushTypes(node -> right);
+	
+	if (not 
+		(node -> type == ASN::CONSTANT or 
+		(node -> type == ASN::VARIABLE and node -> vartype == ASN::PARAMETER and node -> LValue == true and node -> parent -> type == ASN::ITEM)))
+		node -> data_type = ASN::NO_TYPE;
+}
+
+
+
+
+int Source::getFunctionType(ASN* node)
+{
+	ASN* current_def = this -> ast -> head -> left;
+	
+	while (current_def)
+	{
+		if (!strcmp(node -> svalue, current_def -> right -> svalue))
+		{
+			if (current_def -> right -> data_type != ASN::NO_TYPE)
+				return current_def -> right -> data_type;
+			
+			else
+			{
+				this -> setTypes(current_def -> right);
+				return current_def -> right -> data_type;
+			}
+			
+			break;
+		}
+		current_def = current_def -> left;
+	}
+	
+	return ASN::NO_TYPE;
+}
+
+
+
+
 void Source::enumerateBranching(ASN* node, int* number)
 {
 	if (node -> type == ASN::CTRL_OPERATOR and (node -> ivalue == ASN::IF or node -> ivalue == ASN::WHILE or node -> ivalue == ASN::FOR))
@@ -869,7 +1258,7 @@ void Source::enumerateBranching(ASN* node, int* number)
 
 
 
-void Source::setType(ASN* node, const char* varname, int vartype)
+void Source::setSide(ASN* node, const char* varname, int vartype)
 {
 	if (varname == nullptr)
 		return;
@@ -883,10 +1272,10 @@ void Source::setType(ASN* node, const char* varname, int vartype)
 	}
 	
 	if (node -> right)
-		setType(node -> right, varname, vartype);
+		setSide(node -> right, varname, vartype);
 	
 	if (node -> left)
-		setType(node -> left, varname, vartype);
+		setSide(node -> left, varname, vartype);
 	
 	return;
 }
@@ -935,6 +1324,34 @@ void Source::enumerateVariables(ASN* node, const char* varname, int varnumber)
 	
 	return;
 }
+
+
+
+ASN* Source::getLine(ASN* node)
+{
+	while (node -> type != ASN::LINE and node -> parent != nullptr)
+		node = node -> parent;
+	
+	if (node -> type == ASN::LINE)
+		return node;
+	
+	else
+		return nullptr;
+}
+
+
+ASN* Source::getFunction(ASN* node)
+{
+	while (node -> type != ASN::FUNC and node -> parent != nullptr)
+		node = node -> parent;
+	
+	if (node -> type == ASN::FUNC)
+		return node;
+	
+	else
+		return nullptr;
+}
+
 
 
 void Source::dumpAST()

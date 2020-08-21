@@ -4,17 +4,112 @@
 
 ### Contents
 
+* [About language - Syntax](#jc_syntax)
+
 * [Using - Compiler](#jc_usage)  
-* [Using - Running JVM](#jvm_usage)  
-* [Compilation principle](#principle)  
-* [Object files](#object)  
-* [JAUL Virtual Mashine](#jvm)  
-* [Assembly](#assembly)  
-* [Examples](#examples)  
-* [Performance tests](#performance)  
+  [Using - Running JVM](#jvm_usage)  
+  [Compilation principle](#principle)  
+  [Object files](#object)  
+  [JAUL Virtual Mashine](#jvm)  
+  [Assembly](#assembly)  
+  [Examples](#examples)  
+  [Performance tests](#performance)  
 
 * [Source documentation](.docs/html/index.html)
 
+
+<a name="jc_syntax"><h2>JAUL syntax bible</h2></a>
+
+1. Blocks of code are separated with indents.
+
+2. Syntax have simple dynamic-typization -- two types (integer and float) has 4 bytes length.
+   
+   Type redefinition avalible only in linear blocks - if you try to assign 
+   float number to integer variable in cycle you get **assignment error**. 
+   To redifine type in cycle and fix this error, use manual redefinition - 
+   functions `float()` and `int()`
+   
+3. New functions declaring like this:
+   
+   ```
+   def new_function(a, b, ...)
+	   operator
+	   operator
+	   .
+	   .
+	   .
+	   operator
+	   return result
+   ```
+   or like this:
+   
+   ```
+   def new_void_function(a, b, ...)
+	   operator
+	   operator
+	   .
+	   .
+	   .
+	   operator
+   ```
+   
+   Also you can create functions without any parameters.
+   
+   **Beware!** Compiler doesn't check count and correctness of parameters in function call.
+   
+4. Language supports the following branching operators:
+   
+   **If-else branching:**  
+   ```
+   if statement
+	   operator
+	   .
+	   .
+	   .
+   else
+	   operator
+	   .
+	   .
+	   .
+   ```
+   In `if-else` branching you can omit `else` branch.
+   
+   **While cycle:**  
+   ```
+   while statement
+	   operator
+	   operator
+	   .
+	   .
+	   .
+   ```
+   
+   **For cycle:**  
+   ```
+   repeat count times
+	   operator
+	   operator
+	   .
+	   .
+	   .
+   ```
+   Here **_count_** - integer variable or integer number - count of reiterations,
+   **_times_** - name of variable-counter in this cycle.
+   
+   You can also use conrol words **_break_** or **_continue_** in cycles to control
+   execution flow
+   
+5. Default `input()` and `print()` functions are created for floats only.  
+   To use those functions for ints, use `i_input()` and `i_print()`.
+   
+6. Supported operators:
+
+   **Arithmetics:**  `+, -, *, /`  
+   **Comparison:**   `>, >=, <, <=, ==, !=`  
+   **Logic:**        `&&, ||`
+   
+7. Examples of working code you can find in [examples folder](Examples/)
+   
 
 <a name="jc_usage"><h2>Using - Compiler</h2></a>
 
@@ -40,12 +135,14 @@ Compiler supports compilation options:
 Compiler takes three file types as input:
 * **`.j`** - simple hi-level source ([Examples](#examples))
 * **`.jo`** - [object files](#object)
-* **`.jasm`** - special JAUL assembler language (Example of .jasm files at .std folder)
+* **`.s`** - special JAUL assembler language (Example of .jasm files at .std folder)
 
 
 <a name="jvm_usage"><h2>Using - JVM</h2></a>
 
 Using of [JVM](#jvm)
+
+<h3><span style = "color: red">JVM is not implemented!</style></h3>
 
 
 
@@ -74,7 +171,7 @@ saving all compiled code to executable file.
 
 <a name="object"><h2>Object files</h2></a>
 
-Object files contains pre-compiled code and functions names for linker.
+Object files contains pre-compiled code and function names for linker.
 
 First 4 bytes is `JAUL`, next 8 bytes is *long int* with length of subsequent executable bytecode.
 
@@ -86,9 +183,15 @@ Bytecode contains name of function and bytecode of this function.
 | Type |    `int`    | `char*` | `long int`  |  `char*`  |
 
 
+You can make your own object library from assembler with **_makeobj_** tool from [Accessory](Accessory/makeObject/)  
+Information about usage and requirements of this tool you can read by the link above.
+
+
 <a name="jvm"><h2>JAUL Virtual Mashine</h2></a>
 
 JAUL Virtual Mashine
+<h3><span style = "color: red">JVM is not implemented!</style></h3>
+
 
 <a name="assembly"><h2>Assembly</h2></a>
 

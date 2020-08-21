@@ -1,4 +1,5 @@
-cos:		fld dword [rsp + 8]
+ 
+sin:		fld dword [rsp + 8]
 			fcos
 			fst dword [rsp + 8]
 			xor rax, rax

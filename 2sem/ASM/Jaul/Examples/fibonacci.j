@@ -1,4 +1,4 @@
-n = input()
+n = int(input())
 
 number = 0
 next_number = 1

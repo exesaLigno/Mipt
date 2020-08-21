@@ -39,8 +39,9 @@ class AbstractSyntaxTree
 	  	bool LValue = false;
 	  	int vartype = LOCAL;
 		bool enumerated = false;
-		int data_type = FLOAT;
-		int processor_unit = KEEP;
+		int data_type = NO_TYPE;
+		
+		char* line_content = nullptr;
 	  	
 	  	enum SYMTYPES
 		{
@@ -75,8 +76,7 @@ class AbstractSyntaxTree
 			
 	  		_START, INCLUDE, DEFINE,
 			
-			INT, FLOAT,											// DATA TYPES
-			KEEP, TO_CPU, TO_FPU,								// TRANSFER_PARAMETERS
+			NO_TYPE, INT, FLOAT,								// DATA TYPES
 			
 	  		COUNT_OF_TYPES
 	  	};
