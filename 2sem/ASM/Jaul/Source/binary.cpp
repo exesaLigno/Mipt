@@ -112,7 +112,7 @@ void Binary::importAST(ASN* node)
 		}
 		
 		else if (node -> data_type == ASN::INT)
-			this -> pushBack("push dword [r15 + %d]", (node -> ivalue) * 8);
+			this -> pushBack("push qword [r15 + %d]", (node -> ivalue) * 8);
 		
 		else if (node -> data_type == ASN::FLOAT)
 			this -> pushBack("fld dword [r15 + %d]", (node -> ivalue) * 8);
@@ -163,6 +163,9 @@ void Binary::importAST(ASN* node)
 		{
 			if (node -> right)
 				this -> importAST(node -> right);
+			
+			if (node -> data_type == ASN::INT)
+				this -> pushBack("pop rax");
 		}
 		
 		
@@ -234,7 +237,7 @@ void Binary::importAST(ASN* node)
 			this -> pushBack("add rsp, %d", 8);
 		}
 		
-		if (node -> left -> type == ASN::FUNCCALL)
+		if (node -> left -> type == ASN::FUNCCALL and data_type == ASN::FLOAT)
 		{
 			this -> pushBack("sub rsp, %d", 8);
 			this -> pushBack("fstp dword [rsp]");
@@ -248,36 +251,67 @@ void Binary::importAST(ASN* node)
 			this -> pushBack("add rsp, %d", 8);
 		}
 		
-		if (node -> left -> type == ASN::FUNCCALL)
+		if (node -> left -> type == ASN::FUNCCALL and data_type == ASN::FLOAT)
 		{
 			this -> pushBack("fld dword [rsp]");
 			this -> pushBack("fxch");
 			this -> pushBack("add rsp, %d", 8);
 		}
 		
-		if (node -> ivalue == ASN::EQUAL and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nsete cl\nffree\npush rcx");
 		
-		else if (node -> ivalue == ASN::NOT_EQUAL and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nsetne cl\nffree\npush rcx");
+		if (node -> data_type == ASN::FLOAT)
+		{
+			if (node -> ivalue == ASN::EQUAL)
+				this -> pushBack("xor rcx, rcx\nfucomip\nsete cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::NOT_EQUAL)
+				this -> pushBack("xor rcx, rcx\nfucomip\nsetne cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::MORE)
+				this -> pushBack("xor rcx, rcx\nfucomip\nseta cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::LESS)
+				this -> pushBack("xor rcx, rcx\nfucomip\nsetb cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::MORE_EQ)
+				this -> pushBack("xor rcx, rcx\nfucomip\nsetae cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::LESS_EQ)
+				this -> pushBack("xor rcx, rcx\nfucomip\nsetbe cl\nffree\npush rcx");
+			
+			else if (node -> ivalue == ASN::AND)
+				this -> pushBack("pop rax\npop rbx\nand rax, rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::OR)
+				this -> pushBack("pop rax\npop rbx\nor rax, rbx\npush rax");
+		}
 		
-		else if (node -> ivalue == ASN::MORE and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nseta cl\nffree\npush rcx");
-		
-		else if (node -> ivalue == ASN::LESS and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nsetb cl\nffree\npush rcx");
-		
-		else if (node -> ivalue == ASN::MORE_EQ and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nsetae cl\nffree\npush rcx");
-		
-		else if (node -> ivalue == ASN::LESS_EQ and data_type == ASN::FLOAT)
-			this -> pushBack("xor rcx, rcx\nfucomip\nsetbe cl\nffree\npush rcx");
-		
-		else if (node -> ivalue == ASN::AND)
-			this -> pushBack("pop rax\npop rbx\nand rax, rbx\npush rax");
-		
-		else if (node -> ivalue == ASN::OR)
-			this -> pushBack("pop rax\npop rbx\nor rax, rbx\npush rax");
+		if (node -> data_type == ASN::INT)
+		{
+			if (node -> ivalue == ASN::EQUAL)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsete cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::NOT_EQUAL)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetne cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::MORE)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetg cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::LESS)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetl cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::MORE_EQ)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetge cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::LESS_EQ)
+				this -> pushBack("pop rax\npop rbx\nxor rcx, rcx\ncmp rax, rbx\nsetle cl\npush rcx");
+			
+			else if (node -> ivalue == ASN::AND)
+				this -> pushBack("pop rax\npop rbx\nand rax, rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::OR)
+				this -> pushBack("pop rax\npop rbx\nor rax, rbx\npush rax");
+		}
 	}
 	
 	
@@ -297,7 +331,7 @@ void Binary::importAST(ASN* node)
 		
 		if (node -> left)
 		{
-			if (node -> left -> type == ASN::FUNCCALL)
+			if (node -> left -> type == ASN::FUNCCALL and node -> data_type == ASN::FLOAT)
 			{
 				this -> pushBack("sub rsp, %d", 8);
 				this -> pushBack("fstp dword [rsp]");
@@ -311,7 +345,7 @@ void Binary::importAST(ASN* node)
 				this -> pushBack("add rsp, %d", 8);
 			}
 			
-			if (node -> left -> type == ASN::FUNCCALL)
+			if (node -> left -> type == ASN::FUNCCALL and node -> data_type == ASN::FLOAT)
 			{
 				this -> pushBack("fld dword [rsp]");
 				this -> pushBack("fxch");
@@ -319,20 +353,44 @@ void Binary::importAST(ASN* node)
 			}
 		}
 		
-		if (node -> ivalue == ASN::PLUS and node -> data_type == ASN::FLOAT)
-			this -> pushBack("fadd");
+		if (node -> data_type == ASN::FLOAT)
+		{
+			if (node -> ivalue == ASN::PLUS)
+				this -> pushBack("fadd");
+			
+			else if (node -> ivalue == ASN::MINUS)
+				this -> pushBack("fsubr");
+			
+			else if (node -> ivalue == ASN::UNARY_MINUS)
+				this -> pushBack("fchs");
+			
+			else if (node -> ivalue == ASN::MULTIPLY)
+				this -> pushBack("fmul");
+			
+			else if (node -> ivalue == ASN::DIVIDE)
+				this -> pushBack("fdivr");
+		}
 		
-		else if (node -> ivalue == ASN::MINUS and node -> data_type == ASN::FLOAT)
-			this -> pushBack("fsubr");
-		
-		else if (node -> ivalue == ASN::UNARY_MINUS and node -> data_type == ASN::FLOAT)
-			this -> pushBack("fchs");
-		
-		else if (node -> ivalue == ASN::MULTIPLY and node -> data_type == ASN::FLOAT)
-			this -> pushBack("fmul");
-		
-		else if (node -> ivalue == ASN::DIVIDE and node -> data_type == ASN::FLOAT)
-			this -> pushBack("fdivr");
+		else if (node -> data_type == ASN::INT)
+		{
+			if (node -> ivalue == ASN::PLUS)
+				this -> pushBack("pop rax\npop rbx\nadd rax, rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::MINUS)
+				this -> pushBack("pop rax\npop rbx\nsub rax, rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::UNARY_MINUS)
+				this -> pushBack("xor rax, rax\npop rbx\nsub rax, rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::MULTIPLY)
+				this -> pushBack("pop rax\npop rbx\nimul ebx\npush rax");
+			
+			else if (node -> ivalue == ASN::INT_DIVISION)
+				this -> pushBack("pop rax\npop rbx\nidiv rbx\npush rax");
+			
+			else if (node -> ivalue == ASN::MODULO)
+				this -> pushBack("pop rax\npop rbx\nidiv rbx\npush rdx");
+		}
 	}
 	
 	else
@@ -997,17 +1055,20 @@ Binary::Token::Token()
 
 Binary::Token::~Token()
 {
+	//printf("deleting on byte %llu\n", this -> first_byte_position);
 	if (this -> text != nullptr)
 		delete[] this -> text;
-
+	//DEBUG
 	if (this -> bytes != nullptr)
 		delete[] this -> bytes;
-
+	//DEBUG
 	if (this -> svalue != nullptr)
 		delete[] this -> svalue;
-
+	
+	//printf("%p\n", this -> next);
 	if (this -> next)
 		delete this -> next;
+	//printf("%p\n", this -> next);
 }
 
 

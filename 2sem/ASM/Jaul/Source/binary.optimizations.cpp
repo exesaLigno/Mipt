@@ -4,7 +4,7 @@
 void Binary::optimize()
 {
 	int changes_count = 0;
-	
+	return;
 	changes_count += this -> deleteUnusedFunctions();
 	changes_count += this -> foldPushPop();
 	changes_count += this -> foldMovMov();
@@ -56,7 +56,7 @@ int Binary::foldPushPop()
 					current -> text = new_command;
 					
 					Token* deleting = current -> next;
-					current -> next = current -> next -> next;
+					current -> next = deleting -> next;
 					current -> next -> prev = current;
 					
 					deleting -> next = nullptr;
