@@ -42,6 +42,7 @@ class AbstractSyntaxTree
 		int data_type = NO_TYPE;
 		
 		char* line_content = nullptr;
+		Node* bounded_node = nullptr;
 	  	
 	  	enum SYMTYPES
 		{
@@ -114,7 +115,7 @@ class AbstractSyntaxTree
 	AbstractSyntaxTree();
 	~AbstractSyntaxTree();
 	
-	int dumper(const char* filename, int mode);
+	int dumper(const char* filename, int mode, const char* title);
 
 	Node* createNode(int type);
 	Node* createNode(int type, char** text);

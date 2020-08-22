@@ -44,7 +44,7 @@ class Source
 	void setFloats();		///< Простановка типов в старом стиле - только float, только хардкор
 	void prepareAST();
 	
-	void dumpAST();
+	void dumpAST(const char* title);
 	
   private:
 	int calculateIndent(char* text);

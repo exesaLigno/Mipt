@@ -1016,7 +1016,8 @@ int Source::setTypes(ASN* node)
 	else if (node -> type == ASN::ARITHM_OPERATOR or node -> type == ASN::CMP_OPERATOR)
 	{
 		if (((left_type == ASN::INT and right_type == ASN::INT)
-			or node -> ivalue == ASN::INT_DIVISION) and node -> ivalue != ASN::DIVIDE)
+			or node -> ivalue == ASN::INT_DIVISION or (node -> ivalue >= ASN::EQUAL and node -> ivalue <= ASN::LESS_EQ)) 
+			and node -> ivalue != ASN::DIVIDE)
 			node -> data_type = ASN::INT;
 		
 		else if (left_type == ASN::FLOAT or right_type == ASN::FLOAT
@@ -1070,7 +1071,7 @@ int Source::setVariablesTypes(ASN* node, ASN* variable, int mode)
 {	
 	if (node == nullptr)
 		return 0;
-
+	
 	if (node -> type == ASN::VARIABLE and node -> LValue == true and !strcmp(node -> svalue, variable -> svalue) and mode == DEFAULT)
 		return -1;
 	
@@ -1148,6 +1149,8 @@ int Source::verifyDeclarationCoincidence(ASN* node, ASN* declaration)
 	
 	if (node -> type == ASN::FUNCCALL and !strcmp(node -> svalue, declaration -> svalue))
 	{
+		node -> bounded_node = declaration;
+		
 		ASN* decl_parameter = declaration -> right;
 		int decl_parameter_count = 0;
 		
@@ -1354,9 +1357,9 @@ ASN* Source::getFunction(ASN* node)
 
 
 
-void Source::dumpAST()
+void Source::dumpAST(const char* title)
 {
-	ast -> dumper(this -> name, AST::DELETE_TXT);
+	ast -> dumper(this -> name, AST::DELETE_TXT, title);
 	printf("\x1b[1m%s:\x1b[0m Programm tree dump saved as \x1b[1;32m<%s.png>\x1b[0m\n", this -> name, this -> name);
 }
 

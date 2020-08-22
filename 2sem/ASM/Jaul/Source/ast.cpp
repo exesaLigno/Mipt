@@ -413,7 +413,7 @@ void AbstractSyntaxTree::Node::write(std::ofstream& out)
 }
 
 
-int AbstractSyntaxTree::dumper(const char* filename, int mode)
+int AbstractSyntaxTree::dumper(const char* filename, int mode, const char* title)
 {
 	char* cmd = new char[2 * strlen(filename) + 1 + 8 + 29];
 	strcpy(cmd, filename);
@@ -421,6 +421,7 @@ int AbstractSyntaxTree::dumper(const char* filename, int mode)
     std::ofstream file;
     file.open(cmd);
     file << "digraph G{\n";
+	file << "graph [label=\"" << title << "\", labelloc=top, fontsize=30]";
     file << "root [shape = box, style = filled, fillcolor = orange, color = black, label = \" Root = " << this -> head << "\"]\n";
     file << "count [shape = box, style = filled, fillcolor = orange, color = black, label = \" Count of nodes = " << this -> nodes_count << "\"]\n";
     AbstractSyntaxTree::Node* element = this -> head;
@@ -510,7 +511,7 @@ int AbstractSyntaxTree::Node::dumper(std::ofstream& file, int mode)
         	
         else
         	file << (long int) this << " -> " << (long int) this -> left << " [color = black]\n";
-        	
+		
         this -> left -> dumper(file, mode);
     }
 
@@ -536,7 +537,7 @@ int AbstractSyntaxTree::Node::dumper(std::ofstream& file, int mode)
         
         else
         	file << (long int) this << " -> " << (long int) this -> right << " [color = black]\n";
-        	
+		
         this -> right -> dumper(file, mode);
     }
 

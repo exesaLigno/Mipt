@@ -42,6 +42,7 @@ class Binary
 	
 	//------ Abstract syntax tree compilation ------//
 	void importAST(AST* ast);						///< Добавление информации в объект Binary на основе AbstractSyntaxTree
+	void importAST(ASN* node);						///< Рекурсивная компиляция
 	void importDef(ASN* node);						///< Вспомогательный метод для importAST (импорт функции)
 	void importBody(ASN* node);						///< Вспомогательный метод для importAST (импорт основных структур кода)
 	void importParameters(ASN* node);				///< Вспомогательный метод для importAST (импорт загрузки параметров функции)

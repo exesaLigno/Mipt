@@ -65,11 +65,6 @@ input:		sub rsp, 2
 			
 			fdivp
 			fchs
-			
-			fstp dword [rsp + 4]
-			
-			xor rax, rax
-			mov eax, dword [rsp + 4]
 						
 			jmp .exit
 						
@@ -78,11 +73,6 @@ input:		sub rsp, 2
 			fild dword [rsp]
 			
 			fdivp
-			
-			fstp dword [rsp + 4]
-			
-			xor rax, rax
-			mov eax, dword [rsp + 4]			
 			
 	.exit:	add rsp, 24
 			

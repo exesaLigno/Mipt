@@ -370,7 +370,17 @@ void Compiler::dumpAST()
 		{
 			if ((this -> source_list)[counter] -> source_type == Source::JAUL_SOURCE)
 			{
-				(this -> source_list)[counter] -> dumpAST();
+				char* title = new char[strlen((this -> source_list)[counter] -> name) + strlen(" -o#") + 1]{};
+				strcpy(title, strrchr((this -> source_list)[counter] -> name, '/') != nullptr ? 
+								  strrchr((this -> source_list)[counter] -> name, '/') + 1 : 
+								  (this -> source_list)[counter] -> name);
+				
+				strcat(title, this -> optimization_level == 0 ? " -o0" :
+							  this -> optimization_level == 1 ? " -o1" :
+							  this -> optimization_level == 2 ? " -o2" :
+							  this -> optimization_level == 3 ? " -o3" : " fck");
+				
+				(this -> source_list)[counter] -> dumpAST(title);
 				dumped = true;
 			}
 		}

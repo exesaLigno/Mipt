@@ -20,15 +20,343 @@ Binary::~Binary()
 
 
 
+void Binary::importAST(ASN* node)
+{
+	if (node -> type == ASN::FUNC)								// Компиляция кода функции
+	{
+		this -> pushBack(Token::FUNCTION_LABEL, node -> svalue);	// Создание узла с названием функции
+		this -> pushBack("sub rsp, %d", (node -> ivalue) * 8);		// Выделение места под локальные переменные
+		this -> pushBack("mov r15, rsp");							// Сохранение отступа переменных в r15
+		
+		importAST(node -> left);									// Компиляция тела функции
+		
+		this -> pushBack("add rsp, %d", (node -> ivalue) * 8);		// Освобождение места от локальных переменных
+		
+		if (!strcmp(node -> svalue, "_start"))						// Добавление выхода из программы
+		{
+			this -> pushBack("mov rdi, %d", 0);
+			this -> pushBack("mov rax, 60");
+			this -> pushBack("syscall");
+		}
+		
+		else
+			this -> pushBack("ret");								// Добавление возврата из функции
+	}
+	
+	else if (node -> type == ASN::FUNCCALL)						// Компиляция вызова функции
+	{
+		this -> pushBack("push r15");								// Сохранение положения локальных перменных
+		
+		ASN* declaration = node -> bounded_node != nullptr ? node -> bounded_node : node;
+		
+		ASN* call_parameter = node -> right;
+		ASN* decl_parameter = declaration -> right;
+		
+		int params_count = 0;
+		
+		while (call_parameter != nullptr)
+		{
+			call_parameter = call_parameter -> left;
+			params_count++;
+		}
+		
+		call_parameter = node -> right;
+		
+		for (int counter = 0; counter < params_count - 1; counter++)
+		{
+			call_parameter = call_parameter -> left;
+			decl_parameter = decl_parameter -> left;
+		}
+				
+		for (int counter = 0; counter < params_count; counter++)			// После импорта интовской конструкции результат закономерно останется в стэке,
+		{																	// после флоатовской - в FPU. Его необходимо выгрузить в оперативку и очистить FPU
+			this -> importAST(call_parameter -> right);						// Если оказалось, что int необходимо перевести во float, просто кормим его FPU и выгружем обратно
+			
+			if (call_parameter -> right -> data_type == ASN::FLOAT)
+			{
+				this -> pushBack("sub rsp, %d", 8);
+				this -> pushBack("fstp dword [rsp]");
+			}
+			
+			else if (call_parameter -> right -> data_type == ASN::INT and decl_parameter -> right -> data_type == ASN::FLOAT)
+			{
+				this -> pushBack("fild dword [rsp]");
+				this -> pushBack("fstp dword [rsp]");
+			}
+			
+			call_parameter = call_parameter -> parent;
+			decl_parameter = decl_parameter -> parent;
+		}
+		
+		this -> pushBack("call %s", node -> svalue);				// Вызов функции
+		
+		this -> pushBack("add rsp, %d", params_count * 8);			// Очистка места, занятого параметрами
+		
+		this -> pushBack("pop r15");								// Восстановление положения локальных переменных
+		
+		if (node -> data_type == ASN::INT)							// Перемещение результата выполнения из rax в необходимое расположение
+			this -> pushBack("push rax");							// (обычный стэк или стэк регистров FPU)
+																	// В последнем случае переносить результат не надо, он и так находится в регистре FPU
+		else if (node -> data_type == ASN::FLOAT);
+	}
+	
+	
+	
+	
+	else if (node -> type == ASN::VARIABLE)
+	{
+		if (node -> LValue)
+		{
+			this -> pushBack("lea rax, [r15 + %d]", (node -> ivalue) * 8);
+			this -> pushBack("push rax");
+		}
+		
+		else if (node -> data_type == ASN::INT)
+			this -> pushBack("push dword [r15 + %d]", (node -> ivalue) * 8);
+		
+		else if (node -> data_type == ASN::FLOAT)
+			this -> pushBack("fld dword [r15 + %d]", (node -> ivalue) * 8);
+		
+		else
+			this -> pushBack("no-type variable");
+	}
+	
+	
+	
+
+	else if (node -> type == ASN::CONSTANT and node -> data_type == ASN::INT)
+	{
+		this -> pushBack("mov rax, %d", node -> ivalue);
+		this -> pushBack("push rax");
+	}
+
+	else if (node -> type == ASN::CONSTANT and node -> data_type == ASN::FLOAT)
+	{
+		this -> pushBack("mov rax, __float32__(%f)", node -> fvalue);
+		this -> pushBack("push rax");
+		this -> pushBack("fld dword [rsp]");
+		this -> pushBack("add rsp, 8");
+	}
+	
+	
+	
+
+	else if (node -> type == ASN::CTRL_OPERATOR)
+	{
+		if (node -> ivalue == ASN::ASSIGNMENT)
+		{
+			if (node -> right)
+				this -> importAST(node -> right);
+			
+			if (node -> left)
+				this -> importAST(node -> left);
+			
+			if (node -> data_type == ASN::INT)
+				this -> pushBack("pop rax\npop rbx\nmov dword [rax], ebx");
+			
+			else if (node -> data_type == ASN::FLOAT)
+				this -> pushBack("pop rax\nfstp dword [rax]");
+		}
+		
+		
+		else if (node -> ivalue == ASN::RETURN)
+		{
+			if (node -> right)
+				this -> importAST(node -> right);
+		}
+		
+		
+		else if (node -> ivalue == ASN::WHILE)
+		{
+			this -> pushBack(Token::LOCAL_LABEL, ".cycle%d", node -> vartype);
+			
+			if (node -> right)
+				importAST(node -> right);
+			
+			this -> pushBack("pop rax");
+			this -> pushBack("test rax, rax");
+			this -> pushBack("jz .exitcycle%d", node -> vartype);
+			
+			if (node -> left)
+				importAST(node -> left);
+			
+			this -> pushBack("jmp .cycle%d", node -> vartype);
+			
+			this -> pushBack(Token::LOCAL_LABEL, ".exitcycle%d", node -> vartype);
+		}
+		
+		
+		else if (node -> ivalue == ASN::FOR)	// TODO make for compilation
+		{
+			this -> pushBack("for cycle");
+		}
+		
+		
+		else if (node -> ivalue == ASN::IF)
+		{
+			if (node -> right)
+				importAST(node -> right);
+			
+			this -> pushBack("pop rax");
+			this -> pushBack("test rax, rax");
+			this -> pushBack("jz .endif%d", node -> vartype);
+			
+			if (node -> left)
+				importAST(node -> left);
+			
+			this -> pushBack("jmp .exitif%d", node -> vartype);
+			
+			this -> pushBack(Token::LOCAL_LABEL, ".endif%d", node -> vartype);
+			
+			
+			// Else compilation
+			if (node -> parent -> left)
+			{
+				if (node -> parent -> left -> right -> type == ASN::CTRL_OPERATOR and node -> parent -> left -> right -> ivalue == ASN::ELSE)
+					importAST(node -> parent -> left -> right -> left);
+			}
+			
+			this -> pushBack(Token::LOCAL_LABEL, ".exitif%d", node -> vartype);
+		}
+	}
+	
+	
+	
+	
+	else if (node -> type == ASN::CMP_OPERATOR)
+	{
+		int data_type = node -> left -> data_type == ASN::INT and node -> right -> data_type == ASN::INT ? ASN::INT : ASN::FLOAT;
+		
+		this -> importAST(node -> right);
+		if (data_type == ASN::FLOAT and node -> right -> data_type == ASN::INT)
+		{
+			this -> pushBack("fild dword [rsp]");
+			this -> pushBack("add rsp, %d", 8);
+		}
+		
+		if (node -> left -> type == ASN::FUNCCALL)
+		{
+			this -> pushBack("sub rsp, %d", 8);
+			this -> pushBack("fstp dword [rsp]");
+		}
+		
+		this -> importAST(node -> left);
+		
+		if (data_type == ASN::FLOAT and node -> left -> data_type == ASN::INT)
+		{
+			this -> pushBack("fild dword [rsp]");
+			this -> pushBack("add rsp, %d", 8);
+		}
+		
+		if (node -> left -> type == ASN::FUNCCALL)
+		{
+			this -> pushBack("fld dword [rsp]");
+			this -> pushBack("fxch");
+			this -> pushBack("add rsp, %d", 8);
+		}
+		
+		if (node -> ivalue == ASN::EQUAL and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nsete cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::NOT_EQUAL and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nsetne cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::MORE and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nseta cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::LESS and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nsetb cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::MORE_EQ and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nsetae cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::LESS_EQ and data_type == ASN::FLOAT)
+			this -> pushBack("xor rcx, rcx\nfucomip\nsetbe cl\nffree\npush rcx");
+		
+		else if (node -> ivalue == ASN::AND)
+			this -> pushBack("pop rax\npop rbx\nand rax, rbx\npush rax");
+		
+		else if (node -> ivalue == ASN::OR)
+			this -> pushBack("pop rax\npop rbx\nor rax, rbx\npush rax");
+	}
+	
+	
+	
+	
+	else if (node -> type == ASN::ARITHM_OPERATOR)
+	{
+		if (node -> right)
+		{
+			importAST(node -> right);
+			if (node -> data_type == ASN::FLOAT and node -> right -> data_type == ASN::INT)
+			{
+				this -> pushBack("fild dword [rsp]");
+				this -> pushBack("add rsp, %d", 8);
+			}
+		}
+		
+		if (node -> left)
+		{
+			if (node -> left -> type == ASN::FUNCCALL)
+			{
+				this -> pushBack("sub rsp, %d", 8);
+				this -> pushBack("fstp dword [rsp]");
+			}
+			
+			this -> importAST(node -> left);
+			
+			if (node -> data_type == ASN::FLOAT and node -> left -> data_type == ASN::INT)
+			{
+				this -> pushBack("fild dword [rsp]");
+				this -> pushBack("add rsp, %d", 8);
+			}
+			
+			if (node -> left -> type == ASN::FUNCCALL)
+			{
+				this -> pushBack("fld dword [rsp]");
+				this -> pushBack("fxch");
+				this -> pushBack("add rsp, %d", 8);
+			}
+		}
+		
+		if (node -> ivalue == ASN::PLUS and node -> data_type == ASN::FLOAT)
+			this -> pushBack("fadd");
+		
+		else if (node -> ivalue == ASN::MINUS and node -> data_type == ASN::FLOAT)
+			this -> pushBack("fsubr");
+		
+		else if (node -> ivalue == ASN::UNARY_MINUS and node -> data_type == ASN::FLOAT)
+			this -> pushBack("fchs");
+		
+		else if (node -> ivalue == ASN::MULTIPLY and node -> data_type == ASN::FLOAT)
+			this -> pushBack("fmul");
+		
+		else if (node -> ivalue == ASN::DIVIDE and node -> data_type == ASN::FLOAT)
+			this -> pushBack("fdivr");
+	}
+	
+	else
+	{
+		if (node -> right)
+			this -> importAST(node -> right);
+		
+		if (node -> left)
+			this -> importAST(node -> left);
+	}
+}
+
+
+
 void Binary::importAST(AST* ast)
 {
-	ASN* current_def = ast -> head -> left;
-
-	while (current_def)
-	{
-		importDef(current_def -> right);
-		current_def = current_def -> left;
-	}
+	this -> importAST(ast -> head);
+// 	ASN* current_def = ast -> head -> left;
+// 
+// 	while (current_def)
+// 	{
+// 		importDef(current_def -> right);
+// 		current_def = current_def -> left;
+// 	}
 }
 
 void Binary::importDef(ASN* node)
