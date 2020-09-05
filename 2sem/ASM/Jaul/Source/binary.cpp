@@ -374,7 +374,10 @@ void Binary::importAST(ASN* node)
 		else if (node -> data_type == ASN::INT)
 		{
 			if (node -> ivalue == ASN::PLUS)
-				this -> pushBack("pop rax\npop rbx\nadd rax, rbx\npush rax");
+				this -> pushBack("pop rax\n"
+								 "pop rbx\n"
+								 "add rax, rbx\n"
+								 "push rax");
 			
 			else if (node -> ivalue == ASN::MINUS)
 				this -> pushBack("pop rax\npop rbx\nsub rax, rbx\npush rax");
@@ -386,10 +389,10 @@ void Binary::importAST(ASN* node)
 				this -> pushBack("pop rax\npop rbx\nimul ebx\npush rax");
 			
 			else if (node -> ivalue == ASN::INT_DIVISION)
-				this -> pushBack("pop rax\npop rbx\nidiv rbx\npush rax");
+				this -> pushBack("pop rax\npop rbx\nxor rdx, rdx\nidiv rbx\npush rax");
 			
 			else if (node -> ivalue == ASN::MODULO)
-				this -> pushBack("pop rax\npop rbx\nidiv rbx\npush rdx");
+				this -> pushBack("pop rax\npop rbx\nxor rdx, rdx\nidiv rbx\npush rdx");
 		}
 	}
 	

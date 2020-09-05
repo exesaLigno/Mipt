@@ -12,7 +12,7 @@
 #include <cmath>
 #include <cstdio>
 
-#define approximation 0.0001
+const float APPROXIMATION = 0.0001;
 
 class Source
 {

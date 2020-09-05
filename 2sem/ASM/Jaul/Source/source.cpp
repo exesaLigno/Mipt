@@ -974,7 +974,7 @@ int Source::setTypes(ASN* node)
 	{
 		int rounded = round(node -> fvalue);
 		float delta = node -> fvalue - rounded;
-		if (delta <= approximation and delta >= -approximation)
+		if (delta <= APPROXIMATION and delta >= -APPROXIMATION)
 		{
 			node -> fvalue = 0;
 			node -> data_type = ASN::INT;
