@@ -10,8 +10,8 @@ namespace SETTINGS
 }
 
 
-int parseArguments(int argc, char* argv[]);
-int giveResponce(int argc, char* argv[]);
+void parseArguments(int argc, char* argv[]);
+void giveResponce(int argc, char* argv[]);
 
 
 
@@ -24,46 +24,31 @@ int main(int argc, char* argv[])
 
 
 
-int parseArguments(int argc, char* argv[])
-{
-	int keys_count = 0;
-	
+void parseArguments(int argc, char* argv[])
+{	
 	for (int counter = 1; counter < argc; counter++)
 	{		
-		if (argv[counter][0] == '-')
+		if (argv[counter][0] == '-' and strchr("ns", argv[counter][1]))
 		{
-			bool is_parameter = false;
 			
 			if (strchr(argv[counter], 'n'))
-			{
 				SETTINGS::new_line_enabled = false;
-				is_parameter = true;
-			}
 			
 			
 			if (strchr(argv[counter], 's'))
-			{
 				SETTINGS::space_separators_enabled = false;
-				is_parameter = true;
-			}
+
 			
-			if (is_parameter)
-			{
-				keys_count++;
-			}
+			SETTINGS::keys_count += 1;
 		}
 		
 		else
 			break;
 	}
-	
-	SETTINGS::keys_count = keys_count;
-	
-	return 0;
 }
 
 
-int giveResponce(int argc, char* argv[])
+void giveResponce(int argc, char* argv[])
 {
 	int counter = 1 + SETTINGS::keys_count;
 	
@@ -79,7 +64,5 @@ int giveResponce(int argc, char* argv[])
 	
 	if (SETTINGS::new_line_enabled == true)
 		printf("\n");
-	
-	return 0;
 }
 
