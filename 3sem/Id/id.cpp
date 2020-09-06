@@ -41,12 +41,8 @@ int main(int argc, char* argv[])
 	if (argc == 1)
 		users_count = 1;
 	
-	if (argc == 1)
-		getUsersGroups(users, users_count);
-	
-	else
-		printf("\x1b[1;31mGroups finding for other users is not implemented\x1b[0m\n");
-	
+	getUsersGroups(users, users_count);
+
 	int status = giveResponce(users, users_count);
 	
 	delete[] users;
@@ -114,8 +110,9 @@ void getUsersGroups(User* users, int users_count)
 	{
 		if (users[counter].exist)
 		{
+			users[counter].groups_count = MAX_GROUPS_COUNT;
 			users[counter].groups = new gid_t[MAX_GROUPS_COUNT];
-			users[counter].groups_count = getgroups(MAX_GROUPS_COUNT, users[counter].groups);
+			users[counter].groups_count = getgrouplist(users[counter].username, users[counter].gid, users[counter].groups, &(users[counter].groups_count));
 		}
 	}
 }
