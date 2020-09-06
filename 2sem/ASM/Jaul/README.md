@@ -3,7 +3,7 @@
 **JAUL** means **J**ust **A**nother **U**seless **L**anguage.
 
 <h3><span style="color: red">Project not maintained in this repository as a study project</span></h3>
-[Watch actual repository](https://www.github.com/exesaLigno/Jaul/ "Jaul repository")
+[Watch actual repository](https://github.com/exesaLigno/Jaul/)
 
 ### Contents
 
