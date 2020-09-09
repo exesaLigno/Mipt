@@ -33,7 +33,7 @@ public:
 	User(const char* user_name);
 	User(const uid_t uid);
 	
-	void representUser();
+	void represent();
 	
 	~User();
 	
@@ -55,40 +55,30 @@ bool isNumber(const char* str);
 
 
 int main(int argc, char* argv[])
-{
-	User** users = nullptr;
-	int users_count = 0;
-	
+{	
 	if (argc == 1)
 	{
-		users_count = 1;
-		users = new User*[users_count]{nullptr};
-		users[0] = new User;
+		User user;
+		user.represent();
 	}
 	
 	else
-	{
-		users_count = argc - 1;
-		
-		users = new User*[users_count]{nullptr};
-		
+	{		
 		for (int counter = 1; counter < argc; counter++)
 		{
 			if (isNumber(argv[counter]))
-				users[counter - 1] = new User(atoi(argv[counter]));
+			{
+				User user(atoi(argv[counter]));
+				user.represent();
+			}
 				
 			else
-				users[counter - 1] = new User(argv[counter]);
+			{
+				User user(argv[counter]);
+				user.represent();
+			}
 		}
 	}
-	
-	for (int counter = 0; counter < users_count; counter++)
-	{
-		users[counter] -> representUser();
-		delete users[counter];
-	}
-	
-	delete[] users;
 	
 	return 0;
 }
@@ -152,7 +142,7 @@ User::User(const uid_t uid)
 
 
 
-void User::representUser()
+void User::represent()
 {
 	if (this -> status == NOT_EXISTANCE and this -> uid != (uid_t) EMPTY_ID)
 		printf("id: «%d»: there is no such user\n", this -> uid);
