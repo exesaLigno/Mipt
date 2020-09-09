@@ -6,6 +6,7 @@
 #include <grp.h>
 #include <cstring>
 #include <cstdlib>
+#include <ctype.h>
 
 #define DEBUG printf("DEBUG from %d\n", __LINE__);
 const int MAX_GROUPS_COUNT = 20;
@@ -15,7 +16,7 @@ class User
 {
 private:
 	
-	int type = 0;
+	int status = NOT_EXISTANCE;
 	
 	uid_t uid = EMPTY_ID;
 	gid_t gid = EMPTY_ID;
@@ -26,26 +27,21 @@ private:
 	gid_t* additional_groups = nullptr;
 	
 	
-	void setGroups();
-	
-	
 public:
 	
 	User();
 	User(const char* user_name);
 	User(const uid_t uid);
 	
-	void setInfo();
 	void representUser();
 	
 	~User();
 	
 	enum CONSTANTS
 	{
-		CURRENT,
-		USER_NAME,
-		UID,
-		EMPTY_ID = -1
+		EMPTY_ID = -1,
+		OK,
+		NOT_EXISTANCE
 	};
 };
 
@@ -88,7 +84,6 @@ int main(int argc, char* argv[])
 	
 	for (int counter = 0; counter < users_count; counter++)
 	{
-		users[counter] -> setInfo();
 		users[counter] -> representUser();
 		delete users[counter];
 	}
@@ -102,76 +97,68 @@ int main(int argc, char* argv[])
 
 User::User()
 {
-	this -> type = CURRENT;
+	this -> uid = getuid();
+	this -> gid = getgid();
+	
+	this -> user_name = getUserName(this -> uid);
+	
+	this -> additional_groups_count = MAX_GROUPS_COUNT;
+	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
+	
+	this -> additional_groups_count  = getgroups(MAX_GROUPS_COUNT, this -> additional_groups);
+	
+	this -> status = OK;
 }
 
 
 User::User(const char* user_name)
 {
-	this -> type = USER_NAME;
 	this -> user_name = new char[strlen(user_name) + 1]{0};
 	strcpy(this -> user_name, user_name);
+	
+	this -> uid = getUid(this -> user_name);
+	
+	if (this -> uid == (uid_t) EMPTY_ID)
+		return;
+	
+	this -> gid = getGid(this -> uid);
+	
+	this -> additional_groups_count = MAX_GROUPS_COUNT;
+	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
+	
+	this -> additional_groups_count  = getgrouplist(this -> user_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
+	
+	this -> status = OK;
 }
 
 
 User::User(const uid_t uid)
 {
-	this -> type = UID;
 	this -> uid = uid;
-}
-
-
-
-void User::setInfo()
-{
-	if (this -> type == CURRENT)
-	{
-		this -> uid = getuid();
-		this -> gid = getgid();
-		this -> user_name = getUserName(this -> uid);
-	}
+	this -> gid = getGid(this -> uid);
 	
-	else if (this -> type == USER_NAME)
-	{
-		this -> uid = getUid(this -> user_name);
-		this -> gid = getGid(this -> uid);
-	}
+	if (this -> gid == (gid_t) EMPTY_ID)
+		return;
 	
-	else if (this -> type == UID)
-	{
-		this -> user_name = getUserName(this -> uid);
-		this -> gid = getGid(this -> uid);
-	}
+	this -> user_name = getUserName(this -> uid);
 	
-	if (this -> uid != (uid_t) EMPTY_ID and this -> user_name != nullptr)
-	{
-		this -> setGroups();
-	}
-}
-
-
-
-void User::setGroups()
-{
 	this -> additional_groups_count = MAX_GROUPS_COUNT;
 	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
 	
-	if (this -> type == CURRENT)
-		this -> additional_groups_count  = getgroups(MAX_GROUPS_COUNT, this -> additional_groups);
+	this -> additional_groups_count  = getgrouplist(this -> user_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
 	
-	else
-		this -> additional_groups_count  = getgrouplist(this -> user_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
+	this -> status = OK;
 }
 
 
 
 void User::representUser()
 {
-	if (this -> type == USER_NAME and this -> uid == (uid_t) EMPTY_ID)
-		printf("id: «%s»: there is no such user\n", this -> user_name);
-	
-	else if (this -> type == UID and this -> user_name == nullptr)
+	if (this -> status == NOT_EXISTANCE and this -> uid != (uid_t) EMPTY_ID)
 		printf("id: «%d»: there is no such user\n", this -> uid);
+	
+	else if (this -> status == NOT_EXISTANCE and this -> user_name != nullptr)
+		printf("id: «%s»: there is no such user\n", this -> user_name);
 	
 	else
 	{
@@ -251,7 +238,7 @@ char* getUserName(uid_t uid)
 	
 	if (user != nullptr)
 	{
-		name = new char[strlen(user -> pw_name) + 1]{0};
+		name = new char[strlen(user -> pw_name) + 1];
 		strcpy(name, user -> pw_name);
 	}
 
@@ -267,7 +254,7 @@ char* getGroupName(gid_t gid)
 	
 	if (group != nullptr)
 	{
-		name = new char[strlen(group -> gr_name) + 1]{0};
+		name = new char[strlen(group -> gr_name) + 1];
 		strcpy(name, group -> gr_name);
 	}
 	
@@ -281,7 +268,7 @@ bool isNumber(const char* str)
 	
 	for (int counter = 0; str[counter] != '\0'; counter++)
 	{
-		if (str[counter] > '9' or str[counter] < '0')
+		if (!isdigit(str[counter]))
 		{
 			is_number = false;
 			break;
