@@ -56,13 +56,10 @@ int main(int argc, char* argv[])
 		user.represent();
 	}
 	
-	else
-	{		
-		for (int counter = 1; counter < argc; counter++)
-		{
-			User user(argv[counter]);
-			user.represent();
-		}
+	for (int counter = 1; counter < argc; counter++)
+	{
+		User user = argv[counter];
+		user.represent();
 	}
 	
 	return 0;
