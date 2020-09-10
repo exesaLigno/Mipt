@@ -21,10 +21,8 @@ private:
 	uid_t uid = EMPTY_ID;
 	gid_t gid = EMPTY_ID;
 	
-	char* user_name = nullptr;
-	
 	int additional_groups_count = 0;
-	gid_t* additional_groups = nullptr;
+	gid_t* additional_groups = nullptr; 
 	
 	
 public:
@@ -46,10 +44,6 @@ public:
 };
 
 
-uid_t getUid(const char* user_name);
-gid_t getGid(uid_t uid);
-char* getUserName(uid_t uid);
-char* getGroupName(gid_t gid);
 bool isNumber(const char* str);
 
 
@@ -66,17 +60,8 @@ int main(int argc, char* argv[])
 	{		
 		for (int counter = 1; counter < argc; counter++)
 		{
-			if (isNumber(argv[counter]))
-			{
-				User user(atoi(argv[counter]));
-				user.represent();
-			}
-				
-			else
-			{
-				User user(argv[counter]);
-				user.represent();
-			}
+			User user(argv[counter]);
+			user.represent();
 		}
 	}
 	
@@ -90,8 +75,6 @@ User::User()
 	this -> uid = getuid();
 	this -> gid = getgid();
 	
-	this -> user_name = getUserName(this -> uid);
-	
 	this -> additional_groups_count = MAX_GROUPS_COUNT;
 	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
 	
@@ -101,41 +84,23 @@ User::User()
 }
 
 
-User::User(const char* user_name)
+User::User(const char* parameter)
 {
-	this -> user_name = new char[strlen(user_name) + 1]{0};
-	strcpy(this -> user_name, user_name);
-	
-	this -> uid = getUid(this -> user_name);
-	
-	if (this -> uid == (uid_t) EMPTY_ID)
+	passwd* user = isNumber(parameter) ? getpwuid(atoi(parameter)) : getpwnam(parameter);
+		
+	if (user == nullptr)
+	{
+		printf("id: «%s»: there is no such user\n", parameter);
 		return;
+	}
 	
-	this -> gid = getGid(this -> uid);
+	this -> uid = user -> pw_uid;
+	this -> gid = user -> pw_gid;
 	
 	this -> additional_groups_count = MAX_GROUPS_COUNT;
 	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
 	
-	this -> additional_groups_count  = getgrouplist(this -> user_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
-	
-	this -> status = OK;
-}
-
-
-User::User(const uid_t uid)
-{
-	this -> uid = uid;
-	this -> gid = getGid(this -> uid);
-	
-	if (this -> gid == (gid_t) EMPTY_ID)
-		return;
-	
-	this -> user_name = getUserName(this -> uid);
-	
-	this -> additional_groups_count = MAX_GROUPS_COUNT;
-	this -> additional_groups = new gid_t[MAX_GROUPS_COUNT];
-	
-	this -> additional_groups_count  = getgrouplist(this -> user_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
+	this -> additional_groups_count  = getgrouplist(user -> pw_name, this -> gid, this -> additional_groups, &(this -> additional_groups_count));
 	
 	this -> status = OK;
 }
@@ -144,35 +109,22 @@ User::User(const uid_t uid)
 
 void User::represent()
 {
-	if (this -> status == NOT_EXISTANCE and this -> uid != (uid_t) EMPTY_ID)
-		printf("id: «%d»: there is no such user\n", this -> uid);
-	
-	else if (this -> status == NOT_EXISTANCE and this -> user_name != nullptr)
-		printf("id: «%s»: there is no such user\n", this -> user_name);
-	
-	else
+	if (this -> status == OK)
 	{
-		printf("uid=%d(%s) ", this -> uid, this -> user_name);
-		char* group_name = getGroupName(this -> gid);
-		printf("gid=%d(%s)", this -> gid, group_name);
-		
-		delete[] group_name;
+		printf("uid=%d(%s) ", this -> uid, getpwuid(this -> uid) -> pw_name);
+		printf("gid=%d(%s)", this -> gid, getgrgid(this -> gid) -> gr_name);
 		
 		if (additional_groups_count != 0)
 		{
 			printf(" groups=");
 			
 			for (int counter = 0; counter < additional_groups_count; counter++)
-			{
-				char* additional_group_name = getGroupName((this -> additional_groups)[counter]);
-				printf("%d(%s)%c", (this -> additional_groups)[counter], additional_group_name, counter < additional_groups_count - 1 ? ',' : '\n');
-			
-				delete[] additional_group_name;
-			}
+				printf("%d(%s)%c", (this -> additional_groups)[counter], 
+								    getgrgid((this -> additional_groups)[counter]) -> gr_name, 
+									counter < additional_groups_count - 1 ? ',' : '\0');
 		}
 		
-		else
-			printf("\n");
+		printf("\n");
 	}
 }
 
@@ -180,9 +132,6 @@ void User::represent()
 
 User::~User()
 {
-	if (this -> user_name != nullptr)
-		delete[] this -> user_name;
-	
 	if (this -> additional_groups != nullptr)
 		delete[] this -> additional_groups;
 }
