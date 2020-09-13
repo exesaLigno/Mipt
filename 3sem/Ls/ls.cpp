@@ -10,6 +10,59 @@
 #include <grp.h>
 
 
+class DirEntry
+{
+private:
+	char* name = nullptr;
+	struct stat* meta = nullptr;			// Setting on creation
+	
+	short int inode_field_width = 0;
+	short int link_count_field_width = 0;
+	short int user_info_field_width = 0;
+	short int group_info_field_width = 0;
+	short int size_field_width = 0;
+	
+	DirEntry* next;
+	DirEntry* prev;
+
+public:
+	DirEntry(const char* path, const char* dir_entry_name);
+	
+	void show();
+	
+	
+	~DirEntry();
+};
+
+
+class Directory
+{
+private:
+	char* name = nullptr;
+	
+	DirEntry* entry = nullptr;
+	
+	short int max_inode_field_width = 0;			/// Setting up on reading directory
+	short int max_link_count_field_width = 0;
+	short int max_user_info_field_width = 0;
+	short int max_group_info_field_width = 0;
+	short int max_size_field_width = 0;
+	
+	Directory* next = nullptr;
+	
+public:
+	Directory();
+	Directory(const char* dir_name);
+	
+	void read();
+	void align();
+	void show();
+	
+	~Directory();
+};
+
+
+
 enum FILES
 {
 	DIRECTORY,
@@ -96,15 +149,15 @@ void showEntry(const char* dir, dirent64* entry)
 	strcpy(path, dir);
 	strcat(path, "/");
 	strcat(path, entry -> d_name);
-	stat(path, st);
+	lstat(path, st);
 	
 	mode_t mode = st -> st_mode;
 	
 	int file_type = mode & 0040000 ? DIRECTORY : 
 					mode & 0020000 ? SYMBOLIC_DEVICE : 
 					mode & 0060000 ? BLOCK_DEVICE : 
-					mode & 0100000 ? SIMPLE_FILE :
-					mode & 0010000 ? FIFO :
+					mode & 0100000 ? SIMPLE_FILE : 
+					mode & 0010000 ? FIFO : 
 					mode & 0120000 ? SYMBOLIC_LINK : UNKNOWN;
 	
 	nlink_t link_count = st -> st_nlink;
@@ -136,6 +189,16 @@ void showEntry(const char* dir, dirent64* entry)
 			printf("%s %s ", getpwuid(uid) -> pw_name, getgrgid(gid) -> gr_name);
 		
 		printf("%ld ", size);
+		
+		int seconds = time % 60;
+		time = time / 60;
+		
+		int minutes = time % 60;
+		time = time / 60;
+		
+		int hours = time % 24;
+		time = time / 24;
+		printf("%ld %d:%02d ", time, hours, minutes);
 	}
 	
 	printf("%s", file_type == DIRECTORY ? "\x1b[1;34m" : 
