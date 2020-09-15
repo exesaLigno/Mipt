@@ -86,6 +86,8 @@ namespace Keys
 	bool line_by_line = false;		// -1
 	bool tree_view = false;			// -T
 	
+	Directory* dirs = nullptr;
+	
 	void parse(int argc, char* argv[]);
 };
 
@@ -93,13 +95,18 @@ namespace Keys
 int main(int argc, char* argv[])
 {
 	Keys::parse(argc, argv);
-	Directory* dir = new Directory(argv[1]);
 	
-	dir -> read();
+	if (Keys::dirs == nullptr)
+		Keys::dirs = new Directory;
 	
-	dir -> align();
+	Keys::dirs -> read();
 	
-	dir -> show();
+	Keys::dirs -> align();
+	
+	Keys::dirs -> show();
+	
+	delete Keys::dirs;
+	
 	
 	return 0;
 }
@@ -157,6 +164,38 @@ void Directory::read()
 		if (dent -> d_name[0] != '.' or Keys::show_all == true)
 		{
 			DirEntry* entry = new DirEntry(this -> name, dent -> d_name);
+			
+			if (S_ISDIR(entry -> meta -> st_mode) and Keys::recusive and not Keys::tree_view and entry -> name[0] != '.')
+			{
+				Directory* nested = new Directory(this -> name, entry -> name);
+				
+				nested -> nesting_level = this -> nesting_level + 1;
+				
+				Directory* current_dir = this;
+				
+				while (current_dir -> next)
+				{
+					if (current_dir -> next -> nesting_level == this -> nesting_level - 1)
+						break;
+					
+					current_dir = current_dir -> next;
+				}
+				
+				if (current_dir -> next == nullptr)
+				{
+					current_dir -> next = nested;
+					nested -> prev = current_dir;
+				}
+				
+				else
+				{
+					nested -> next = current_dir -> next;
+					nested -> prev = current_dir;
+					current_dir -> next = nested;
+					nested -> next -> prev = nested;
+				}
+			}
+			
 			this -> blocks_count += (entry -> meta -> st_blocks / 2);
 			
 			if (Keys::show_detailed or Keys::show_inod)
@@ -214,6 +253,11 @@ void Directory::read()
 			
 		}
 	}
+	
+	closedir(directory);
+	
+	if (this -> next)
+		this -> next -> read();
 }
 
 
@@ -233,6 +277,9 @@ void Directory::align()
 			
 			current = current -> next;
 		}
+		
+		if (this -> next)
+			this -> next -> align();
 	}
 }
 
@@ -244,7 +291,8 @@ void Directory::show()
 	if (this -> next or this -> prev)
 		printf("%s:\n", this -> name);
 	
-	printf("Total %d\n", this -> blocks_count);
+	if (Keys::show_detailed)
+		printf("Total %d\n", this -> blocks_count);
 	
 	while (current)
 	{		
@@ -257,49 +305,6 @@ void Directory::show()
 			
 			else
 				printf("  ");
-		}
-		
-		if (S_ISDIR(current -> meta -> st_mode) and Keys::recusive)
-		{
-			Directory* nested = new Directory(this -> name, current -> name);
-			
-			nested -> nesting_level = this -> nesting_level + 1;
-			
-			nested -> read();
-			nested -> align();
-
-			if (Keys::tree_view)
-			{
-				nested -> show();
-				delete nested;
-			}
-			
-			else
-			{
-				Directory* current_dir = this;
-				
-				while (current_dir -> next)
-				{
-					if (current_dir -> next -> nesting_level == this -> nesting_level - 1)
-						break;
-					
-					current_dir = current_dir -> next;
-				}
-				
-				if (current_dir -> next == nullptr)
-				{
-					current_dir -> next = nested;
-					nested -> prev = current_dir;
-				}
-				
-				else
-				{
-					nested -> next = current_dir -> next;
-					nested -> prev = current_dir;
-					current_dir -> next = nested;
-					nested -> next -> prev = nested;
-				}
-			}
 		}
 		
 		current = current -> next;
@@ -317,8 +322,7 @@ void Directory::show()
 
 DirEntry::DirEntry(const char* path, const char* dir_entry_name)
 {
-	char* pathname = new char[strlen(path) + strlen(dir_entry_name) + 2];
-	this -> pathname = pathname;
+	this -> pathname = new char[strlen(path) + strlen(dir_entry_name) + 2];
 	
 	strcpy(pathname, path);
 	if (*(strchr(pathname, '\0') - 1) != '/')
@@ -350,6 +354,12 @@ DirEntry::~DirEntry()
 	
 	if (this -> next)
 		delete this -> next;
+	
+	if (this -> pathname)
+		delete[] this -> pathname;
+	
+	if (this -> meta)
+		delete this -> meta;
 }
 
 
@@ -401,12 +411,12 @@ void DirEntry::show(bool inod, bool detailed)
 		{
 			printf("%s ", getpwuid(this -> meta -> st_uid) -> pw_name);
 			
-			for (int i = 0; i < this -> user_info_field_width - strlen(getpwuid(this -> meta -> st_uid) -> pw_name); i++)
+			for (int i = 0; i < this -> user_info_field_width - (int) strlen(getpwuid(this -> meta -> st_uid) -> pw_name); i++)
 				printf(" ");
 			
 			printf("%s ", getgrgid(this -> meta -> st_gid) -> gr_name);
 			
-			for (int i = 0; i < this -> group_info_field_width - strlen(getgrgid(this -> meta -> st_gid) -> gr_name); i++)
+			for (int i = 0; i < this -> group_info_field_width - (int) strlen(getgrgid(this -> meta -> st_gid) -> gr_name); i++)
 				printf(" ");
 		}
 		
@@ -428,7 +438,8 @@ void DirEntry::show(bool inod, bool detailed)
 	
 	printf("%s", S_ISDIR(mode) ? "\x1b[1;34m" :
 				 S_ISLNK(mode) ? "\x1b[1;36m" : 
-				 S_ISCHR(mode) ? "\x1b[1;33m" : 
+				 S_ISCHR(mode) or S_ISBLK(mode) ? "\x1b[1;33m" : 
+				 S_ISSOCK(mode) ? "\x1b[1;35m" : 
 				 mode & 0100 or mode & 0010 or mode & 0001 ? "\x1b[1;32m" : 
 				 "\x1b[0m");
 	
@@ -437,7 +448,8 @@ void DirEntry::show(bool inod, bool detailed)
 	printf("%s", S_ISDIR(mode) ? "/" :
 				 S_ISLNK(mode) and detailed ? " → " : 
 				 S_ISLNK(mode) and not detailed ? "@" : 
-				 S_ISCHR(mode) ? "" : 
+				 S_ISCHR(mode) or S_ISBLK(mode) ? "" : 
+				 S_ISSOCK(mode) ? "=" : 
 				 mode & 0100 or mode & 0010 or mode & 0001 ? "*" : 
 				 S_ISREG(mode) ? "" : 
 				 "?");
@@ -446,9 +458,18 @@ void DirEntry::show(bool inod, bool detailed)
 	{
 		char real_address[100] = {};
 		readlink(this -> pathname, real_address, 100);
-		DirEntry real("", real_address);
+		
+		if (*real_address == '/')
+			this -> pathname[0] = '\0';
+		
+		else
+			*strrchr(this -> pathname, '/') = '\0';
+		
+		DirEntry real(this -> pathname, real_address);
+		
 		real.show(false, false);
 	}
+	
 }
 
 
@@ -477,106 +498,6 @@ int intlen(long int number)
 
 
 
-/*
-void showDir(const char* dir_name)
-{
-	DIR* directory = opendir(dir_name);
-	dirent64* entry = nullptr;
-	
-	while ((entry = readdir64(directory)) != nullptr)
-	{
-		if (entry -> d_name[0] != '.' or Keys::show_all == true)
-		{
-			showEntry(dir_name, entry);
-			
-			if (Keys::line_by_line)
-				printf("\n");
-			
-			else
-				printf("  ");
-		}
-	}
-	
-	if (not Keys::line_by_line)
-		printf("\n");
-}
-
-
-void showEntry(const char* dir, dirent64* entry)
-{
-	struct stat* st = new struct stat;
-	char path[strlen(dir) + strlen(entry -> d_name) + 2];
-	strcpy(path, dir);
-	strcat(path, "/");
-	strcat(path, entry -> d_name);
-	lstat(path, st);
-	
-	mode_t mode = st -> st_mode;
-	
-	int file_type = mode & 0040000 ? DIRECTORY : 
-					mode & 0020000 ? SYMBOLIC_DEVICE : 
-					mode & 0060000 ? BLOCK_DEVICE : 
-					mode & 0100000 ? SIMPLE_FILE : 
-					mode & 0010000 ? FIFO : 
-					mode & 0120000 ? SYMBOLIC_LINK : UNKNOWN;
-	
-	nlink_t link_count = st -> st_nlink;
-	uid_t uid = st -> st_uid;
-	gid_t gid = st -> st_gid;
-	off_t size = st -> st_size;
-	time_t time = st -> st_mtim.tv_sec;
-	
-	if (Keys::show_inod)
-		printf("%lu ", entry -> d_ino);
-	
-	if (Keys::show_detailed)
-	{
-		printf("%c", file_type == DIRECTORY ? 'd' : 
-					 file_type == SYMBOLIC_LINK ? 'l' : 
-					 file_type == SYMBOLIC_DEVICE ? 'c' : 
-					 file_type == SIMPLE_FILE ? '-' : '?');
-		
-		printf("%c%c%c", mode & 0400 ? 'r' : '-', mode & 0200 ? 'w' : '-', mode & 0100 ? 'x' : '-');
-		printf("%c%c%c", mode & 0040 ? 'r' : '-', mode & 0020 ? 'w' : '-', mode & 0010 ? 'x' : '-');
-		printf("%c%c%c ", mode & 0004 ? 'r' : '-', mode & 0002 ? 'w' : '-', mode & 0001 ? 'x' : '-');
-		
-		printf("%lu ", link_count);
-		
-		if (Keys::numeric_ids)
-			printf("%d %d ", uid, gid);
-		
-		else
-			printf("%s %s ", getpwuid(uid) -> pw_name, getgrgid(gid) -> gr_name);
-		
-		printf("%ld ", size);
-		
-		int seconds = time % 60;
-		time = time / 60;
-		
-		int minutes = time % 60;
-		time = time / 60;
-		
-		int hours = time % 24;
-		time = time / 24;
-		printf("%ld %d:%02d ", time, hours, minutes);
-	}
-	
-	printf("%s", file_type == DIRECTORY ? "\x1b[1;34m" : 
-				 file_type == SYMBOLIC_LINK ? "\x1b[1;35m" : 
-				 file_type == SYMBOLIC_DEVICE ? "\x1b[1;33m" : 
-				 mode & 0100 or mode & 0010 or mode & 0001 ? "\x1b[1;32m" : 
-				 "\x1b[0m");
-	
-	printf("%s\x1b[0m", entry -> d_name);
-	
-	printf("%s", file_type == DIRECTORY ? "/" : 
-				 mode & 0100 or mode & 0010 or mode & 0001 ? "*" : 
-				 "");
-}
-
-
-
-*/
 void Keys::parse(int argc, char* argv[])
 {
 	for (int counter = 1; counter < argc; counter++)
@@ -597,7 +518,6 @@ void Keys::parse(int argc, char* argv[])
 			if (strchr(str, 'R') != nullptr)
 			{
 				recusive = true;
-				line_by_line = true;
 			}
 			
 			if (strchr(str, 'i') != nullptr)
@@ -621,7 +541,19 @@ void Keys::parse(int argc, char* argv[])
 		
 		else
 		{
+			if (Keys::dirs == nullptr)
+				Keys::dirs = new Directory(str);
 			
+			else
+			{
+				Directory* current_dir = Keys::dirs;
+				
+				while (current_dir -> next)
+					current_dir = current_dir -> next;
+				
+				current_dir -> next = new Directory(str);
+				current_dir -> next -> prev = current_dir;
+			}
 		}
 	}
 }
