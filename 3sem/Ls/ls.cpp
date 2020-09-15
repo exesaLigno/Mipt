@@ -19,6 +19,7 @@ public:
 	char* name = nullptr;
 	char* pathname = nullptr;
 	struct stat* meta = nullptr;			// Setting on creation
+	bool exist = false;
 	
 	short int inode_field_width = 0;
 	short int link_count_field_width = 0;
@@ -332,9 +333,18 @@ DirEntry::DirEntry(const char* path, const char* dir_entry_name)
 	this -> name = new char[strlen(dir_entry_name) + 1];
 	strcpy(this -> name, dir_entry_name);
 	
-	this -> meta = new struct stat;
-	lstat(pathname, this -> meta);
+	this -> meta = new struct stat();
+	int status = lstat(pathname, this -> meta);
 	
+	if (status == -1)
+	{
+		this -> exist = false;
+		return;
+	}
+	
+	else
+		this -> exist = true;
+		
 	if (Keys::show_detailed or Keys::show_inod)
 	{
 		this -> inode_field_width = intlen(this -> meta -> st_ino);
@@ -344,6 +354,7 @@ DirEntry::DirEntry(const char* path, const char* dir_entry_name)
 		this -> user_info_field_width = Keys::numeric_ids ? intlen(this -> meta -> st_uid) : strlen(getpwuid(this -> meta -> st_uid) -> pw_name);
 		this -> group_info_field_width = Keys::numeric_ids ? intlen(this -> meta -> st_gid) : strlen(getgrgid(this -> meta -> st_gid) -> gr_name);
 	}
+	
 }
 
 
@@ -436,23 +447,7 @@ void DirEntry::show(bool inod, bool detailed)
 		printf("%s ", date);
 	}
 	
-	printf("%s", S_ISDIR(mode) ? "\x1b[1;34m" :
-				 S_ISLNK(mode) ? "\x1b[1;36m" : 
-				 S_ISCHR(mode) or S_ISBLK(mode) ? "\x1b[1;33m" : 
-				 S_ISSOCK(mode) ? "\x1b[1;35m" : 
-				 mode & 0100 or mode & 0010 or mode & 0001 ? "\x1b[1;32m" : 
-				 "\x1b[0m");
-	
-	printf("%s\x1b[0m", this -> name);
-	
-	printf("%s", S_ISDIR(mode) ? "/" :
-				 S_ISLNK(mode) and detailed ? " → " : 
-				 S_ISLNK(mode) and not detailed ? "@" : 
-				 S_ISCHR(mode) or S_ISBLK(mode) ? "" : 
-				 S_ISSOCK(mode) ? "=" : 
-				 mode & 0100 or mode & 0010 or mode & 0001 ? "*" : 
-				 S_ISREG(mode) ? "" : 
-				 "?");
+	DirEntry* real = nullptr;
 	
 	if (S_ISLNK(mode) and detailed)
 	{
@@ -465,9 +460,33 @@ void DirEntry::show(bool inod, bool detailed)
 		else
 			*strrchr(this -> pathname, '/') = '\0';
 		
-		DirEntry real(this -> pathname, real_address);
-		
-		real.show(false, false);
+		real = new DirEntry(this -> pathname, real_address);
+	}
+	
+	printf("%s", not this -> exist ? "\x1b[1;31m" : 
+			     S_ISDIR(mode) ? "\x1b[1;34m" :
+				 S_ISLNK(mode) and real -> exist ? "\x1b[1;36m" : 
+				 S_ISLNK(mode) and not real -> exist ? "\x1b[1;31m" : 
+				 S_ISCHR(mode) or S_ISBLK(mode) ? "\x1b[1;33m" : 
+				 S_ISSOCK(mode) ? "\x1b[1;35m" : 
+				 mode & 0100 or mode & 0010 or mode & 0001 ? "\x1b[1;32m" : 
+				 "\x1b[0m");
+	
+	printf("%s\x1b[0m", this -> name);
+	
+	printf("%s", not this -> exist ? "" : 
+			     S_ISDIR(mode) ? "/" :
+				 S_ISLNK(mode) and detailed ? " → " : 
+				 S_ISLNK(mode) and not detailed ? "@" : 
+				 S_ISCHR(mode) or S_ISBLK(mode) ? "" : 
+				 S_ISSOCK(mode) ? "=" : 
+				 mode & 0100 or mode & 0010 or mode & 0001 ? "*" : 
+				 S_ISREG(mode) ? "" : 
+				 "?");
+	
+	if (S_ISLNK(mode) and detailed)
+	{
+		real -> show(false, false);
 	}
 	
 }
