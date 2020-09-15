@@ -85,7 +85,9 @@ namespace Keys
 	bool show_inod = false;			// -i --inod
 	bool numeric_ids = false;		// -n --numeric-uid-gid
 	bool line_by_line = false;		// -1
-	bool tree_view = false;			// -T
+	bool tree_view = false;			// -T --tree
+	bool ignore_backups = false;	// -B --ignore-backups
+	bool almost_all = false; 		// -A --almost-all
 	
 	Directory* dirs = nullptr;
 	
@@ -161,8 +163,17 @@ void Directory::read()
 	dirent64* dent = nullptr;
 	
 	while ((dent = readdir64(directory)) != nullptr)
-	{		
-		if (dent -> d_name[0] != '.' or Keys::show_all == true)
+	{
+		if (Keys::ignore_backups and *(strchr(dent -> d_name, '\0') - 1) == '~')
+			continue;
+		
+		if ((!strcmp(dent -> d_name, ".") or !strcmp(dent -> d_name, "..")) and Keys::almost_all == true)
+			continue;
+		
+		if (dent -> d_name[0] == '.' and Keys::show_all == false)
+			continue;
+			
+		else
 		{
 			DirEntry* entry = new DirEntry(this -> name, dent -> d_name);
 			
@@ -526,12 +537,21 @@ void Keys::parse(int argc, char* argv[])
 		if (str[0] == '-' and str[1] != '-' and str[strlen(str) - 1] != '/')	// parsing one-letter parameters
 		{
 			if (strchr(str, 'a') != nullptr)
+			{
 				show_all = true;
+				almost_all = false;
+			}
 			
 			if (strchr(str, 'l') != nullptr)
 			{
 				show_detailed = true;
 				line_by_line = true;
+			}
+			
+			if (strchr(str, 'T') != nullptr)
+			{
+				recusive = true;
+				tree_view = true;
 			}
 			
 			if (strchr(str, 'R') != nullptr)
@@ -551,6 +571,15 @@ void Keys::parse(int argc, char* argv[])
 			
 			if (strchr(str, '1') != nullptr)
 				line_by_line = true;
+			
+			if (strchr(str, 'B') != nullptr)
+				ignore_backups = true;
+			
+			if (strchr(str, 'A') != nullptr)
+			{
+				show_all = true;
+				almost_all = true;
+			}
 		}
 		
 		else if (str[0] == '-' and str[1] == '-' and str[strlen(str) - 1] != '/')	// parsing one-word parameter
