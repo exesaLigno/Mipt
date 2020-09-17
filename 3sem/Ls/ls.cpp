@@ -187,7 +187,7 @@ void Directory::read()
 				
 				while (current_dir -> next)
 				{
-					if (current_dir -> next -> nesting_level == this -> nesting_level - 1)
+					if (current_dir -> next -> nesting_level == this -> nesting_level - 1 or namecmp(nested -> name, current_dir -> next -> name) < 0)
 						break;
 					
 					current_dir = current_dir -> next;
