@@ -19,6 +19,7 @@ class Shell
 	char* current_directory_str = nullptr;
 	char* current_user_str = nullptr;
 	char* current_pc_name = nullptr;
+	int last_status = 0;
 
   public:
 	Shell();
@@ -84,7 +85,12 @@ void Shell::printGreeting()
 		}
 	}
 	
-	printf("\x1b[34m%s\x1b[0m@%s \x1b[32m%s\x1b[0m> ", this -> current_user_str, this -> current_pc_name, greeting);
+	printf("\x1b[34m%s\x1b[0m@%s \x1b[32m%s\x1b[0m", this -> current_user_str, this -> current_pc_name, greeting);
+	
+	if (this -> last_status)
+		printf(" \x1b[31m[%d]\x1b[0m", this -> last_status);
+	
+	printf("> ");
 }
 
 
@@ -187,19 +193,18 @@ int Shell::executeCommand(char* command)
 			perror("something gone wrong");
 		#endif
 		
-		exit(123);
+		abort();		// TODO replace magic number with any correct way to catch unknown commands
 	}
 	
 	else
 	{
 		wait(&wstatus);
-		if (wstatus == 123)
-			
-		#ifdef DEBUG
-			printf("farsh: \x1b[1;31mUnknown command\x1b[0m: %s; error code: %d\n", command, wstatus);
-		#else
+		
+		if (not WIFEXITED(wstatus))
 			printf("farsh: \x1b[1;31mUnknown command\x1b[0m: %s\n", command);
-		#endif
+		
+		else
+			this -> last_status = WEXITSTATUS(wstatus);
 	}
 	
 	return OK;
