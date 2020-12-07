@@ -6,6 +6,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+//#define DEBUG
+
+
+const int OK = 0;
+const int EXIT = 1;
+
 
 class Shell
 {
@@ -18,7 +24,7 @@ class Shell
 	Shell();
 	~Shell();
 	void printGreeting();
-	void executeCommand(char* command);
+	int executeCommand(char* command);
 	void polling();
 };
 
@@ -54,9 +60,7 @@ void Shell::printGreeting()
 		strcat(greeting, "~");
 		full_path += + strlen(home_path);
 	}
-
-	//strcat(greeting, full_path);
-
+	
 	while (true)
 	{
 		if (*full_path == '/')
@@ -79,57 +83,50 @@ void Shell::printGreeting()
 			break;
 		}
 	}
-
-
+	
 	printf("\x1b[34m%s\x1b[0m@%s \x1b[32m%s\x1b[0m> ", this -> current_user_str, this -> current_pc_name, greeting);
-
-	//printf("\x1b[33m%s\x1b[0m \x1b[32m%s\x1b[0m\n", this -> current_user_str, this -> current_directory_str);
 }
 
 
 void Shell::polling()
 {
+	printf("\x1b[3mWelcome to \x1b[3;32mfarsh\x1b[0m\x1b[3m, Futile Awful Retard Shell!\n\n");
+	
 	while (true)
 	{
 		this -> printGreeting();
 		char command[1000] = {};
-
+		
 		int counter = 0;
 		char symbol = 0;
-
+		
 		while (true)
 		{
 			symbol = getchar();
-
+			
 			if (symbol == '\n')
 				break;
-
+			
 			else if (symbol == EOF)
 			{
 				printf("exiting...\n");
 				return;
 			}
-
-// 			TODO Arrows buttons processing is not implemented yet
-// 			else if (symbol == 27)
-// 			{
-// 				getchar();
-// 				char cmd = getchar();
-// 				//printf("%d\n", cmd);
-// 				//printf("\b\b\b");
-// 			}
-
+			
 			else
 				command[counter++] = symbol;
 		}
-
-		this -> executeCommand(command);
+		
+		int status = this -> executeCommand(command);
+		
+		if (status == EXIT)
+			return;
 	}
 }
 
 
-void Shell::executeCommand(char* command)
-{
+int Shell::executeCommand(char* command)
+{	
 	int word_count = 0;
 	
 	int counter = 0;
@@ -147,7 +144,10 @@ void Shell::executeCommand(char* command)
 	}
 	
 	char* command_parsed[word_count + 1];
-		
+	
+	if (word_count == 0)
+		return OK;
+	
 	word_count = 0;
 	
 	counter = 0;
@@ -172,6 +172,9 @@ void Shell::executeCommand(char* command)
 	
 	command_parsed[word_count] = NULL;
 	
+	if (!strcmp(command_parsed[0], "exit"))
+		return EXIT;
+	
 	pid_t child = fork();
 	
 	int wstatus = 0;
@@ -179,17 +182,27 @@ void Shell::executeCommand(char* command)
 	if (!child)
 	{
 		execvp(command_parsed[0], command_parsed);
-		perror("something gone wrong");
-		exit(1);
+		
+		#ifdef DEBUG
+			perror("something gone wrong");
+		#endif
+		
+		exit(123);
 	}
 	
 	else
 	{
 		wait(&wstatus);
-		if (wstatus != 0)
-			printf("can't execute command «%s»\n", command);
+		if (wstatus == 123)
 			
+		#ifdef DEBUG
+			printf("farsh: \x1b[1;31mUnknown command\x1b[0m: %s; error code: %d\n", command, wstatus);
+		#else
+			printf("farsh: \x1b[1;31mUnknown command\x1b[0m: %s\n", command);
+		#endif
 	}
+	
+	return OK;
 }
 
 
