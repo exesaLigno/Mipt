@@ -181,6 +181,13 @@ int Shell::executeCommand(char* command)
 	if (!strcmp(command_parsed[0], "exit"))
 		return EXIT;
 	
+	if (!strcmp(command_parsed[0], "cd") and word_count > 1)
+	{
+		chdir(command_parsed[1]);
+		getcwd(this -> current_directory_str, 1000);
+		return OK;
+	}
+	
 	pid_t child = fork();
 	
 	int wstatus = 0;
