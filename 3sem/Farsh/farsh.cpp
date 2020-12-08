@@ -318,13 +318,13 @@ int Shell::executeCommand(char* command)
 			}
 		}
 		
-				execvp(command_set[commands_count - 1 - counter][0], command_set[commands_count - 1 - counter]);
+		execvp(command_set[commands_count - 1 - counter][0], command_set[commands_count - 1 - counter]);
 		
 		#ifdef DEBUG
 			perror("something gone wrong");
 		#endif
 		
-		abort();		// TODO replace magic number with any correct way to catch unknown commands
+		abort();		// TODO replace abort with something else to increase program speed
 	}
 	
 	else
