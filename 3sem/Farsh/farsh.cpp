@@ -171,9 +171,7 @@ int Shell::executeCommand(char* command)
 				counter++;
 		}
 	}
-	
-	printf("test\n");
-	
+		
 	char* command_parsed[word_count + 1];
 	
 	if (word_count == 0)
@@ -240,13 +238,87 @@ int Shell::executeCommand(char* command)
 		return OK;
 	}
 	
+	counter = 0;
+	int commands_count = 1;
+	
+	while (command_parsed[counter] != NULL)
+	{
+		if (!strcmp(command_parsed[counter], "|"))
+			commands_count++;
+		
+		counter++;
+	}
+	
+	
+	char** command_set[commands_count];
+	int commands_counter = 0;
+	counter = 0;
+	
+	while (command_parsed[counter] != NULL)
+	{
+		if (strcmp(command_parsed[counter], "|"))
+		{
+			command_set[commands_counter] = command_parsed + counter;
+			
+			commands_counter++;
+			
+			while (command_parsed[counter] != NULL and strcmp(command_parsed[counter], "|"))
+				counter++;
+		}
+		
+		if (command_parsed[counter] != NULL and !strcmp(command_parsed[counter], "|"))
+		{
+			command_parsed[counter] = NULL;
+			counter++;
+		}
+	}
+	
+	
 	pid_t child = fork();
 	
 	int wstatus = 0;
 	
 	if (!child)
 	{
-		execvp(command_parsed[0], command_parsed);
+		int counter = 0;
+		
+		while (true)
+		{
+			if (counter < commands_count - 1)
+			{
+				int pipe_fd[2];
+				pipe(pipe_fd);
+				
+				int result = fork();
+				
+				if (result != 0)
+				{
+					close(pipe_fd[1]);
+					
+					dup2(pipe_fd[0], STDIN_FILENO);
+					close(pipe_fd[0]);
+					
+					break;
+				}
+				
+				else
+				{
+					close(pipe_fd[0]);
+					
+					dup2(pipe_fd[1], STDOUT_FILENO);
+					close(pipe_fd[1]);
+					
+					counter++;
+				}
+			}
+			
+			else
+			{
+				break;
+			}
+		}
+		
+				execvp(command_set[commands_count - 1 - counter][0], command_set[commands_count - 1 - counter]);
 		
 		#ifdef DEBUG
 			perror("something gone wrong");
