@@ -145,9 +145,34 @@ int Shell::executeCommand(char* command)
 		if (command[counter] != '\0' and command[counter] != ' ')
 			word_count++;
 		
-		while (command[counter] != ' ' and command[counter] != '\0')
+		if (command[counter] == '\"')
+		{
 			counter++;
+			
+			while (command[counter] != '\"')
+				counter++;
+			
+			counter++;
+		}
+		
+		else if (command[counter] == '\'')
+		{
+			counter++;
+			
+			while (command[counter] != '\'')
+				counter++;
+			
+			counter++;
+		}
+		
+		else
+		{
+			while (command[counter] != ' ' and command[counter] != '\0')
+				counter++;
+		}
 	}
+	
+	printf("test\n");
 	
 	char* command_parsed[word_count + 1];
 	
@@ -169,11 +194,38 @@ int Shell::executeCommand(char* command)
 		if (command[counter] != '\0' and command[counter] != ' ')
 		{
 			command_parsed[word_count] = command + counter;
+			
+			if (command[counter] == '\"' or command[counter] == '\'')
+				command_parsed[word_count]++;
+			
 			word_count++;
 		}
 		
-		while (command[counter] != ' ' and command[counter] != '\0')
-			counter++;
+		if (command[counter] == '\"')
+		{
+			command[counter++] = '\0';
+			
+			while (command[counter] != '\"')
+				counter++;
+			
+			command[counter++] = '\0';
+		}
+		
+		else if (command[counter] == '\'')
+		{
+			command[counter++] = '\0';
+						
+			while (command[counter] != '\'')
+				counter++;
+			
+			command[counter++] = '\0';
+		}
+		
+		else
+		{
+			while (command[counter] != ' ' and command[counter] != '\0')
+				counter++;
+		}
 	}
 	
 	command_parsed[word_count] = NULL;
