@@ -30,24 +30,29 @@ int main()
 	ftruncate(ships_count_shm_fd, sizeof(int));
 	int* ships_counter = (int*) mmap(0, sizeof(int), PROT_WRITE | PROT_READ, MAP_SHARED, ships_count_shm_fd, 0);
 	
-	sem_t* bridge_opened = sem_open("bridge_opened", O_RDWR);
-	if (bridge_opened == SEM_FAILED)
-		perror("sem_open");
-	
-	sem_t* bridge_closed = sem_open("bridge_closed", O_RDWR);
 	sem_t* cars_moving = sem_open("cars_moving", O_RDWR);
 	sem_t* ships_moving = sem_open("ships_moving", O_RDWR);
 	
 	printf("\x1b[1;33mcar_%d\x1b[0m> I arrived to the bridge\n", getpid());
 	
-	sem_trywait(bridge_opened); // Waiting for bridge opened semaphore (while bridge is opened for ships)
-	sem_wait(cars_moving);	 // Waiting for car get away from bridge
+	sem_wait(cars_moving);	 	// Ждем пока машина уедет с моста
+	
+	if (*ships_counter >= 2)
+	{
+		sem_post(ships_moving);
+	
+		while (*ships_counter > 0)
+		{
+			sem_wait(cars_moving);
+		}
+	}
 	
 	printf("\x1b[1;33mcar_%d\x1b[0m> Passing the bridge\n", getpid());
+	sleep(1); 					// Машина проезжает мост за одну секунду
 	
 	printf("\x1b[1;33mcar_%d\x1b[0m> Passed the bridge! Buy-buy!\n", getpid());
 	
-	sem_post(cars_moving);
+	sem_post(cars_moving);		// разблокирует въезд для остальных когда машина уезжает с моста
 	
 	return 0;
 }

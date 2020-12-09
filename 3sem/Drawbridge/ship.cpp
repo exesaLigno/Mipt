@@ -31,18 +31,33 @@ int main()
 	ftruncate(ships_count_shm_fd, sizeof(int));
 	int* ships_counter = (int*) mmap(0, sizeof(int), PROT_WRITE | PROT_READ, MAP_SHARED, ships_count_shm_fd, 0);
 	
-	//sem_t* bridge_opened = sem_open("bridge_opened", O_RDWR);
-	//sem_t* bridge_closed = sem_open("bridge_closed", O_RDWR);
-	//sem_t* cars_moving = sem_open("cars_moving", O_RDWR);
-	//sem_t* ships_moving = sem_open("ships_moving", O_RDWR);
+	sem_t* cars_moving = sem_open("cars_moving", O_RDWR);
+	sem_t* ships_moving = sem_open("ships_moving", O_RDWR);
 	
 	*ships_counter += 1;
-	printf("\x1b[1;32mship\x1b[0m> I arrived to the bridge\n");
+	printf("\x1b[1;32mship_%d\x1b[0m> I arrived to the bridge\n", getpid());
 	
-	printf("\x1b[1;32mship\x1b[0m> Passing the bridge\n");
+	if (*ships_counter >= 2)
+	{
+		sem_trywait(cars_moving);
+		sem_post(ships_moving);
+	}
 	
-	printf("\x1b[1;32mship\x1b[0m> Passed the bridge! Buy-buy!\n");
+	sem_wait(ships_moving);		// Ждем пока корабль пройдет
+	
+	printf("\x1b[1;32mship_%d\x1b[0m> Passing the bridge\n", getpid());
+	sleep(1);
+	
+	printf("\x1b[1;32mship_%d\x1b[0m> Passed the bridge! Buy-buy!\n", getpid());
 	*ships_counter -= 1;
+		
+	sem_post(ships_moving);		// Позволяем следующим кораблям пройти
+	
+	if (*ships_counter == 0)
+	{
+		sem_wait(ships_moving);
+		sem_post(cars_moving);
+	}
 	
 	return 0;
 }

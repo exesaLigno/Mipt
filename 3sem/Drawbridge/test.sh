@@ -1,3 +1,3 @@
 #!/bin/bash
 
-for i in `seq 1 100`; do ./car & done
+for i in `seq 1 20`; do ./car & done
