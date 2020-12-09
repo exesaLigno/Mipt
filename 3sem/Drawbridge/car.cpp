@@ -30,16 +30,24 @@ int main()
 	ftruncate(ships_count_shm_fd, sizeof(int));
 	int* ships_counter = (int*) mmap(0, sizeof(int), PROT_WRITE | PROT_READ, MAP_SHARED, ships_count_shm_fd, 0);
 	
-	//sem_t* bridge_opened = sem_open("bridge_opened", O_RDWR);
-	//sem_t* bridge_closed = sem_open("bridge_closed", O_RDWR);
-	//sem_t* cars_moving = sem_open("cars_moving", O_RDWR);
-	//sem_t* ships_moving = sem_open("ships_moving", O_RDWR);
+	sem_t* bridge_opened = sem_open("bridge_opened", O_RDWR);
+	if (bridge_opened == SEM_FAILED)
+		perror("sem_open");
 	
-	printf("\x1b[1;33mcar\x1b[0m> I arrived to the bridge\n");
+	sem_t* bridge_closed = sem_open("bridge_closed", O_RDWR);
+	sem_t* cars_moving = sem_open("cars_moving", O_RDWR);
+	sem_t* ships_moving = sem_open("ships_moving", O_RDWR);
 	
-	printf("\x1b[1;33mcar\x1b[0m> Passing the bridge\n");
+	printf("\x1b[1;33mcar_%d\x1b[0m> I arrived to the bridge\n", getpid());
 	
-	printf("\x1b[1;33mcar\x1b[0m> Passed the bridge! Buy-buy!\n");
+	sem_trywait(bridge_opened); // Waiting for bridge opened semaphore (while bridge is opened for ships)
+	sem_wait(cars_moving);	 // Waiting for car get away from bridge
+	
+	printf("\x1b[1;33mcar_%d\x1b[0m> Passing the bridge\n", getpid());
+	
+	printf("\x1b[1;33mcar_%d\x1b[0m> Passed the bridge! Buy-buy!\n", getpid());
+	
+	sem_post(cars_moving);
 	
 	return 0;
 }
