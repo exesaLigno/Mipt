@@ -13,6 +13,7 @@ bool new_line = true;
 int parseKeys(int argc, char* argv[]);
 int getFile(const char* filename);
 int getStdin();
+int print(const char* string, int length);
 
 
 int main(int argc, char* argv[])
@@ -66,20 +67,7 @@ int getFile(const char* filename)
 	
 	fread(file_text, sizeof(char), length, file);
 	
-	for (int counter = 0; counter < length; counter++)
-	{
-		if (line_numering and new_line)
-			printf("%6d  ", line_number);
-		
-		putchar(file_text[counter]);
-		new_line = false;
-		
-		if (file_text[counter] == '\n')
-		{
-			line_number++;
-			new_line = true;
-		}
-	}
+	print(file_text, length);
 	
 	return 0;
 }
@@ -93,22 +81,30 @@ int getStdin()
 	while ((std_input[counter] = getchar()) != EOF and counter < DEFAULT_STRING_LENGTH)
 		counter++;
 		
-	for (int i = 0; i < counter; i++)
-	{		
+	print(std_input, counter);
+	
+	delete[] std_input;
+	
+	return 0;
+}
+
+
+int print(const char* string, int length)
+{
+	for (int counter = 0; counter < length; counter++)
+	{
 		if (line_numering and new_line)
 			printf("%6d  ", line_number);
 		
-		putchar(std_input[i]);
+		putchar(string[counter]);
 		new_line = false;
 		
-		if (std_input[i] == '\n')
+		if (string[counter] == '\n')
 		{
 			line_number++;
 			new_line = true;
 		}
 	}
-	
-	delete[] std_input;
 	
 	return 0;
 }
