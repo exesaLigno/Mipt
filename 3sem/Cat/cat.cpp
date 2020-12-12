@@ -54,7 +54,7 @@ int parseKeys(int argc, char* argv[])
 		}
 	}
 	
-	return 0;
+	return files_count;
 }
 
 
