@@ -18,12 +18,10 @@ int print(const char* string, int length);
 
 int main(int argc, char* argv[])
 {
-	parseKeys(argc, argv);
+	int files_count = parseKeys(argc, argv);
 	
-	if (argc == 1)
-	{
+	if (files_count == 0)
 		getStdin();
-	}
 	
 	for (int file_counter = 1; file_counter < argc; file_counter++)
 	{
@@ -43,10 +41,14 @@ int main(int argc, char* argv[])
 
 int parseKeys(int argc, char* argv[])
 {
+	int files_count = argc - 1;
+	
 	for (int counter = 1; counter < argc; counter++)
 	{
 		if (argv[counter][0] == '-')
 		{
+			files_count--;
+			
 			if (argv[counter][1] == 'n')
 				line_numering = true;
 		}
@@ -79,9 +81,21 @@ int getStdin()
 	
 	int counter = 0;
 	while ((std_input[counter] = getchar()) != EOF and counter < DEFAULT_STRING_LENGTH)
-		counter++;
+	{
+		if (std_input[counter] == '\n')
+		{
+			counter++;
+			std_input[counter] = '\0';
+			print(std_input, counter);
+			counter = 0;
+		}
 		
-	print(std_input, counter);
+		else
+			counter++;
+	}
+	
+	if (std_input[0] != '\0')
+		print(std_input, counter);
 	
 	delete[] std_input;
 	
