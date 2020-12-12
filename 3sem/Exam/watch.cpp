@@ -10,12 +10,15 @@
 #include <cstdlib>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
+#include <cstring>
 
 
 int interval = 2;
 
 
 int getKeys(int argc, char* argv[]);
+int displayResult(const char* stdout_text, const char* stderr_text, int width, int height, char* command[]);
 
 
 int main(int argc, char* argv[])
@@ -62,6 +65,12 @@ int main(int argc, char* argv[])
 		int status = 0;
 		wait(&status);
 		
+		if (not WIFEXITED(status))
+		{
+			printf("command can't be executed, exiting...\n");
+			exit(1);
+		}
+		
 		close(stdout_pipe_fd[1]);
 		close(stderr_pipe_fd[1]);
 		
@@ -82,14 +91,7 @@ int main(int argc, char* argv[])
 		stdout_text[stdout_length] = '\0';
 		stderr_text[stderr_length] = '\0';
 		
-		
-		//printf("%s\n%s\n", stdout_text, stderr_text);
-		
- 		if (not WIFEXITED(status))
-		{
-			printf("command can't be executed, exiting...\n");
-			exit(1);
-		}
+		displayResult(stdout_text, stderr_text, size.ws_col, size.ws_row, command);
 		
 		//printf("ws_row = %d, ws_col = %d\n", size.ws_row, size.ws_col);
 		
@@ -117,4 +119,30 @@ int getKeys(int argc, char* argv[])
 	}
 	
 	return counter;
+}
+
+
+int displayResult(const char* stdout_text, const char* stderr_text, int width, int height, char* command[])
+{
+	int printed_width = 0;
+	int printed_height = 0;
+	
+	printed_width += printf("Every %d second: ", interval);
+	int counter = 0;
+	while (command[counter] != nullptr)
+		printed_width += printf("%s ", command[counter++]);
+	
+	long int ttime = 0;
+	ttime = time(NULL);
+	char* time_str = ctime(&ttime);
+	int time_len = strlen(time_str);
+	
+	for (int i = 0; i < width - printed_width - time_len + 1; i++)
+		printf(" ");
+	
+	printf("%s\n", time_str);
+	
+	printed_height++;
+	
+	return 0;
 }
