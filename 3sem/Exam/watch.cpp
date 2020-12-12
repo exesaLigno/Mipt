@@ -127,6 +127,9 @@ int displayResult(const char* stdout_text, const char* stderr_text, int width, i
 	int printed_width = 0;
 	int printed_height = 0;
 	
+	
+	// Printing header
+	
 	printed_width += printf("Every %d second: ", interval);
 	int counter = 0;
 	while (command[counter] != nullptr)
@@ -142,7 +145,46 @@ int displayResult(const char* stdout_text, const char* stderr_text, int width, i
 	
 	printf("%s\n", time_str);
 	
-	printed_height++;
+	printed_height += 1;
+	
+	
+	// Printing body
+	
+	counter = 0;
+	while (stdout_text[counter] != '\0' and printed_height < height - 2)
+	{
+		if (stdout_text[counter] == '\n')
+		{
+			printed_height++;
+			printed_width = 0;
+		}
+		
+		putchar(stdout_text[counter++]);
+		printed_width++;
+	}
+	
+	counter = 0;
+	while (stderr_text[counter] != '\0' and printed_height < height - 2)
+	{
+		if (stderr_text[counter] == '\n')
+		{
+			printed_height++;
+			printed_width = 0;
+		}
+		
+		putchar(stderr_text[counter++]);
+		printed_width++;
+	}
+	
+	
+	
+	// Printing footer
+	
+	while (printed_height < height - 2)
+	{
+		printf("\n");
+		printed_height++;
+	}
 	
 	return 0;
 }
