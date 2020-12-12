@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 
 int interval = 2;
@@ -19,17 +21,38 @@ int getKeys(int argc, char* argv[]);
 int main(int argc, char* argv[])
 {
 	int command_start = getKeys(argc, argv);
+		
+	char* command[argc - command_start + 1];
+	command[argc - command_start] = nullptr;
 	
-	printf("command starts on %d parameter\n", command_start);
+	for (int counter = 0; counter < argc - command_start; counter++)
+		command[counter] = argv[counter + command_start];
 	
-	winsize size;
-	if (ioctl(0, TIOCGWINSZ, &size) == -1)
+	while (true)
 	{
-		perror("ioctl error");
-		exit(1);
+		winsize size;
+		if (ioctl(0, TIOCGWINSZ, &size) == -1)
+		{
+			perror("ioctl error");
+			exit(1);
+		}
+		
+		pid_t child_id = fork();
+		if (child_id == 0)
+		{
+			execvp(command[0], command);
+		}
+		
+		int status = 0;
+		wait(&status);
+		
+		if (WIFEXITED(status))
+			printf("cmd exited with %d\n", WEXITSTATUS(status));
+		
+		printf("ws_row = %d, ws_col = %d\n", size.ws_row, size.ws_col);
+		
+		sleep(interval);
 	}
-	
-	printf("ws_row = %d, ws_col = %d\n", size.ws_row, size.ws_col);
 	
     return 0;
 }
