@@ -37,19 +37,61 @@ int main(int argc, char* argv[])
 			exit(1);
 		}
 		
+		int stdout_pipe_fd[2];
+		int stderr_pipe_fd[2];
+		pipe(stdout_pipe_fd);
+		pipe(stderr_pipe_fd);
+		
 		pid_t child_id = fork();
 		if (child_id == 0)
 		{
+			close(stdout_pipe_fd[0]);
+			close(stderr_pipe_fd[0]);
+			
+			dup2(stdout_pipe_fd[1], STDOUT_FILENO);
+			dup2(stderr_pipe_fd[1], STDERR_FILENO);
+			
+			close(stdout_pipe_fd[1]);
+			close(stderr_pipe_fd[1]);
+			
 			execvp(command[0], command);
-		}
+			
+			abort();
+		}		
 		
 		int status = 0;
 		wait(&status);
 		
-		if (WIFEXITED(status))
-			printf("cmd exited with %d\n", WEXITSTATUS(status));
+		close(stdout_pipe_fd[1]);
+		close(stderr_pipe_fd[1]);
 		
-		printf("ws_row = %d, ws_col = %d\n", size.ws_row, size.ws_col);
+		int stdout_length = 0;
+		int stderr_length = 0;
+		ioctl(stdout_pipe_fd[0], FIONREAD, &stdout_length);
+		ioctl(stderr_pipe_fd[0], FIONREAD, &stderr_length);
+		
+		char stdout_text[stdout_length + 1];
+		char stderr_text[stderr_length + 1];
+		
+		read(stdout_pipe_fd[0], stdout_text, stdout_length);
+		read(stderr_pipe_fd[0], stderr_text, stderr_length);
+		
+		close(stdout_pipe_fd[0]);
+		close(stderr_pipe_fd[0]);
+		
+		stdout_text[stdout_length] = '\0';
+		stderr_text[stderr_length] = '\0';
+		
+		
+		//printf("%s\n%s\n", stdout_text, stderr_text);
+		
+ 		if (not WIFEXITED(status))
+		{
+			printf("command can't be executed, exiting...\n");
+			exit(1);
+		}
+		
+		//printf("ws_row = %d, ws_col = %d\n", size.ws_row, size.ws_col);
 		
 		sleep(interval);
 	}
