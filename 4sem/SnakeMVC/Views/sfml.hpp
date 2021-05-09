@@ -8,5 +8,5 @@ class View
   public:
 	View();
 	~View();
-	int draw();
+	int draw(Block* game_view);
 };

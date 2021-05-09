@@ -119,32 +119,66 @@ Model::~Model()
 
 int Model::processEvent(int event)
 {
-	if (not food_existing)
-		generateFood();
-	
-	if (event != NO_DIRECTION)						// Processing command
+	if (game_status == NOT_STARTED)
 	{
-		snake.changeDirection(event);
-		if (game_status == NOT_STARTED)
+		if (event == MOVE_UP or event == MOVE_DOWN or event == MOVE_LEFT or event == MOVE_RIGHT)
+		{
+			game_status = RUNNING;
+			snake.changeDirection(event);
+			generateFood();
+		}
+	}
+	
+	if (game_status == PAUSED)
+	{
+		if (event == PAUSE)
 			game_status = RUNNING;
 	}
 	
-	if (snake.getHeadPosition() == food_position)	// Eating food
+	if (game_status == RUNNING)
 	{
-		snake.feed();
-		food_existing = false;
+		if (event == MOVE_UP or event == MOVE_DOWN or event == MOVE_LEFT or event == MOVE_RIGHT)
+			snake.changeDirection(event);
+		
+		else if (event == PAUSE)
+		{
+			game_status = PAUSED;
+			return 0;
+		}
+		
+		snake.move();
+		
+		if (snake.getHeadPosition() == food_position)
+		{
+			snake.feed();
+			generateFood();
+		}
+		
+		if (not snake.ok())
+			game_status = ENDED;
 	}
 	
-	if (snake.ok() and game_status == RUNNING)		// Moving snake
-		snake.move();
-	
-	else if (game_status == RUNNING)
-		game_status = ENDED;
-	
-	if (not food_existing)
-		generateFood();
+	if (game_status == ENDED)
+	{
+		if (event == RESTART)
+			resetGame();
+	}
 	
 	return 0;
 }
 
+void Model::generateFood()
+{
+	food_position = Position(2, 3);
+}
 
+void Model::resetGame()
+{
+	game_status = NOT_STARTED;
+	snake.reset();
+}
+
+Block* Model::getView()
+{
+	return nullptr;
+}

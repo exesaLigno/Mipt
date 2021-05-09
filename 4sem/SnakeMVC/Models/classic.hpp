@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../Types/event.hpp"
 #include "../Types/block.hpp"
 #include "../Types/position.hpp"
 #include <vector>
@@ -8,6 +7,7 @@
 
 
 enum DIRECTIONS { NO_DIRECTION, UP, LEFT, DOWN, RIGHT };
+enum EVENTS { NO_COMMAND, MOVE_UP, MOVE_LEFT, MOVE_DOWN, MOVE_RIGHT, RESTART, PAUSE };
 enum GAME_STATUS { NOT_STARTED, RUNNING, ENDED, PAUSED };
 
 
@@ -40,7 +40,6 @@ class Model
 
 	int game_status = NOT_STARTED;
 	
-	bool food_existing = false;
 	Position food_position;
 	
 	Snake snake;
@@ -51,5 +50,6 @@ class Model
 	~Model();
 	void generateFood();
 	int processEvent(int event);
-	
+	void resetGame();
+	Block* getView();
 };
