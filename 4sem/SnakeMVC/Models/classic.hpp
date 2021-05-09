@@ -4,16 +4,18 @@
 #include "../Types/block.hpp"
 #include "../Types/position.hpp"
 #include <vector>
+#include <math.h>
 
 
-enum DIRECTIONS { UP = 1, LEFT, DOWN, RIGHT };
+enum DIRECTIONS { NO_DIRECTION, UP, LEFT, DOWN, RIGHT };
+enum GAME_STATUS { NOT_STARTED, RUNNING, ENDED, PAUSED };
 
 
 class Snake
 {
 	std::vector<Position> body;
 	int length = 1;
-	short direction = 0;
+	short direction = NO_DIRECTION;
 	
 	bool snake_alive = true;
 	
@@ -28,13 +30,15 @@ class Snake
 	
 	bool ok();
 	Position getHeadPosition();
+	
+	void reset();
 };
 
 
 class Model
 {
 
-	bool game_running = false;
+	int game_status = NOT_STARTED;
 	
 	bool food_existing = false;
 	Position food_position;
