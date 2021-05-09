@@ -165,7 +165,7 @@ int displayResult(const char* stdout_text, const char* stderr_text, int width, i
 	
 	counter = 0;
 	while (stderr_text[counter] != '\0' and printed_height < height - 2)
-	{
+	{		
 		if (stderr_text[counter] == '\n')
 		{
 			printed_height++;
