@@ -25,6 +25,9 @@ class Snake
 	
 	bool snake_alive = true;
 	
+	int generating_area_x = 0;
+	int generating_area_y = 0;
+	
   public:
 	Snake();
 	int generateDefaultSnake(int length);
@@ -38,6 +41,7 @@ class Snake
 	
 	bool ok();
 	Position getHeadPosition();
+	bool contains(Position other_head);
 	
 	void reset();
 };
@@ -47,17 +51,19 @@ class Model
 {
 	int window_size_x = 0;
 	int window_size_y = 0;
-
+	
 	int game_status = NOT_STARTED;
 	
 	Position food_position;
 	bool food_existing = false;
 	
 	Snake snake;
+	Snake enemy;
 	
 	sf::Clock clock;
 	
 	int score = 0;
+	int enemy_score = 0;
 	
 	
   public:
@@ -67,6 +73,9 @@ class Model
 	void generateFood();
 	int processEvent(Event event);
 	void resetGame();
+	
+	void ai();
+	bool aiCheck();
 	
 	std::vector<Block> getBlocks();
 	Representation getRepresentation();

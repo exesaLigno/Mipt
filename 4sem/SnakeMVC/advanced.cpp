@@ -1,48 +1,32 @@
 #include "Controllers/keyboard.hpp"
-#include "Models/classic.hpp"
+#include "Models/pvp.hpp"
 #include "Views/sfml.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "Types/event.hpp"
 
 
 int main()
 {
-// 	Controller controller;
-// 	Model model;
-// 	View view;
-// 
-// 	int event = controller.checkEvents();
-// 
-// 	model.processEvent(event);
-// 	Block* game_view = model.getView();
-// 
-// 	view.draw(game_view);
-// 
-// 	return 0;
-	
 	setlocale(LC_ALL, "ru");
 	
-	sf::RenderWindow window(sf::VideoMode(800, 480), "Snake", sf::Style::Fullscreen);
+	sf::RenderWindow window(sf::VideoMode(800, 480), "Snake PVP");
 	window.setFramerateLimit(60);
 	sf::Vector2u size = window.getSize();
 	
 	Controller controller(&window);
 	View view(&window);
 	Model model(size.x/20, size.y/20);
-		
+	
 	while (true)
 	{
-		int event = controller.checkEvents();
+		Event event = controller.checkEvents();
 		
 		if (event == EXIT)
 			break;
 		
 		model.processEvent(event);
 		Representation representation = model.getRepresentation();
-		
-		/* for (auto block : blocks)
-			std::cout << "(" << block.position.x << ", " << block.position.y << ")";
-		std::cout << std::endl; */
 		
 		view.draw(representation);
 	}

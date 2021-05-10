@@ -10,6 +10,9 @@ class View
 	sf::RenderWindow* window = nullptr;
 	sf::Font* font;
 	
+	sf::Clock clock;
+	unsigned long frame_number = 0;
+	
   public:
 	View(sf::RenderWindow* window);
 	~View();

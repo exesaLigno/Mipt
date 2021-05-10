@@ -1,17 +1,54 @@
-#include "classic.hpp"
+#include "pvp.hpp"
 
 
 
 Snake::Snake()
 {
 	generateDefaultSnake(5);
-	direction = UP;
 }
 
 int Snake::generateDefaultSnake(int length)
 {
+	direction = rand() % 4 + 1;
+	
+	int d1 = 0, d2 = 0;
+	
+	switch (direction)
+	{
+		case UP:
+		{
+			d1 = 0;
+			d2 = -1;
+			break;
+		}
+		
+		case DOWN:
+		{
+			d1 = 0;
+			d2 = 1;
+			break;
+		}
+		
+		case RIGHT:
+		{
+			d1 = -1;
+			d2 = 0;
+			break;
+		}
+				
+		case LEFT:
+		{
+			d1 = 1;
+			d2 = 0;
+			break;
+		}
+	}
+	
+	int x_init = rand() % (generating_area_x - 8) + 4;
+	int y_init = rand() % (generating_area_y - 8) + 4;
+	
 	for (int counter = 0; counter < length; counter++)
-		body.push_back(Position(10, 10 + counter));
+		body.push_back(Position(x_init + counter * d1, y_init + counter * d2));
 	
 	this -> length = length;
 	
@@ -55,6 +92,7 @@ Position Snake::getFutureHeadPosition()
 		}
 				
 		default:
+			future_head = head;
 			break;
 	}
 	
@@ -125,11 +163,21 @@ void Snake::reset()
 {
 	body.clear();
 	generateDefaultSnake(5);
-		
-	direction = UP;
 	
 	snake_alive = true;
 }
+
+bool Snake::contains(Position other_head)
+{
+	for (Position elem : body)
+	{
+		if (elem == other_head)
+			return true;
+	}
+	
+	return false;
+}
+
 
 
 
@@ -142,6 +190,12 @@ Model::Model(int x, int y)
 {
 	window_size_x = x;
 	window_size_y = y;
+	
+	snake.generating_area_x = x;
+	snake.generating_area_y = y;
+	
+	enemy.generating_area_x = x;
+	enemy.generating_area_y = y;
 }
 
 
@@ -184,14 +238,17 @@ int Model::processEvent(Event event)
 		if (clock.getElapsedTime().asMilliseconds() >= 150)
 		{
 			Position head = snake.getFutureHeadPosition();
-			if (head.x < 0 or head.x >= window_size_x or head.y < 0 or head.y >= window_size_y)
+			if (head.x < 0 or head.x >= window_size_x or head.y < 0 or head.y >= window_size_y or enemy.contains(head))
 				snake.kill();
 			
 			if (not snake.ok())
 				game_status = ENDED;
 			
 			else
+			{
 				snake.move();
+				ai();
+			}
 			
 			if (snake.getHeadPosition() == food_position)
 			{
@@ -219,6 +276,37 @@ int Model::processEvent(Event event)
 	return 0;
 }
 
+
+
+void Model::ai()
+{	
+	if (aiCheck())
+	{
+		enemy.direction = NO_DIRECTION;
+	}
+	
+	/*if (not aiCheck())
+	{
+		enemy.direction = enemy.direction % 4 + 1;
+		if (not aiCheck())
+			enemy.direction = (enemy.direction + 1) % 4 + 1;
+		enemy.kill();
+		enemy.reset();
+	}
+	
+	if (enemy.getFutureHeadPosition() == food_position)
+		enemy.feed();*/
+	
+	enemy.move();
+}
+
+bool Model::aiCheck()
+{
+	Position future_head = enemy.getFutureHeadPosition();
+	return snake.contains(future_head) or future_head.x < 0 or future_head.y < 0 or future_head.x >= window_size_x or future_head.y >= window_size_y or not enemy.ok();
+}
+
+
 void Model::generateFood()
 {	
 	food_position = Position(rand() % window_size_x, rand() % window_size_y);
@@ -229,17 +317,19 @@ void Model::resetGame()
 {
 	game_status = NOT_STARTED;
 	snake.reset();
+	enemy.reset();
 	food_existing = false;
 }
 
 std::vector<Block> Model::getBlocks()
-{	
+{
 	std::vector<Block> blocks;
 		
 	for (Position block_position : snake.body)
-	{
 		blocks.push_back(Block(block_position, WHITE_SNAKE_BODY));
-	}
+	
+	for (Position block_position : enemy.body)
+		blocks.push_back(Block(block_position, RED_SNAKE_BODY));
 	
 	if (food_existing)
 		blocks.push_back(Block(food_position, GREEN_FOOD));

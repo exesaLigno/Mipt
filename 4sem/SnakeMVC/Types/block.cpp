@@ -7,7 +7,7 @@ Block::Block()
 Block::Block(Position pos, int col)
 {
 	position = pos;
-	color = col;
+	style = col;
 }
 
 

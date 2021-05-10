@@ -5,10 +5,13 @@
 #include <vector>
 
 
+enum STYLES { NO_STYLE, WHITE_SNAKE_BODY, GREEN_FOOD, RED_SNAKE_BODY, GOLD_FOOD };
+
+
 class Block
 {
   public:
-	int color = 0;
+	int style = 0;
 	Position position;
 	
   public:

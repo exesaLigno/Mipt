@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include "../Types/event.hpp"
 
 
 
@@ -12,5 +13,5 @@ class Controller
   public:
 	Controller(sf::RenderWindow* window_lnk);
 	~Controller();
-	int checkEvents();
+	Event checkEvents();
 };
