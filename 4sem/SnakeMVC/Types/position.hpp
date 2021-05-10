@@ -4,13 +4,13 @@
 class Position
 {
   public:
-	int x = 0;
-	int y = 0;
+	int x = -1;
+	int y = -1;
 	
   public:
 	Position();
 	Position(int x, int y);
 	~Position();
 	
-	bool operator==(Position other);
+	bool operator==(Position& other);
 };

@@ -1,12 +1,17 @@
 #pragma once
-
+#include <SFML/Graphics.hpp>
 #include "../Types/block.hpp"
+#include <vector>
+#include <iostream>
 
 
 class View
 {
+	sf::RenderWindow* window = nullptr;
+	sf::Font* font;
+	
   public:
-	View();
+	View(sf::RenderWindow* window);
 	~View();
-	int draw(Block* game_view);
+	int draw(Representation game_view);
 };
