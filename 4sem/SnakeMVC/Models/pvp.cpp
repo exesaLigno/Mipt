@@ -293,6 +293,7 @@ void Model::ai()
 		{
 			enemy.kill();
 			enemy.reset();
+			enemy_score = 0;
 		}
 	}
 	
@@ -302,12 +303,34 @@ void Model::ai()
 		int vertical_delta = food_position.y - enemy.getHeadPosition().y;
 		int horizontal_delta = food_position.x - enemy.getHeadPosition().x;
 		
+		if (vertical_delta == 0 and (enemy.direction == UP or enemy.direction == DOWN))
+		{
+			if (food_position.x > enemy.getHeadPosition().x)
+				enemy.changeDirection(RIGHT);
+			
+			else if (food_position.x < enemy.getHeadPosition().x)
+				enemy.changeDirection(LEFT);
+		}
+		
+		else if (horizontal_delta == 0 and (enemy.direction == LEFT or enemy.direction == RIGHT))
+		{
+			if (food_position.y > enemy.getHeadPosition().y)
+				enemy.changeDirection(UP);
+			
+			else if (food_position.y < enemy.getHeadPosition().y)
+				enemy.changeDirection(DOWN);
+		}
+		
 		if (aiCheck())
 			enemy.direction = old_direction;
 	}
 	
 	if (enemy.getFutureHeadPosition() == food_position)
+	{
 		enemy.feed();
+		generateFood();
+		enemy_score += 5;
+	}
 	
 	enemy.move();
 }
@@ -330,6 +353,10 @@ void Model::resetGame()
 	game_status = NOT_STARTED;
 	snake.reset();
 	enemy.reset();
+	
+	score = 0;
+	enemy_score = 0;
+	
 	food_existing = false;
 }
 
