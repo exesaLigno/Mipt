@@ -1,0 +1,7 @@
+*~
+database/
+token.txt
+config.json
+*__pycache__
+test*.py
+TODO.txt

@@ -1,0 +1,14 @@
+{
+    "id": 1,
+    "name": "Виски-Кола",
+    "ingredients": [
+        "Виски",
+        "Кола",
+        "Лёд"
+    ],
+    "receipe": "Смешайте виски с колой в соотношении 1:1, добавьте лёд",
+    "sweetness": "Sweet like a cola",
+    "strength": "For girls one glass is enough ",
+    "prettiness": "Brown substaince",
+    "estime": "From my opinion 10/10"
+}
