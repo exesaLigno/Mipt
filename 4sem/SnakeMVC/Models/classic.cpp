@@ -10,8 +10,46 @@ Snake::Snake()
 
 int Snake::generateDefaultSnake(int length)
 {
+	direction = rand() % 4 + 1;
+	
+	int d1 = 0, d2 = 0;
+	
+	switch (direction)
+	{
+		case UP:
+		{
+			d1 = 0;
+			d2 = 1;
+			break;
+		}
+		
+		case DOWN:
+		{
+			d1 = 0;
+			d2 = -1;
+			break;
+		}
+		
+		case RIGHT:
+		{
+			d1 = 1;
+			d2 = 0;
+			break;
+		}
+				
+		case LEFT:
+		{
+			d1 = -1;
+			d2 = 0;
+			break;
+		}
+	}
+	
+	int x_init = rand() % (generating_area_x - 8) + 4;
+	int y_init = rand() % (generating_area_y - 8) + 4;
+	
 	for (int counter = 0; counter < length; counter++)
-		body.push_back(Position(10, 10 + counter));
+		body.push_back(Position(x_init + counter * d1, y_init + counter * d2));
 	
 	this -> length = length;
 	
@@ -142,6 +180,14 @@ Model::Model(int x, int y)
 {
 	window_size_x = x;
 	window_size_y = y;
+	
+	snake.generating_area_x = x;
+	snake.generating_area_y = y;
+	
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	
+	srand((time_t)ts.tv_nsec);
 }
 
 
@@ -214,6 +260,9 @@ int Model::processEvent(Event event)
 	{
 		this -> window_size_x = event.width / 20;
 		this -> window_size_y = event.height / 20;
+		
+		snake.generating_area_x = window_size_x;
+		snake.generating_area_y = window_size_y;
 	}
 	
 	return 0;
@@ -240,6 +289,8 @@ std::vector<Block> Model::getBlocks()
 	{
 		blocks.push_back(Block(block_position, WHITE_SNAKE_BODY));
 	}
+	
+	blocks.back().style = WHITE_SNAKE_HEAD;
 	
 	if (food_existing)
 		blocks.push_back(Block(food_position, GREEN_FOOD));

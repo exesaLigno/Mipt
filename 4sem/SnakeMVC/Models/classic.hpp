@@ -7,6 +7,7 @@
 #include <math.h>
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <time.h>
 
 
 
@@ -24,6 +25,9 @@ class Snake
 	bool rotation_blocked = false;
 	
 	bool snake_alive = true;
+	
+	int generating_area_x = 0;
+	int generating_area_y = 0;
 	
   public:
 	Snake();

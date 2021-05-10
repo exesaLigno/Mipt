@@ -196,6 +196,11 @@ Model::Model(int x, int y)
 	
 	enemy.generating_area_x = x;
 	enemy.generating_area_y = y;
+	
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	
+	srand((time_t)ts.tv_nsec);
 }
 
 
@@ -271,6 +276,12 @@ int Model::processEvent(Event event)
 	{
 		this -> window_size_x = event.width / 20;
 		this -> window_size_y = event.height / 20;
+		
+		snake.generating_area_x = window_size_x;
+		snake.generating_area_y = window_size_y;
+		
+		enemy.generating_area_x = window_size_x;
+		enemy.generating_area_y = window_size_y;
 	}
 	
 	return 0;
