@@ -18,27 +18,27 @@ int Snake::generateDefaultSnake(int length)
 		case UP:
 		{
 			d1 = 0;
-			d2 = -1;
+			d2 = 1;
 			break;
 		}
 		
 		case DOWN:
 		{
 			d1 = 0;
-			d2 = 1;
+			d2 = -1;
 			break;
 		}
 		
 		case RIGHT:
 		{
-			d1 = -1;
+			d1 = 1;
 			d2 = 0;
 			break;
 		}
 				
 		case LEFT:
 		{
-			d1 = 1;
+			d1 = -1;
 			d2 = 0;
 			break;
 		}
@@ -146,11 +146,12 @@ Position Snake::getHeadPosition()
 bool Snake::ok()
 {
 	Position head = getFutureHeadPosition();
-	
+		
 	for (Position elem : body)
 	{
 		if (elem == head)
 		{
+			std::cout << "test" << std::endl;
 			kill();
 			break;
 		}
@@ -282,20 +283,31 @@ void Model::ai()
 {	
 	if (aiCheck())
 	{
-		enemy.direction = NO_DIRECTION;
+		enemy.direction = new_random_direction(enemy.direction); // enemy.direction % 4 + 1;
+		if (aiCheck())
+		{
+			enemy.direction = (enemy.direction + 1) % 4 + 1;
+		}
+		
+		if (aiCheck())
+		{
+			enemy.kill();
+			enemy.reset();
+		}
 	}
 	
-	/*if (not aiCheck())
+	else 
 	{
-		enemy.direction = enemy.direction % 4 + 1;
-		if (not aiCheck())
-			enemy.direction = (enemy.direction + 1) % 4 + 1;
-		enemy.kill();
-		enemy.reset();
+		int old_direction = enemy.direction;
+		int vertical_delta = food_position.y - enemy.getHeadPosition().y;
+		int horizontal_delta = food_position.x - enemy.getHeadPosition().x;
+		
+		if (aiCheck())
+			enemy.direction = old_direction;
 	}
 	
 	if (enemy.getFutureHeadPosition() == food_position)
-		enemy.feed();*/
+		enemy.feed();
 	
 	enemy.move();
 }
@@ -328,8 +340,12 @@ std::vector<Block> Model::getBlocks()
 	for (Position block_position : snake.body)
 		blocks.push_back(Block(block_position, WHITE_SNAKE_BODY));
 	
+	blocks.back().style = WHITE_SNAKE_HEAD;
+	
 	for (Position block_position : enemy.body)
 		blocks.push_back(Block(block_position, RED_SNAKE_BODY));
+	
+	blocks.back().style = RED_SNAKE_HEAD;
 	
 	if (food_existing)
 		blocks.push_back(Block(food_position, GREEN_FOOD));
@@ -353,4 +369,18 @@ Representation Model::getRepresentation()
 	
 	Representation representation(center_text, getBlocks());
 	return representation;
+}
+
+
+
+
+int new_random_direction(int old_direction)
+{
+	int randomizer = rand() % 2;
+	
+	if (old_direction == LEFT or old_direction == RIGHT)
+		return UP * randomizer + DOWN * !randomizer;
+	
+	else
+		return LEFT * randomizer + RIGHT * !randomizer;
 }

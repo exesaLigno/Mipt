@@ -80,3 +80,6 @@ class Model
 	std::vector<Block> getBlocks();
 	Representation getRepresentation();
 };
+
+
+int new_random_direction(int old_direction);

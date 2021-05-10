@@ -39,7 +39,24 @@ int View::draw(Representation game_view)
 				window -> draw(square);
 			}
 			
-			if (block.style == RED_SNAKE_BODY)
+			else if (block.style == WHITE_SNAKE_HEAD)
+			{
+				sf::RectangleShape square(sf::Vector2f(18.f, 18.f));
+				square.setPosition(block.position.x * 20 + 1, size.y - (block.position.y + 1) * 20 + 1);
+				square.setOutlineThickness(1.f);
+				square.setOutlineColor(sf::Color::Black);
+				square.setFillColor(sf::Color::White);
+				window -> draw(square);
+				
+				sf::RectangleShape eye(sf::Vector2f(8.f, 8.f));
+				eye.setPosition(block.position.x * 20 + 6, size.y - (block.position.y + 1) * 20 + 6);
+				eye.setOutlineThickness(1.f);
+				eye.setOutlineColor(sf::Color::Black);
+				eye.setFillColor(sf::Color::Black);
+				window -> draw(eye);
+			}
+			
+			else if (block.style == RED_SNAKE_BODY)
 			{
 				sf::RectangleShape square(sf::Vector2f(18.f, 18.f));
 				square.setPosition(block.position.x * 20 + 1, size.y - (block.position.y + 1) * 20 + 1);
@@ -47,6 +64,23 @@ int View::draw(Representation game_view)
 				square.setOutlineColor(sf::Color::Black);
 				square.setFillColor(sf::Color::Red);
 				window -> draw(square);
+			}
+			
+			else if (block.style == RED_SNAKE_HEAD)
+			{
+				sf::RectangleShape square(sf::Vector2f(18.f, 18.f));
+				square.setPosition(block.position.x * 20 + 1, size.y - (block.position.y + 1) * 20 + 1);
+				square.setOutlineThickness(1.f);
+				square.setOutlineColor(sf::Color::Black);
+				square.setFillColor(sf::Color::Red);
+				window -> draw(square);
+				
+				sf::RectangleShape eye(sf::Vector2f(8.f, 8.f));
+				eye.setPosition(block.position.x * 20 + 6, size.y - (block.position.y + 1) * 20 + 6);
+				eye.setOutlineThickness(1.f);
+				eye.setOutlineColor(sf::Color::Black);
+				eye.setFillColor(sf::Color::Black);
+				window -> draw(eye);
 			}
 			
 			else if (block.style == GREEN_FOOD)
