@@ -13,6 +13,7 @@
 
 enum DIRECTIONS { NO_DIRECTION, UP, LEFT, DOWN, RIGHT };
 enum GAME_STATUS { NOT_STARTED, RUNNING, ENDED, PAUSED };
+enum AI_LEVELS { EASY, MEDIUM, HARD, IMPOSSIBLE };
 
 
 class Snake
@@ -65,6 +66,8 @@ class Model
 	int score = 0;
 	int enemy_score = 0;
 	
+	int ai_level = HARD;
+	
 	
   public:
 	Model(int x, int y);
@@ -76,6 +79,7 @@ class Model
 	
 	void ai();
 	bool aiCheck();
+	int aiMakeTrap();
 	
 	std::vector<Block> getBlocks();
 	Representation getRepresentation();

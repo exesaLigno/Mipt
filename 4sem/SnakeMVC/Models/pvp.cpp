@@ -151,12 +151,11 @@ bool Snake::ok()
 	{
 		if (elem == head)
 		{
-			std::cout << "test" << std::endl;
-			kill();
+			return false;
 			break;
 		}
 	}
-	
+		
 	return snake_alive;
 }
 
@@ -282,7 +281,7 @@ int Model::processEvent(Event event)
 void Model::ai()
 {	
 	if (aiCheck())
-	{
+	{		
 		enemy.direction = new_random_direction(enemy.direction); // enemy.direction % 4 + 1;
 		if (aiCheck())
 		{
@@ -298,12 +297,12 @@ void Model::ai()
 	}
 	
 	else 
-	{
+	{		
 		int old_direction = enemy.direction;
 		int vertical_delta = food_position.y - enemy.getHeadPosition().y;
 		int horizontal_delta = food_position.x - enemy.getHeadPosition().x;
 		
-		if (vertical_delta == 0 and (enemy.direction == UP or enemy.direction == DOWN))
+		if (vertical_delta == 0 and (enemy.direction == UP or enemy.direction == DOWN) and ai_level >= EASY)
 		{
 			if (food_position.x > enemy.getHeadPosition().x)
 				enemy.changeDirection(RIGHT);
@@ -312,7 +311,7 @@ void Model::ai()
 				enemy.changeDirection(LEFT);
 		}
 		
-		else if (horizontal_delta == 0 and (enemy.direction == LEFT or enemy.direction == RIGHT))
+		else if (horizontal_delta == 0 and (enemy.direction == LEFT or enemy.direction == RIGHT) and ai_level >= EASY)
 		{
 			if (food_position.y > enemy.getHeadPosition().y)
 				enemy.changeDirection(UP);
@@ -321,8 +320,28 @@ void Model::ai()
 				enemy.changeDirection(DOWN);
 		}
 		
+		else if ((enemy.direction == UP or enemy.direction == DOWN) and ai_level >= MEDIUM)
+		{
+			if (food_position.x > enemy.getHeadPosition().x)
+				enemy.changeDirection(RIGHT);
+			
+			else if (food_position.x < enemy.getHeadPosition().x)
+				enemy.changeDirection(LEFT);
+		}
+		
+		else if (enemy.direction == LEFT and food_position.x > enemy.getHeadPosition().x and ai_level >= HARD)
+			enemy.changeDirection(rand() % 2 ? UP : DOWN);
+		
+		else if (enemy.direction == RIGHT and food_position.x < enemy.getHeadPosition().x and ai_level >= HARD)
+			enemy.changeDirection(rand() % 2 ? UP : DOWN);
+		
+		else if (ai_level >= IMPOSSIBLE)
+			aiMakeTrap();
+		
 		if (aiCheck())
+		{
 			enemy.direction = old_direction;
+		}
 	}
 	
 	if (enemy.getFutureHeadPosition() == food_position)
@@ -338,8 +357,16 @@ void Model::ai()
 bool Model::aiCheck()
 {
 	Position future_head = enemy.getFutureHeadPosition();
+	
 	return snake.contains(future_head) or future_head.x < 0 or future_head.y < 0 or future_head.x >= window_size_x or future_head.y >= window_size_y or not enemy.ok();
 }
+
+
+int Model::aiMakeTrap()
+{
+	return 0;
+}
+
 
 
 void Model::generateFood()
