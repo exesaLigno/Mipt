@@ -28,4 +28,4 @@ $(GAME_CLASSIC): $(OBJECTS_CLASSIC)
 	
 .PHONY: clean
 clean:
-	rm *.o */*.o
+	rm *.o */*.o *~ game_classic game_advanced
