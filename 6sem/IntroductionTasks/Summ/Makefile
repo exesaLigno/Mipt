@@ -5,7 +5,7 @@ summ.o: summ.cpp
 
 PHONY: run
 run: summ.o
-	mpiexec -n 4 ./summ.o 48
+	mpiexec -n 4 ./summ.o 10000
 
 PHONY: clean
 clean:
