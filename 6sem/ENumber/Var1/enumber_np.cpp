@@ -25,5 +25,6 @@ int main(int argc, char** argv)
 
   auto stop_time = clock();
 
-  printf("Calculated number e^%d = %llg in %d milliseconds\n", x, result, stop_time - start_time);
+  printf("Calculated number e^%d = %.30Lf\n", x, result);
+  printf("Executed in %d milliseconds\n", stop_time - start_time);
 }
