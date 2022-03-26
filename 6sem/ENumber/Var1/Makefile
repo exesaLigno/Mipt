@@ -1,3 +1,5 @@
+count = 1000000000
+
 all: enumber.o enumber_np.o
 
 enumber.o: enumber.cpp
@@ -8,11 +10,14 @@ enumber_np.o: enumber_np.cpp
 
 PHONY: run
 run: enumber.o
-	mpiexec -n 4 ./enumber.o 100000000
+	mpiexec -n 4 ./enumber.o $(count)
 
 PHONY: run_np
 run_np: enumber_np.o
-	./enumber_np.o 100000000
+	./enumber_np.o $(count)
+
+PHONY: compare
+compare: run run_np
 
 PHONY: clean
 clean:
