@@ -5,7 +5,7 @@ int THREADS_COUNT = 0;
 int THREAD_NUM = 0;
 pthread_mutex_t MUTEX;
 
-void* helloThread(void* temp);
+void* helloThread(void* _);
 
 int main(int argc, char** argv)
 {
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 }
 
 
-void* helloThread(void* thread_num_pointer)
+void* helloThread(void* _)
 {
   pthread_mutex_lock(&MUTEX);
     int rank = THREAD_NUM++;
