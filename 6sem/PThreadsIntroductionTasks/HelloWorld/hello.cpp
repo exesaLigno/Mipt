@@ -31,8 +31,8 @@ int main(int argc, char** argv)
 void* helloThread(void* thread_num_pointer)
 {
   pthread_mutex_lock(&MUTEX);
-    printf("Hello world, I am thread #%d of %d\n", THREAD_NUM, THREADS_COUNT);
-    THREAD_NUM++;
+    int rank = THREAD_NUM++;
   pthread_mutex_unlock(&MUTEX);
+  printf("Hello world, I am thread #%d of %d\n", rank, THREADS_COUNT);
   return nullptr;
 }
