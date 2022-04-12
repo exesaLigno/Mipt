@@ -36,7 +36,7 @@ void* threadFunction(void* _)
 {
   pthread_mutex_lock(&MUTEX);
     int old_var = global_variable++;
+    printf("Hi, I am thread #%d and I'm changed variable from %d to %d\n", old_var, old_var, global_variable);
   pthread_mutex_unlock(&MUTEX);
-  printf("Hi, I am thread #%d and I'm changed variable from %d to %d\n", old_var, old_var, global_variable);
   return nullptr;
 }
