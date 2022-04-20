@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstdio>
+#include <ctime>
 
 #include "task.cpp"
 
@@ -9,8 +10,11 @@ void exportData(double x_lim, double h, double t_lim, double tau, double** U);
 
 int main(int argc, char** argv)
 {
+  clock_t start_time = clock();
   double** U = calculate(X_LIM, H, T_LIM, TAU, phi, psi, f);
-  exportData(X_LIM, H, T_LIM, TAU, U);
+  clock_t stop_time = clock();
+  printf("\x1b[1;33mNon-parallel run completed in %ld ms\x1b[0m\nWriting to file started\n", stop_time - start_time);
+  if (EXPORT_TO_FILE) exportData(X_LIM, H, T_LIM, TAU, U);
   return 0;
 }
 

@@ -1,7 +1,9 @@
 #include <mpi.h>
+#include <ctime>
 
 const int PREVIOUS_VALUE_TAG = 1;
 const int DATA_WRITED_TAG = 2;
+const int TASK_SOLVED_TAG = 3;
 
 #include "task.cpp"
 
@@ -13,6 +15,12 @@ int main(int argc, char** argv)
   MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Status status;
+  int temp = 0;
+
+  clock_t start_time = 0, stop_time = 0;
+
+  if (rank == 0)
+    start_time = clock();
 
   int t_size = (int) (T_LIM / TAU), x_size = (int) (X_LIM / H);
 
@@ -45,25 +53,37 @@ int main(int argc, char** argv)
       MPI_Send(&(current_U[t][current_x_size - (rank == 0 ? 1 : 0)]), 1, MPI_DOUBLE, rank+1, PREVIOUS_VALUE_TAG, MPI_COMM_WORLD);
   }
 
-  int writed = 0;
-  FILE* file = nullptr;
+  if (rank == comm_size - 1)
+    MPI_Send(&temp, 1, MPI_INT, 0, TASK_SOLVED_TAG, MPI_COMM_WORLD);
 
-  if (rank != 0)
-    MPI_Recv(&writed, 1, MPI_INT, rank-1, DATA_WRITED_TAG, MPI_COMM_WORLD, &status);
-
-  file = fopen("result.txt", rank == 0 ? "w" : "a");
-
-  for (int x = (rank == 0 ? 0 : 1); x < current_x_size + (rank == 0 ? 0 : 1); x++)
+  if (rank == 0)
   {
-    for (int t = 0; t < t_size; t++)
-      fprintf(file, "%lg ", current_U[t][x]);
-    fprintf(file, "\n");
+    MPI_Recv(&temp, 1, MPI_INT, comm_size-1, TASK_SOLVED_TAG, MPI_COMM_WORLD, &status);
+    stop_time = clock();
+    printf("\x1b[1;33mParallel run completed in %ld ms\x1b[0m\nWriting to file started\n", stop_time - start_time);
   }
 
-  fclose(file);
+  if (EXPORT_TO_FILE)
+  {
+    FILE* file = nullptr;
 
-  if (rank != comm_size - 1)
-    MPI_Send(&writed, 1, MPI_INT, rank+1, DATA_WRITED_TAG, MPI_COMM_WORLD);
+    if (rank != 0)
+      MPI_Recv(&temp, 1, MPI_INT, rank-1, DATA_WRITED_TAG, MPI_COMM_WORLD, &status);
+
+    file = fopen("result.txt", rank == 0 ? "w" : "a");
+
+    for (int x = (rank == 0 ? 0 : 1); x < current_x_size + (rank == 0 ? 0 : 1); x++)
+    {
+      for (int t = 0; t < t_size; t++)
+        fprintf(file, "%lg ", current_U[t][x]);
+      fprintf(file, "\n");
+    }
+
+    fclose(file);
+
+    if (rank != comm_size - 1)
+      MPI_Send(&temp, 1, MPI_INT, rank+1, DATA_WRITED_TAG, MPI_COMM_WORLD);
+  }
 
   MPI_Finalize();
 }
