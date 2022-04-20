@@ -22,4 +22,8 @@ compare: lab.out lab_np.out
 
 PHONY: clean
 clean:
-	rm lab.out lab_np.out result.txt result_np.txt
+	rm lab.out lab_np.out result.txt result_np.txt result.png
+
+PHONY: plot
+plot: run
+	./make_plot.py
