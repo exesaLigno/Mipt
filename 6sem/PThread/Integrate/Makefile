@@ -1,8 +1,15 @@
-all: integrate.o
+CC = g++
+CFLAGS = -c -std=c++2a -O3 -pthread
+LDFLAGS =
 
-integrate.o: integrate.cpp
-	g++ -o integrate.o integrate.cpp -pthread
+SOURCES = integral.cpp main.cpp
+OBJECTS = $(SOURCES:.cpp=.o)
+INTEGRATOR = integrate.out
 
-PHONY: clean
-clean:
-	rm integrate.o
+all: $(INTEGRATOR)
+
+$(INTEGRATOR): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+
+.cpp.o:
+	$(CC) $(CFLAGS) $< -o $@
