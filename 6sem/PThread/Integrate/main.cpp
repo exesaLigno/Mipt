@@ -2,70 +2,41 @@
 #include <cmath>
 #include "integral.hpp"
 
-const double START = -2.999;
-const double STOP = 0;
+namespace Assignment
+{
+  double function(double parameter) { return cos(1 / (3 + parameter)); }
+  const double start = -2.999;
+  const double stop = 0;
+};
 
-double function(double parameter) { return cos(1 / (3 + parameter)); }
-double quad(double parameter) { return parameter * parameter; }
+namespace Quad
+{
+  double function(double parameter) { return parameter * parameter; }
+  const double start = 0;
+  const double stop = 10;
+};
+
+using namespace Assignment; // Only for quick changing of function and limits
 
 int main(int argc, char** argv)
 {
-  auto integral = Integral(function);
-  //auto result = integral.Calculate(START, STOP);
-  double result2 = integral.Calculate(START, STOP);
-  printf("integral = %lg\n", result2);
-  return 0;
-}
+  int threads_count = 0;
+  double accuracy = 0;
 
-
-/*
-int main(int argc, char** argv)
-{
   if (argc < 3)
   {
-    printf("Usage: ./integrate [threads_count] [accuracy]");
+    printf("Usage: %s [threads_count] [accuracy]\n", argv[0]);
     return 1;
   }
-
-  int threads_count = atoi(argv[1]);
-  double accuracy = atof(argv[2]);
-
-  printf("Calculating integral on %d threads with %lg accuracy\n", threads_count, accuracy);
-
-  double start = START, stop = STOP, dx = 0.0001;
-  printf("Result: %lg\n", integrate(function, start, stop, dx, accuracy));
-  return 0;
-}
-
-
-double function(double parameter) { return cos(1 / (3 + parameter)); }
-
-double quad(double param) { return param * param; }
-
-double integrate(double f(double), double start, double stop, double initial_dx, double accuracy)
-{
-  double integral = 0;
-
-  double dx = initial_dx;
-
-  for (double x = start; x < stop; x += dx)
+  else
   {
-    double current_accuracy = abs(f(x) * dx - f(x + dx) / f(x));
-    if (current_accuracy > accuracy)
-    {
-      dx /= 2;
-      printf("dx increased\n");
-    }
-
-    if (current_accuracy * 10 < accuracy)
-    {
-      dx *= 2;
-      printf("dx decreaced\n");
-    }
-
-    integral += (f(x) + f(x + dx)) / 2 * dx;
+    threads_count = atoi(argv[1]);
+    accuracy = atof(argv[2]);
   }
 
-  return integral;
+  auto integral = Integral(function, accuracy, threads_count);
+  integral.thread_summary = true;
+  double result = integral.Calculate(start, stop);
+  printf("Integral for assigned function is \x1b[1;32m%lg\x1b[0m\n", result);
+  return 0;
 }
-*/

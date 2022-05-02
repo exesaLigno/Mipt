@@ -7,13 +7,13 @@
 
 class Integral
 {
-// This fields
+// This fields connected to integral object
 private:
   double (*f) (double) = nullptr;
   double accuracy = 0;
   int threads_count = 0;
 
-//
+// This fields connected to calculation only
 private:
   pthread_mutex_t mutex;
   int tasks_count = 0;
@@ -26,6 +26,9 @@ private:
   double ThreadRoutine();
 
 public:
+  bool verbose_process = false;
+  bool thread_summary = false;
+
   Integral(double (*function) (double), double accuracy = 0.0001, int threads_count = 8);
   ~Integral();
 

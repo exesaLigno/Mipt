@@ -83,7 +83,7 @@ double Integral::ThreadRoutine()
   pthread_mutex_lock(&(this -> mutex));
     thread_number = (this -> thread_number)++;
   pthread_mutex_unlock(&(this -> mutex));
-  printf("Thread %d started\n", thread_number);
+  if (this -> verbose_process) printf("Thread %d started\n", thread_number);
 
   double thread_result = 0;
   int solved_tasks = 0;
@@ -107,18 +107,18 @@ double Integral::ThreadRoutine()
     double local_start_point = this -> start_point + interval_size * task_number;
     double local_stop_point = this -> start_point + interval_size * (task_number + 1);
 
-    printf("Thread %d solving task %d [%lg; %lg)\n", thread_number, task_number, local_start_point, local_stop_point);
+    if (this -> verbose_process) printf("Thread %d solving task %d [%lg; %lg)\n", thread_number, task_number, local_start_point, local_stop_point);
 
-    double local_integral = this -> SimpleRiman(local_start_point, local_stop_point);
+    double local_integral = this -> SimpleRiman(local_start_point, local_stop_point, this -> accuracy);
     thread_result += local_integral;
     solved_tasks++;
 
-    printf("Thread %d solved task %d. Result is %lg\n", thread_number, task_number, local_integral);
+    if (this -> verbose_process) printf("Thread %d solved task %d. Result is %lg\n", thread_number, task_number, local_integral);
   }
 
   clock_t stop_time = clock();
 
-  printf("Thread %d solved %d tasks in %ld ms\n", thread_number, solved_tasks, stop_time - start_time);
+  if (this -> thread_summary) printf("Thread %d solved %d tasks in %ld ms\n", thread_number, solved_tasks, stop_time - start_time);
 
   return thread_result;
 }
