@@ -1,6 +1,9 @@
 #include <fstream>
 #include <cmath>
+#include <ctime>
 #include "integral.hpp"
+
+long int clk();
 
 namespace Assignment
 {
@@ -35,8 +38,27 @@ int main(int argc, char** argv)
   }
 
   auto integral = Integral(function, accuracy, threads_count);
-  integral.thread_summary = true;
+  //integral.thread_summary = true;
+
+  long int start_time, stop_time;
+  start_time = clk();
   double result = integral.Calculate(start, stop);
-  printf("Integral for assigned function is \x1b[1;32m%lg\x1b[0m\n", result);
+  stop_time = clk();
+
+  printf("Integral is \x1b[1;32m%lg\x1b[0m (%ld ms in parallel method)\n", result, stop_time - start_time);
+
+  start_time = clk();
+  result = integral.SimpleRiman(start, stop, accuracy);
+  stop_time = clk();
+
+  printf("Integral is \x1b[1;32m%lg\x1b[0m (%ld ms in linear method)\n", result, stop_time - start_time);
   return 0;
+}
+
+long int clk()
+{
+  timespec time;
+  clock_gettime(CLOCK_MONOTONIC, &time);
+  long int time_ms = time.tv_sec * 1000 + time.tv_nsec / 1000000;
+  return time_ms;
 }
