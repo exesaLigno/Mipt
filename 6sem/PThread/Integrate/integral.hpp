@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <cmath>
 
+long int clk();
+
 class Integral
 {
 // This fields connected to integral object
@@ -33,5 +35,6 @@ public:
   ~Integral();
 
   double SimpleRiman(double start_point, double stop_point, double dx = 0.000000001);
+  double Recursive(double start_point, double stop_point, double accuracy);
   double Calculate(double start_point, double stop_point);
 };

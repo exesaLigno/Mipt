@@ -1,6 +1,14 @@
 #include "integral.hpp"
 
 
+long int clk()
+{
+  timespec time;
+  clock_gettime(CLOCK_MONOTONIC, &time);
+  long int time_ms = time.tv_sec * 1000 + time.tv_nsec / 1000000;
+  return time_ms;
+}
+
 
 Integral::Integral(double (*function) (double), double accuracy, int threads_count)
 {
@@ -28,6 +36,24 @@ double Integral::SimpleRiman(double start_point, double stop_point, double dx)
   return result;
 }
 
+double Integral::Recursive(double start_point, double stop_point, double accuracy)
+{
+  double integral = (this -> f(start_point) + this -> f(stop_point)) / 2 * (stop_point - start_point);
+  double middle_point = (start_point + stop_point) / 2;
+
+  double left_integral = (this -> f(start_point) + this -> f(middle_point)) / 2 * (middle_point - start_point);
+  double right_integral = (this -> f(middle_point) + this -> f(stop_point)) / 2 * (stop_point - middle_point);
+
+  double precised_integral = left_integral + right_integral;
+
+  // printf("%lg, %lg, %lg, %lg\n", integral, precised_integral, precised_integral - integral, std::abs(precised_integral - integral));
+
+  if (std::abs(precised_integral - integral) < accuracy)
+    return precised_integral;
+  else
+    return this -> Recursive(start_point, middle_point, accuracy / 2) + this -> Recursive(middle_point, stop_point, accuracy / 2);
+}
+
 
 // Parallel integration
 double Integral::Calculate(double start_point, double stop_point)
@@ -38,7 +64,7 @@ double Integral::Calculate(double start_point, double stop_point)
   this -> thread_number = 0;
 
   // Initializing task pool to balance process between threads
-  this -> tasks_count = pow(this -> threads_count, 2);
+  this -> tasks_count = pow(this -> threads_count, 6);
   this -> task_number = 0;
 
   // Initializing integration borders
@@ -87,7 +113,7 @@ double Integral::ThreadRoutine()
 
   double thread_result = 0;
   int solved_tasks = 0;
-  clock_t start_time = clock();
+  clock_t start_time = clk();
 
   while (true)
   {
@@ -109,14 +135,16 @@ double Integral::ThreadRoutine()
 
     if (this -> verbose_process) printf("Thread %d solving task %d [%lg; %lg)\n", thread_number, task_number, local_start_point, local_stop_point);
 
-    double local_integral = this -> SimpleRiman(local_start_point, local_stop_point, this -> accuracy);
+    // double local_integral = this -> SimpleRiman(local_start_point, local_stop_point, this -> accuracy);
+    double local_integral = this -> Recursive(local_start_point, local_stop_point, this -> accuracy);
+
     thread_result += local_integral;
     solved_tasks++;
 
     if (this -> verbose_process) printf("Thread %d solved task %d. Result is %lg\n", thread_number, task_number, local_integral);
   }
 
-  clock_t stop_time = clock();
+  clock_t stop_time = clk();
 
   if (this -> thread_summary) printf("Thread %d solved %d tasks in %ld ms\n", thread_number, solved_tasks, stop_time - start_time);
 
