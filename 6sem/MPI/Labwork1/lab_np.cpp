@@ -2,6 +2,14 @@
 #include <cstdio>
 #include <ctime>
 
+long int clk()
+{
+  timespec time;
+  clock_gettime(CLOCK_MONOTONIC, &time);
+  long int time_ms = time.tv_sec * 1000 + time.tv_nsec / 1000000;
+  return time_ms;
+}
+
 #include "task.cpp"
 
 double** calculate(double x_lim, double h, double t_lim, double tau, double (*phi) (double x), double (*psi) (double t), double (*f) (double x, double t));
@@ -10,11 +18,15 @@ void exportData(double x_lim, double h, double t_lim, double tau, double** U);
 
 int main(int argc, char** argv)
 {
-  clock_t start_time = clock();
+  clock_t start_time = clk();
   double** U = calculate(X_LIM, DX, T_LIM, DT, phi, psi, f);
-  clock_t stop_time = clock();
-  printf("\x1b[1;33mNon-parallel run completed in %ld ms\x1b[0m\nWriting to file started\n", stop_time - start_time);
-  if (EXPORT_TO_FILE) exportData(X_LIM, DX, T_LIM, DT, U);
+  clock_t stop_time = clk();
+  printf("\x1b[1;33mNon-parallel run completed in %ld ms\x1b[0m\n", stop_time - start_time);
+  if (EXPORT_TO_FILE)
+  {
+    printf("Writing to file started\n");
+    exportData(X_LIM, DX, T_LIM, DT, U);
+  }
   return 0;
 }
 
