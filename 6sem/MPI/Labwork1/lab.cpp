@@ -113,6 +113,17 @@ int main(int argc, char** argv)
     stop_time = clk();
     printf("\x1b[1;33mParallel run completed in %ld ms\x1b[0m\n", stop_time - start_time);
 
+#ifdef MEASURE_TIMES
+    FILE* fp = fopen("times_n.txt", "a");
+    if (comm_size == 1)
+      fprintf(fp, "%d, %d", x_size * t_size, stop_time - start_time);
+    else
+      fprintf(fp, ", %d", stop_time - start_time);
+    if (comm_size == 4)
+      fprintf(fp, "\n");
+    fclose(fp);
+#endif
+
     if (EXPORT_TO_FILE)
     {
       printf("Writing to file started\n");

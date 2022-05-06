@@ -20,6 +20,13 @@ compare: lab.out lab_np.out
 	./lab_np.out
 	./compare.sh result.txt result_np.txt
 
+PHONY: compare2
+compare2: lab.out
+	mpiexec -n 1 ./lab.out
+	mpiexec -n 2 ./lab.out
+	mpiexec -n 3 ./lab.out
+	mpiexec -n 4 ./lab.out
+
 PHONY: clean
 clean:
 	rm lab.out lab_np.out result.txt result_np.txt result.png
