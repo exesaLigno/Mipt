@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 
     for (int x = 1; x < current_x_size + (rank == 0 ? 0 : 1); x++)  // Calculating all values in row for this t
     {
-      current_U[t][x] = (2 * f(DX * (x + 1/2), DT * (t + 1/2)) -
+      current_U[t][x] = (2 * f(DX * (x + start_number - (rank == 0 ? 0 : 1) + 1/2), DT * (t + 1/2)) -
                         (1/DT - 1/DX) * (current_U[t][x-1] + current_U[t-1][x]) +
                         (1/DT + 1/DX) * current_U[t - 1][x - 1]) / (1/DT + 1/DX);
     }
