@@ -136,7 +136,7 @@ double Integral::ThreadRoutine()
     if (this -> verbose_process) printf("Thread %d solving task %d [%lg; %lg)\n", thread_number, task_number, local_start_point, local_stop_point);
 
     // double local_integral = this -> SimpleRiman(local_start_point, local_stop_point, this -> accuracy);
-    double local_integral = this -> Recursive(local_start_point, local_stop_point, this -> accuracy);
+    double local_integral = this -> Recursive(local_start_point, local_stop_point, (this -> accuracy) / (this -> tasks_count));
 
     thread_result += local_integral;
     solved_tasks++;
