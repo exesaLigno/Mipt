@@ -60,7 +60,7 @@ double Integral::Calculate(double start_point, double stop_point)
 {
   // Initializing pthread fields
   pthread_mutex_init(&(this -> mutex), NULL);
-  pthread_t threads[this -> threads_count] = {};
+  pthread_t threads[this -> threads_count];
   this -> thread_number = 0;
 
   // Initializing task pool to balance process between threads
