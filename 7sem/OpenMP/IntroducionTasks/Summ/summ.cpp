@@ -32,7 +32,7 @@ int main(int argc, char** argv)
       final_sum += sum;
   }
 
-  printf("Final summ is %lg\n", final_sum);
+  printf("Final summ is %.50lg\n", final_sum);
 
   return 0;
 }
