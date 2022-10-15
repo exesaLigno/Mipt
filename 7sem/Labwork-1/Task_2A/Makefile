@@ -1,4 +1,5 @@
 GRID_SIZE = 7000
+THREADS_COUNT = 8
 
 all: task.o task_omp_v1.o task_omp_v2.o
 
@@ -13,6 +14,10 @@ task_omp_v2.o: task_OpenMP_v2.cpp
 
 .PHONY: run
 run: run_linear run_omp_v1 run_omp_v2
+	echo "Comparing OpenMP_v1 variant with linear..."
+	../compare.sh result_linear.txt result_omp_v1.txt
+	echo "Comparing OpenMP_v2 variant with linear..."
+	../compare.sh result_linear.txt result_omp_v2.txt
 
 .PHONY: run_linear
 run_linear: task.o
@@ -20,11 +25,11 @@ run_linear: task.o
 
 .PHONY: run_omp_v1
 run_omp_v1: task_omp_v1.o
-	./task_omp_v1.o $(GRID_SIZE) $(GRID_SIZE)
+	./task_omp_v1.o $(GRID_SIZE) $(GRID_SIZE) $(THREADS_COUNT)
 
 .PHONY: run_omp_v2
 run_omp_v2: task_omp_v2.o
-	./task_omp_v2.o $(GRID_SIZE) $(GRID_SIZE)
+	./task_omp_v2.o $(GRID_SIZE) $(GRID_SIZE) $(THREADS_COUNT)
 
 .PHONY: clean
 clean:

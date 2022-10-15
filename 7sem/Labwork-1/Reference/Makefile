@@ -1,4 +1,6 @@
-GRID_SIZE = 5000
+GRID_SIZE = 7000
+THREADS_COUNT = 8
+WORKERS_COUNT = 4
 
 all: ref.o ref_mpi.o ref_omp.o
 
@@ -13,6 +15,10 @@ ref_mpi.o: reference_MPI.cpp
 
 .PHONY: run
 run: run_linear run_omp run_mpi
+	echo "Comparing OpenMP variant with linear..."
+	../compare.sh result_linear.txt result_omp.txt
+	echo "Comparing MPI variant with linear..."
+	../compare.sh result_linear.txt result_mpi.txt
 
 .PHONY: run_linear
 run_linear: ref.o
@@ -20,11 +26,11 @@ run_linear: ref.o
 
 .PHONY: run_omp
 run_omp: ref_omp.o
-	./ref_omp.o $(GRID_SIZE) $(GRID_SIZE)
+	./ref_omp.o $(GRID_SIZE) $(GRID_SIZE) $(THREADS_COUNT)
 
 .PHONY: run_mpi
 run_mpi: ref_mpi.o
-	mpiexec -quiet -n 4 ./ref_mpi.o $(GRID_SIZE) $(GRID_SIZE)
+	mpiexec -quiet -n $(WORKERS_COUNT) ./ref_mpi.o $(GRID_SIZE) $(GRID_SIZE)
 
 .PHONY: clean
 clean:

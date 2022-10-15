@@ -1,4 +1,5 @@
 GRID_SIZE = 7000
+WORKERS_COUNT = 4
 
 all: task.o task_mpi.o
 
@@ -10,14 +11,16 @@ task_mpi.o: task_MPI.cpp
 
 .PHONY: run
 run: run_linear run_mpi
+	echo "Comparing MPI variant with linear..."
+	../compare.sh result_linear.txt result_mpi.txt
 
 .PHONY: run_linear
 run_linear: task.o
-	./task.o $(GRID_SIZE) $(GRID_SIZE)
+	./task.o $(GRID_SIZE) $(GRID_SIZE) 
 
 .PHONY: run_mpi
 run_mpi: task_mpi.o
-	mpiexec -quiet -n 4 ./task_mpi.o $(GRID_SIZE) $(GRID_SIZE)
+	mpiexec -quiet -n $(WORKERS_COUNT) ./task_mpi.o $(GRID_SIZE) $(GRID_SIZE)
 
 .PHONY: clean
 clean:

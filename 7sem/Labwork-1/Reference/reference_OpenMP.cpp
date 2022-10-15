@@ -13,9 +13,9 @@ double defaultFiller(int line, int column);
 
 int main(int argc, char **argv)
 {
-    int height = DEFAULT_HEIGHT, width = DEFAULT_WIDTH;
+    int height = DEFAULT_HEIGHT, width = DEFAULT_WIDTH, thread_count = 8;
 
-    if (argc == 3)
+    if (argc >= 3)
     {
         height = atoi(argv[1]);
         width = atoi(argv[2]);
@@ -26,11 +26,14 @@ int main(int argc, char **argv)
                "If you want to specify size, use \x1b[1m%s [height] [width]\x1b[0m\n",
                DEFAULT_HEIGHT, DEFAULT_WIDTH, argv[0]);
 
+    if (argc == 4)
+        thread_count = atoi(argv[3]);
+
     auto grid = createGrid(height, width, defaultFiller);
     
     long start_time = clk();
 
-    #pragma omp parallel for schedule(dynamic, 1)
+    #pragma omp parallel for schedule(dynamic, 1) num_threads(thread_count)
     for (int line = 0; line < height; line++)
     {
         for (int column = 0; column < width; column++)
