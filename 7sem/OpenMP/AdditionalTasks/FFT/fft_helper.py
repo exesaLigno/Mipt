@@ -38,12 +38,12 @@ if __name__ == "__main__":
 
         f_band, spectre = GenerateComplexSignal(int(amount))
 
-        file = open(f'signals/{amount}_signal.txt', 'w')
+        file = open(f'signals/{amount}/{amount}_signal.txt', 'w')
         for f in f_band:
             file.write(f'{f:.4f} ')
         file.close()
 
-        file = open(f'signals/{amount}_reference_spectre.txt', 'w')
+        file = open(f'signals/{amount}/{amount}_reference_spectre.txt', 'w')
         for s in spectre:
             file.write(f'{np.abs(s):.4f} ')
         file.close()

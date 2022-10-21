@@ -46,8 +46,8 @@ void show_results()
 
 void read_signal(double* signal, long signal_length)
 {
-    char filename[100] = {};
-    sprintf(filename, "signals/%ld_signal.txt", signal_length);
+    char filename[200] = {};
+    sprintf(filename, "signals/%ld/%ld_signal.txt", signal_length, signal_length);
     FILE* signal_file = fopen(filename, "r");
     int n = 0;
     double readed = 0;
@@ -58,8 +58,8 @@ void read_signal(double* signal, long signal_length)
 
 void write_spectre(cpl* spectre, long signal_length)
 {
-    char filename[100] = {};
-    sprintf(filename, "signals/%ld_spectre.txt", signal_length);
+    char filename[200] = {};
+    sprintf(filename, "signals/%ld/%ld_spectre.txt", signal_length, signal_length);
     FILE* spectre_file = fopen(filename, "w");
     for (int i = 0; i < signal_length; i++)
         fprintf(spectre_file, "%.4lf ", spectre[i].abs());
