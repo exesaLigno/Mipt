@@ -70,12 +70,12 @@ class Complex
 
     bool operator==(Complex other)
     {
-        return real == other.real and imag == other.imag;
+        return fabs(real - other.real) < 1e-10 and fabs(imag - other.imag) < 1e-10;
     }
 
     bool operator!=(Complex other)
     {
-        return real != other.real or imag != other.imag;
+        return fabs(real - other.real) > 1e-10 or fabs(imag - other.imag) > 1e-10;
     }
 
     double abs()
