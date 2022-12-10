@@ -33,8 +33,6 @@ private:
     {
         auto numeric = (F(x, y + H/2.0) - F(x, y - H/2.0)) / H + 
                        (F(x + H/2.0, y) - F(x + H/2.0, y)) / H;
-        auto calculated = 3.0 * powl(y, 2.0) - 1.0;
-        //printf("numeric = %Lg, calculated = %Lg\n", numeric, calculated);
         return numeric;
     }
 
@@ -50,8 +48,7 @@ private:
     {
         long double nm = (YBand[k + 1] + YBand[k - 1] - 2.0 * YBand[k]) / (H * H);
         long double addition = (1.0 / 12.0) * (F(XBand[k-1], YBand[k-1]) + F(XBand[k+1], YBand[k+1]));
-        //return 6.0 * (nm - addition) / 5.0;
-        return nm;
+        return 6.0 * (nm - addition) / 5.0;
     }
 
     void CalculatePsi()
@@ -89,8 +86,6 @@ private:
         CalculatePsi();
         long double coeff = -Psi0[N - 1] / Psi2[N - 1];
 
-        //printf("coeff = %Lg (%Lg, %Lg)\n", coeff, Psi0[N - 1], Psi2[N - 1]);
-
         #pragma omp parallel for if(RunParallel)
         for (int k = 1; k < N - 1; k++)
             YBand[k] += Psi0[k] + coeff * Psi2[k];
@@ -112,7 +107,7 @@ public:
     Solver(long int n, long double (*f) (long double, long double), double x_start = 0, double x_stop = 1, bool parallel = false) : 
         N(n), F(f), XStart(x_start), XStop(x_stop), RunParallel(parallel)
     {
-        H = /*(XStop - XStart)*/ 1.0 / ((long double) N);
+        H = (XStop - XStart) / ((long double) N);
         XBand = new long double[N] { };
         for (int k = 0; k < N; k++)
             XBand[k] = XStart + (XStop - XStart) * k / ((long double) (N - 1));
@@ -153,7 +148,6 @@ public:
         {
             Iteration();
             CurrentError = CheckPrecision();
-            //printf("Cur accuracy: %Lg\n", CurrentError);
             if (CurrentError > 0 and CurrentError < Precision) break;
         }
 
@@ -176,6 +170,9 @@ public:
         char filename[strlen(filename_prefix) + 100] = { };
         sprintf(filename, "%s_output_%s.txt", filename_prefix, RunParallel ? "parallel" : "linear");
         FILE* output_file = fopen(filename, "w");
+        for (int k = 0; k < N; k++)
+            fprintf(output_file, "%.4Lf ", XBand[k]);
+        fprintf(output_file, "\n");
         for (int k = 0; k < N; k++)
             fprintf(output_file, "%.4Lf ", YBand[k]);
         fclose(output_file);

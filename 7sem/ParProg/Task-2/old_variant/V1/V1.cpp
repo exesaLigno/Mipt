@@ -1,31 +1,34 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include "lib.cpp"
+#include "../lib.cpp"
 
 long N = 10;
 bool Silent = false;
-const long double XStart = -10;
-const long double XStop = 10;
-const long double YStart = sqrt(2);
-const long double YStop = sqrt(2);
+const long double XStart = 0;
+const long double XStop = 1;
+const long double YStart = 1;
+const long double YStop = 1.5;
 
-long double f(long double x, long double y) { return powl(y, 3) - y; }
+long double f(long double x, long double y) { return expl(y); }
 
 int main(int argc, char** argv)
 {
     if (argc >= 2) N = atoi(argv[1]);
     if (argc >= 3) Silent = !strcmp(argv[2], "-s");
 
+    char prefix[50] = { };
+    sprintf(prefix, "V1_%.1Lf", YStop);
+
     auto linear_solver = Solver(N, f, XStart, XStop, false);
     linear_solver.SetBounds(YStart, YStop);
     auto linear_time = linear_solver.Calculate();
-    if (not Silent) linear_solver.ExportSolution("V4");
+    linear_solver.ExportSolution(prefix);
 
     auto parallel_solver = Solver(N, f, XStart, XStop, true);
     parallel_solver.SetBounds(YStart, YStop);
     auto parallel_time = parallel_solver.Calculate();
-    if (not Silent) parallel_solver.ExportSolution("V4");
+    parallel_solver.ExportSolution(prefix);
 
     if (not Silent)
     {
